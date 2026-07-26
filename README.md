@@ -1,6 +1,6 @@
 # Blightfall
 
-Top-down action RPG in Godot 4.4. See [`docs/GDD.md`](docs/GDD.md) for the design
+Top-down action RPG in Godot 4.6. See [`docs/GDD.md`](docs/GDD.md) for the design
 and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule.
 
 **Current milestone: M1 — combat prototype.** Grey boxes, one enemy, one room.
@@ -12,7 +12,7 @@ built, what is deliberately missing, and what needs tuning by hand.
 
 ## Running it
 
-Open the project in Godot 4.4+ and press F5. `levels/prototype/prototype_room.tscn`
+Open the project in Godot 4.6+ and press F5. `levels/prototype/prototype_room.tscn`
 is the main scene.
 
 ```
