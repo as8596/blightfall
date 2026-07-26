@@ -19,26 +19,26 @@ const SPRITES: Array[Texture2D] = [
 const PANELS: Array = [
 	[0, 16, "16x24", "384px / 8 col"],
 	[1, 32, "32x48", "1536px / 16 col"],
-	[2, 64, "64x96", "6144px / 21 col"],
+	[2, 64, "64x96  <- STANDARD", "6144px / 21 col"],
 ]
 
-const BASELINE: float = 152.0
-const PANEL_W: float = 100.0
-const PANEL_TOP: float = 22.0
+const BASELINE: float = 600.0
+const PANEL_W: float = 400.0
+const PANEL_TOP: float = 80.0
 const INK := Color(0.86, 0.90, 0.76)
 const FLOOR := Color(0.223, 0.231, 0.247)
 
 
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
-	draw_rect(Rect2(0, 0, 320, 180), Color(0.145, 0.152, 0.168), true)
-	draw_string(font, Vector2(6, 12), "one character, three resolutions - all at true 1:1 scale",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
+	draw_rect(Rect2(Vector2.ZERO, get_viewport_rect().size), Color(0.145, 0.152, 0.168), true)
+	draw_string(font, Vector2(24, 40), "one character, three resolutions - all at true 1:1 scale",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 24, INK)
 
-	var x := 6.0
+	var x := 24.0
 	for panel in PANELS:
 		_panel(font, x, SPRITES[panel[0]], panel[1], panel[2], panel[3])
-		x += PANEL_W + 4.0
+		x += PANEL_W + 16.0
 
 
 func _panel(font: Font, x: float, texture: Texture2D, tile: int, title: String, sub: String) -> void:
@@ -61,9 +61,9 @@ func _panel(font: Font, x: float, texture: Texture2D, tile: int, title: String, 
 	var size := texture.get_size()
 	draw_texture(texture, Vector2(x + roundf((PANEL_W - size.x) * 0.5), BASELINE - size.y))
 
-	draw_string(font, Vector2(x + 2.0, BASELINE + 11.0), title,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
-	draw_string(font, Vector2(x + 2.0, BASELINE + 21.0), sub,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.75))
-	draw_string(font, Vector2(x + 56.0, BASELINE + 21.0), "%dpx tiles" % tile,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.78, 0.84, 0.62, 0.9))
+	draw_string(font, Vector2(x + 4.0, BASELINE + 34.0), title,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 26, INK)
+	draw_string(font, Vector2(x + 4.0, BASELINE + 60.0), sub,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.86, 0.90, 0.76, 0.75))
+	draw_string(font, Vector2(x + 230.0, BASELINE + 60.0), "%dpx tiles" % tile,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.78, 0.84, 0.62, 0.9))

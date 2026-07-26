@@ -5,7 +5,8 @@
 **Team:** 1 developer
 **Platform:** PC (Windows/Linux), Steam or itch.io
 **Target playtime:** 2.5–4 hours
-**Status:** Working draft. Open questions marked 🔶
+**Status:** Working draft, and a **template** — sections are amended when the
+build says otherwise. Open questions marked 🔶. Amendments logged in §15.
 
 ---
 
@@ -164,16 +165,16 @@ Concrete starting values, all in seconds.
 - Movement during attack: 25% speed on hits 1–2, 0% on hit 3
 
 **Dodge**
-- Duration 0.36s · i-frames 0.04→0.24 · distance 46px · 0.12s cooldown after recovery
+- Duration 0.36s · i-frames 0.04→0.24 · distance 184px · 0.12s cooldown after recovery
 
 **Player baseline**
-- Move speed 82 px/s (at 320×180) · full speed in 0.08s · 6 hearts start, 12 max · 0.8s i-frames on damage
+- Move speed 328 px/s (at 1280×720) · full speed in 0.08s · 6 hearts start, 12 max · 0.8s i-frames on damage
 
 ### Game feel checklist
 
 - **Hitstop:** 0.05s on hits 1–2, 0.10s on hit 3
-- **Screen shake:** 2px on heavy hits only
-- **Knockback:** 12–20px on final combo hit
+- **Screen shake:** 8px on heavy hits only
+- **Knockback:** 48–80px on final combo hit
 - **Hit flash:** white for 0.08s via shader, not `modulate`
 - **Sound layering:** every hit gets a swing sound *and* an impact sound
 
@@ -377,10 +378,10 @@ A fox that talks. **The game never explains this and no NPC ever remarks on it.*
 
 ## 8. Art Direction
 
-- **Internal resolution:** 320×180 (scales to 720p, 1080p, 1440p)
-- **Tile size:** 16×16
-- **Character sprite:** 16×24; enemies 16×16 to 32×32; bosses up to 64×64
-- **Palette:** 32 colours, fixed. Use a pre-made one (Endesga 32 or similar, from lospec.com). Do not design your own — it's a week you don't have
+- **Internal resolution:** 1280×720 (1× at 720p, 2× at 1440p, 3× at 4K; 1080p lands on 1.5× — see §15)
+- **Tile size:** 64×64
+- **Character sprite:** 64×96; enemies 64×64 to 128×128; bosses up to 256×256
+- **Palette:** fixed, pre-made, from lospec.com. Do not design your own — it's a week you don't have. **Size is open (🔶):** one 64×96 character already uses 21 colours, so a 32-colour global palette only works with aggressively shared ramps. See §15
 - **Animation budget:** idle 2 · walk 4 (×4 dir) · attack 3/hit · dodge 4 · hurt 1 · death 5
 
 ### Visual language
@@ -486,7 +487,7 @@ func play_intro() -> void:
 
 ### Pixel-perfect setup
 
-- **Viewport** 320×180, **Window** 1280×720
+- **Viewport** 1280×720, **Window** 1280×720
 - **Stretch Mode:** `canvas_items` + **Snap 2D Transforms to Pixel**
 - **Default Texture Filter:** `Nearest`
 - **Snap 2D Vertices to Pixel:** on
@@ -563,6 +564,58 @@ The frame data in §5 is tuned tighter than naive netcode supports — an 80ms a
 - 🔶 Difficulty options? (Recommend: yes, as accessibility)
 
 See `BUILD-PLAN.md` for the operational M1 plan.
+
+---
+
+## 15. Amendments
+
+This document is a template. Where the build has overridden it, the change is
+recorded here rather than silently diverging.
+
+### A1 — Sprite resolution raised to 64×96 (supersedes §8)
+
+**Was:** 320×180 internal, 16×16 tiles, 16×24 character.
+**Now:** 1280×720 internal, 64×64 tiles, 64×96 character.
+
+A straight 4× on everything spatial. Framing is unchanged — still 20×11.2 tiles
+on screen, still a character 13% of screen height — so nothing about camera
+work, encounter spacing or telegraph readability shifts. What changes is pixel
+density: a 16×24 character has 384 pixels and room for one flat colour per
+material, while 64×96 has 6144 and room for a full shadow/base/highlight/
+specular ramp, an iris, cloth folds and separated fingers. That is what makes
+individual characters distinguishable at a glance, which the cast in §7 and the
+corruption-stage readability rule in §8 both depend on.
+
+**All timings are unchanged.** Frame data is in seconds; only distances and
+speeds scaled. Move speed 82→328 px/s, dodge 46→184px, knockback 12–20→48–80px,
+shake 2→8px, and every range in `EnemyData` ×4.
+
+**Costs, accepted knowingly:**
+
+- **Art is roughly 4× the pixel work.** §13 already rates "art becomes the
+  bottleneck" as High; this raises it. The §2 sprite count is unchanged, the
+  hours per sprite are not. Re-baseline the §11 estimates before trusting them.
+- **1080p is a 1.5× upscale.** 1280×720 is integer at 720p, 1440p and 4K, but
+  1920×1080 is not a whole multiple. At this pixel density the unevenness is
+  subtle, and the fix is a standard "integer scaling only" video option that
+  letterboxes — worth folding into the §14 difficulty/accessibility options
+  question rather than solving now.
+
+### A2 — Palette size reopened (🔶, affects §8)
+
+32 colours was chosen when a character had 8. The drawn 64×96 reference uses 21
+on its own, which leaves 11 for every environment, every other character and
+every effect. Either move to a larger pre-made palette (Endesga 64 or similar),
+or keep 32 and commit to heavily shared ramps — skin and wood off the same warm
+browns, foliage and cloth off the same greens.
+
+Shared ramps are what good pixel art does anyway and would keep the game
+visually tight, but it is a real constraint on how distinct characters can look,
+which is the whole reason the resolution went up. **Decide before drawing the
+player**, because repalletting finished art is the expensive kind of rework.
+
+The one rule that does not bend either way: the blight accent stays the only
+saturated colour in the game.
 
 ---
 

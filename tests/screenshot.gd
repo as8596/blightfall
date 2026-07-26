@@ -59,10 +59,14 @@ func _capture() -> void:
 
 	var player := _room.get_node_or_null("Player") as Player
 	if _pull_enemies_close and player != null:
-		var offset := Vector2(26, 0)
 		for node in get_tree().get_nodes_in_group(Targeting.ENEMY_GROUP):
-			(node as Node2D).global_position = player.global_position + offset
-			offset = offset.rotated(TAU / 3.0)
+			var enemy := node as BaseEnemy
+			if enemy == null:
+				continue
+			# Park each enemy just inside its own attack range, so this stays
+			# right whatever the sprite resolution is.
+			var reach: float = enemy.data.attack_range if enemy.data != null else 100.0
+			enemy.global_position = player.global_position + Vector2(reach * 0.9, 0)
 		await _wait_ticks(20)
 
 	if _attack and player != null:

@@ -17,8 +17,8 @@ hitstop = 0.05
 screen_shake = 0.0
 swing_sfx = &"swing_light"
 impact_sfx = &"impact_light"
-hitbox_size = Vector2(22, 20)
-hitbox_offset = 15.0
+hitbox_size = Vector2(88, 80)
+hitbox_offset = 60.0
 
 [sub_resource type="Resource" id="Resource_hit2"]
 resource_name = "Hit 2"
@@ -34,8 +34,8 @@ hitstop = 0.05
 screen_shake = 0.0
 swing_sfx = &"swing_light"
 impact_sfx = &"impact_light"
-hitbox_size = Vector2(22, 20)
-hitbox_offset = 15.0
+hitbox_size = Vector2(88, 80)
+hitbox_offset = 60.0
 
 [sub_resource type="Resource" id="Resource_hit3"]
 resource_name = "Hit 3 (commit)"
@@ -44,15 +44,15 @@ windup = 0.14
 active = 0.12
 recovery = 0.32
 damage = 8
-knockback_distance = 16.0
+knockback_distance = 64.0
 cancel_into_next_at = -1.0
 move_speed_scale = 0.0
 hitstop = 0.1
-screen_shake = 2.0
+screen_shake = 8.0
 swing_sfx = &"swing_heavy"
 impact_sfx = &"impact_heavy"
-hitbox_size = Vector2(28, 24)
-hitbox_offset = 17.0
+hitbox_size = Vector2(112, 96)
+hitbox_offset = 68.0
 
 [resource]
 resource_name = "Player Light Combo"

@@ -16,10 +16,10 @@ extends Camera2D
 @export var room_bounds: Rect2 = Rect2()
 
 @export_group("Shake")
-## GDD §5: 2px on heavy hits only. This is the ceiling, not the default.
-@export var max_shake: float = 4.0
+## The GDD's 2px at 320×180, scaled to 1280×720. A ceiling, not a default.
+@export var max_shake: float = 16.0
 ## How fast a shake decays, in shake-units per second.
-@export var shake_decay: float = 12.0
+@export var shake_decay: float = 48.0
 
 var _target: Node2D
 var _shake_amount: float = 0.0

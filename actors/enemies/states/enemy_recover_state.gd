@@ -6,6 +6,9 @@ extends EnemyState
 ## works if there is a reliable window to spend those hits in. This is it —
 ## long, obvious, and vulnerable.
 
+## Deceleration out of the lunge. Slower than normal so the attack has weight.
+@export var slide_deceleration: float = 1040.0
+
 var _t: float = 0.0
 
 
@@ -17,6 +20,6 @@ func enter(_msg: Dictionary = {}) -> void:
 func physics_update(delta: float) -> void:
 	_t += delta
 	# Slide to a stop rather than stopping dead, so the lunge has weight.
-	enemy.apply_motion(delta, Vector2.ZERO, 260.0)
+	enemy.apply_motion(delta, Vector2.ZERO, slide_deceleration)
 	if _t >= data.recover_time:
 		state_machine.transition_to(&"Chase")

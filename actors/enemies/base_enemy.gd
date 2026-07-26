@@ -13,7 +13,7 @@ extends CharacterBody2D
 ## How far past the edge of the screen still counts as on-screen, in pixels.
 ## A little slack: an enemy exactly on the boundary shouldn't flicker between
 ## "allowed to attack" and "not".
-@export var offscreen_margin: float = 12.0
+@export var offscreen_margin: float = 48.0
 
 @onready var health: HealthComponent = $HealthComponent
 @onready var knockback: KnockbackComponent = $KnockbackComponent
@@ -69,12 +69,15 @@ func _apply_data() -> void:
 	# Scale the telegraph "pose" about the feet, not the top-left corner.
 	visual.pivot_offset = Vector2(data.body_size.x * 0.5, data.body_size.y)
 
+	# Derived from body_size rather than hard-coded, so changing the sprite
+	# resolution moves the collider with it instead of silently leaving a
+	# 16px-era footprint under a 64px character.
 	var body_rect := body_shape.shape as RectangleShape2D
 	if body_rect != null:
 		body_rect = body_rect.duplicate()
-		body_rect.size = Vector2(data.body_size.x * 0.75, 8.0)
+		body_rect.size = Vector2(data.body_size.x * 0.75, data.body_size.y * 0.5)
 		body_shape.shape = body_rect
-		body_shape.position = Vector2(0, -4)
+		body_shape.position = Vector2(0, -data.body_size.y * 0.25)
 
 	hitbox.damage = data.contact_damage
 	hitbox.position = Vector2(0, -data.body_size.y * 0.5)
@@ -86,7 +89,7 @@ func _apply_data() -> void:
 	hitbox_shape.position = Vector2(data.hitbox_offset, 0)
 
 
-func apply_motion(delta: float, desired: Vector2, accel: float = 400.0) -> void:
+func apply_motion(delta: float, desired: Vector2, accel: float = 1600.0) -> void:
 	motion_velocity = motion_velocity.move_toward(desired, accel * delta)
 	velocity = motion_velocity + knockback.velocity
 	move_and_slide()

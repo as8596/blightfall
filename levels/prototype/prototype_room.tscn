@@ -7,10 +7,10 @@
 [ext_resource type="PackedScene" path="res://ui/debug_overlay.tscn" id="5_overlay"]
 
 [sub_resource type="RectangleShape2D" id="Rect_wall_h"]
-size = Vector2(496, 8)
+size = Vector2(1984, 32)
 
 [sub_resource type="RectangleShape2D" id="Rect_wall_v"]
-size = Vector2(8, 320)
+size = Vector2(32, 1280)
 
 [node name="PrototypeRoom" type="Node2D"]
 y_sort_enabled = true
@@ -22,17 +22,17 @@ spawn_points_path = NodePath("SpawnPoints")
 
 [node name="Floor" type="ColorRect" parent="."]
 z_index = -10
-offset_right = 480.0
-offset_bottom = 320.0
+offset_right = 1920.0
+offset_bottom = 1280.0
 mouse_filter = 2
 color = Color(0.184314, 0.192157, 0.207843, 1)
 
 [node name="FloorGrid" type="ColorRect" parent="."]
 z_index = -9
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 472.0
-offset_bottom = 312.0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 1888.0
+offset_bottom = 1248.0
 mouse_filter = 2
 color = Color(0.211765, 0.219608, 0.235294, 1)
 
@@ -42,77 +42,77 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="Top" type="CollisionShape2D" parent="Walls"]
-position = Vector2(240, -4)
+position = Vector2(960, -16)
 shape = SubResource("Rect_wall_h")
 
 [node name="Bottom" type="CollisionShape2D" parent="Walls"]
-position = Vector2(240, 324)
+position = Vector2(960, 1296)
 shape = SubResource("Rect_wall_h")
 
 [node name="Left" type="CollisionShape2D" parent="Walls"]
-position = Vector2(-4, 160)
+position = Vector2(-16, 640)
 shape = SubResource("Rect_wall_v")
 
 [node name="Right" type="CollisionShape2D" parent="Walls"]
-position = Vector2(484, 160)
+position = Vector2(1936, 640)
 shape = SubResource("Rect_wall_v")
 
 [node name="TopVisual" type="ColorRect" parent="Walls"]
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 488.0
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 1952.0
 mouse_filter = 2
 color = Color(0.301961, 0.286275, 0.270588, 1)
 
 [node name="BottomVisual" type="ColorRect" parent="Walls"]
-offset_left = -8.0
-offset_top = 320.0
-offset_right = 488.0
-offset_bottom = 328.0
+offset_left = -32.0
+offset_top = 1280.0
+offset_right = 1952.0
+offset_bottom = 1312.0
 mouse_filter = 2
 color = Color(0.301961, 0.286275, 0.270588, 1)
 
 [node name="LeftVisual" type="ColorRect" parent="Walls"]
-offset_left = -8.0
+offset_left = -32.0
 offset_right = 0.0
-offset_bottom = 320.0
+offset_bottom = 1280.0
 mouse_filter = 2
 color = Color(0.301961, 0.286275, 0.270588, 1)
 
 [node name="RightVisual" type="ColorRect" parent="Walls"]
-offset_left = 480.0
-offset_right = 488.0
-offset_bottom = 320.0
+offset_left = 1920.0
+offset_right = 1952.0
+offset_bottom = 1280.0
 mouse_filter = 2
 color = Color(0.301961, 0.286275, 0.270588, 1)
 
 [node name="SpawnPoints" type="Node2D" parent="."]
 
 [node name="Spawn1" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(80, 72)
+position = Vector2(320, 288)
 
 [node name="Spawn2" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(400, 72)
+position = Vector2(1600, 288)
 
 [node name="Spawn3" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(80, 256)
+position = Vector2(320, 1024)
 
 [node name="Spawn4" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(400, 256)
+position = Vector2(1600, 1024)
 
 [node name="Spawn5" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(240, 56)
+position = Vector2(960, 224)
 
 [node name="Spawn6" type="Marker2D" parent="SpawnPoints"]
-position = Vector2(240, 272)
+position = Vector2(960, 1088)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(240, 176)
+position = Vector2(960, 704)
 
 [node name="CameraRig" parent="." instance=ExtResource("4_camera")]
-position = Vector2(240, 176)
+position = Vector2(960, 704)
 target_path = NodePath("../Player")
-room_bounds = Rect2(0, 0, 480, 320)
+room_bounds = Rect2(0, 0, 1920, 1280)
 
 [node name="DebugOverlay" parent="." instance=ExtResource("5_overlay")]
 player_path = NodePath("../Player")

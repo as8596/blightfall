@@ -6,6 +6,9 @@ extends EnemyState
 ## being asked (BUILD-PLAN, week 3 gate). Most of that is the hit that killed
 ## it, but the body has to acknowledge the kill too.
 
+## Deceleration of the corpse as it comes to rest.
+@export var slide_deceleration: float = 800.0
+
 var _t: float = 0.0
 
 
@@ -27,7 +30,7 @@ func enter(_msg: Dictionary = {}) -> void:
 
 func physics_update(delta: float) -> void:
 	_t += delta
-	enemy.apply_motion(delta, Vector2.ZERO, 200.0)
+	enemy.apply_motion(delta, Vector2.ZERO, slide_deceleration)
 	var u := clampf(_t / maxf(data.death_time, 0.0001), 0.0, 1.0)
 	enemy.visual.modulate.a = 1.0 - u
 	if _t >= data.death_time:

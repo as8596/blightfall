@@ -4,6 +4,9 @@ Top-down action RPG in Godot 4.6. See [`docs/GDD.md`](docs/GDD.md) for the desig
 and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule. Art conventions
 live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md).
 
+**Sprite standard: 64×96 characters, 64×64 tiles, 1280×720 internal**
+(GDD §15, A1).
+
 **Current milestone: M1 — combat prototype.** Grey boxes, one enemy, one room.
 The only question it exists to answer is whether the combat is fun before any
 art or story exists. See [`docs/M1-NOTES.md`](docs/M1-NOTES.md) for what is

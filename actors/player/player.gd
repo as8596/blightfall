@@ -8,8 +8,9 @@ extends CharacterBody2D
 ## "add a second player" being a week and being a rewrite.
 
 @export_group("Movement")
-## GDD §5: 82 px/s at 320×180.
-@export var move_speed: float = 82.0
+## 328 px/s at 1280×720 — the GDD's 82 px/s at 320×180, scaled with the
+## resolution so the character still crosses the screen in the same time.
+@export var move_speed: float = 328.0
 ## GDD §5: full speed in 0.08s.
 @export var time_to_max_speed: float = 0.08
 ## Not specified; slightly snappier than acceleration so stops read as crisp.
@@ -20,7 +21,7 @@ extends CharacterBody2D
 @export var damage_invuln_time: float = 0.8
 ## Control loss on being hit. Short — this game blames the player, not the game.
 @export var hurt_stun_time: float = 0.18
-@export var hurt_knockback_distance: float = 22.0
+@export var hurt_knockback_distance: float = 88.0
 @export var combo: PlayerComboData
 
 @export_group("References")
@@ -152,7 +153,7 @@ func _on_hit_taken(hitbox_hit: Hitbox) -> void:
 	hurtbox.start_damage_iframes(damage_invuln_time)
 	flash.flash()
 	Sfx.play(&"player_hurt")
-	Events.screen_shake_requested.emit(2.0, 0.2)
+	Events.screen_shake_requested.emit(8.0, 0.2)
 	HitStop.freeze(0.08)
 	if state_machine.has_state(&"Hurt"):
 		state_machine.transition_to(&"Hurt", {"source": hitbox_hit.source})

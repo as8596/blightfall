@@ -16,13 +16,13 @@
 [ext_resource type="Script" path="res://actors/enemies/states/enemy_dead_state.gd" id="14_dead"]
 
 [sub_resource type="RectangleShape2D" id="Rect_enemy_body"]
-size = Vector2(12, 8)
+size = Vector2(48, 32)
 
 [sub_resource type="RectangleShape2D" id="Rect_enemy_hit"]
-size = Vector2(20, 18)
+size = Vector2(80, 72)
 
 [sub_resource type="RectangleShape2D" id="Rect_enemy_hurt"]
-size = Vector2(14, 14)
+size = Vector2(56, 56)
 
 [node name="BaseEnemy" type="CharacterBody2D"]
 collision_layer = 16
@@ -31,14 +31,14 @@ motion_mode = 1
 script = ExtResource("1_enemy")
 
 [node name="Visual" type="ColorRect" parent="."]
-offset_left = -8.0
-offset_top = -16.0
-offset_right = 8.0
+offset_left = -32.0
+offset_top = -64.0
+offset_right = 32.0
 mouse_filter = 2
 color = Color(0.419608, 0.4, 0.360784, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(0, -16)
 shape = SubResource("Rect_enemy_body")
 
 [node name="HealthComponent" type="Node" parent="."]
@@ -47,7 +47,7 @@ max_health = 12
 
 [node name="KnockbackComponent" type="Node" parent="."]
 script = ExtResource("3_knockback")
-friction = 900.0
+friction = 3600.0
 
 [node name="FlashComponent" type="Node" parent="."]
 script = ExtResource("4_flash")
@@ -55,7 +55,7 @@ target_path = NodePath("../Visual")
 flash_time = 0.08
 
 [node name="Hitbox" type="Area2D" parent="."]
-position = Vector2(0, -8)
+position = Vector2(0, -32)
 collision_layer = 32
 collision_mask = 8
 monitoring = false
@@ -64,7 +64,7 @@ script = ExtResource("5_hitbox")
 impact_sfx = &"impact_light"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
-position = Vector2(12, 0)
+position = Vector2(48, 0)
 shape = SubResource("Rect_enemy_hit")
 
 [node name="Hurtbox" type="Area2D" parent="."]
@@ -74,7 +74,7 @@ monitoring = false
 script = ExtResource("6_hurtbox")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
-position = Vector2(0, -8)
+position = Vector2(0, -32)
 shape = SubResource("Rect_enemy_hurt")
 
 [node name="StateMachine" type="Node" parent="."]

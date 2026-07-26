@@ -11,7 +11,7 @@ extends Node2D
 @export var initial_enemy_count: int = 1
 @export var max_enemies: int = 12
 ## Don't drop an enemy in the player's lap.
-@export var min_spawn_distance: float = 48.0
+@export var min_spawn_distance: float = 192.0
 
 @export_group("References")
 @export var player_path: NodePath = ^"Player"

@@ -35,7 +35,7 @@ func _run() -> void:
 
 	_build_room()
 	_player = PLAYER_SCENE.instantiate()
-	_player.global_position = Vector2(200, 200)
+	_player.global_position = Vector2(800, 800)
 	_world.add_child(_player)
 	await _ticks(4)
 
@@ -109,7 +109,7 @@ func _await_state(state: StringName, limit: int = 30) -> bool:
 func _reset_player() -> void:
 	_release_all()
 	_player.respawn()
-	_player.global_position = Vector2(200, 200)
+	_player.global_position = Vector2(800, 800)
 	await _ticks(3)
 
 
@@ -119,10 +119,10 @@ func _build_room() -> void:
 	walls.collision_layer = 1
 	walls.collision_mask = 0
 	var geometry := [
-		[Vector2(200, -4), Vector2(600, 8)],
-		[Vector2(200, 404), Vector2(600, 8)],
-		[Vector2(-104, 200), Vector2(8, 420)],
-		[Vector2(504, 200), Vector2(8, 420)],
+		[Vector2(800, -16), Vector2(2400, 32)],
+		[Vector2(800, 1616), Vector2(2400, 32)],
+		[Vector2(-416, 800), Vector2(32, 1680)],
+		[Vector2(2016, 800), Vector2(32, 1680)],
 	]
 	for entry in geometry:
 		var shape := CollisionShape2D.new()
@@ -139,9 +139,9 @@ func _build_room() -> void:
 func _test_project_configuration() -> void:
 	print("Project configuration (GDD §10, BUILD-PLAN day 1)")
 	_check(
-		"viewport is 320x180",
-		ProjectSettings.get_setting("display/window/size/viewport_width") == 320
-			and ProjectSettings.get_setting("display/window/size/viewport_height") == 180
+		"viewport is 1280x720",
+		ProjectSettings.get_setting("display/window/size/viewport_width") == 1280
+			and ProjectSettings.get_setting("display/window/size/viewport_height") == 720
 	)
 	_check(
 		"stretch mode is canvas_items",
@@ -169,13 +169,13 @@ func _test_project_configuration() -> void:
 
 
 func _test_movement() -> void:
-	print("\nMovement (GDD §5: 82 px/s, full speed in 0.08s)")
+	print("\nMovement (328 px/s at 1280x720, full speed in 0.08s)")
 	await _reset_player()
 
 	_hold(&"move_right")
 	# Long enough to be unambiguously at terminal velocity.
 	await _ticks(30)
-	_check_near("walk speed", _player.motion_velocity.length(), 82.0, 3.0)
+	_check_near("walk speed", _player.motion_velocity.length(), 328.0, 12.0)
 	_check("state is Move while walking", _player.state_machine.is_in(&"Move"))
 	_check("facing snapped east", _player.facing.is_equal_approx(Vector2.RIGHT))
 	_release_all()
@@ -184,7 +184,7 @@ func _test_movement() -> void:
 	_hold(&"move_right")
 	_hold(&"move_up")
 	await _ticks(30)
-	_check_near("diagonal speed matches cardinal", _player.motion_velocity.length(), 82.0, 3.0)
+	_check_near("diagonal speed matches cardinal", _player.motion_velocity.length(), 328.0, 12.0)
 	_release_all()
 	await _ticks(20)
 
@@ -192,7 +192,7 @@ func _test_movement() -> void:
 	# from the button press. Input is sampled in _process and consumed in
 	# _physics_process, so a press costs up to a frame of latency before the
 	# ramp begins — real, expected, and not what this check is about.
-	_check_near("decelerates to rest", _player.motion_velocity.length(), 0.0, 2.0)
+	_check_near("decelerates to rest", _player.motion_velocity.length(), 0.0, 8.0)
 	_hold(&"move_right")
 	var elapsed := -1.0
 	for i in 40:
@@ -202,7 +202,7 @@ func _test_movement() -> void:
 			continue
 		if elapsed < 0.0:
 			elapsed = 0.0
-		if speed >= 82.0 * 0.95:
+		if speed >= 328.0 * 0.95:
 			break
 		elapsed += TICK
 	_check("reaches full speed in ~0.08s", elapsed >= 0.0 and elapsed <= 0.09,
@@ -284,7 +284,7 @@ func _test_combo_chain() -> void:
 
 
 func _test_dodge() -> void:
-	print("\nDodge (GDD §5: 0.36s, 46px, i-frames 0.04→0.24)")
+	print("\nDodge (0.36s, 184px, i-frames 0.04→0.24)")
 	await _reset_player()
 
 	var start := _player.global_position
@@ -311,7 +311,7 @@ func _test_dodge() -> void:
 	_check_near("dodge duration", duration, 0.36, 0.025)
 	_check_near("i-frames begin", iframes_first, 0.04, 0.025)
 	_check_near("i-frames end", iframes_last + TICK, 0.24, 0.025)
-	_check_near("dodge distance", start.distance_to(_player.global_position), 46.0, 2.0)
+	_check_near("dodge distance", start.distance_to(_player.global_position), 184.0, 8.0)
 	_check("i-frames are off after the roll", not _player.hurtbox.dodge_invulnerable)
 	_check_near("cooldown armed on exit", _player.dodge_cooldown_remaining, 0.12, 0.03)
 
@@ -369,7 +369,7 @@ func _test_damage_and_death() -> void:
 	await _reset_player()
 
 	var enemy: BaseEnemy = ENEMY_SCENE.instantiate()
-	enemy.global_position = _player.global_position + Vector2(18, 0)
+	enemy.global_position = _player.global_position + Vector2(72, 0)
 	_world.add_child(enemy)
 	await _ticks(4)
 	# Freeze it into a damage dummy: with target acquisition off it stays in
@@ -417,7 +417,7 @@ func _test_enemy_behaviour() -> void:
 	camera.make_current()
 
 	var enemy: BaseEnemy = ENEMY_SCENE.instantiate()
-	enemy.global_position = _player.global_position + Vector2(90, 0)
+	enemy.global_position = _player.global_position + Vector2(360, 0)
 	_world.add_child(enemy)
 	await _ticks(4)
 
@@ -468,8 +468,8 @@ func _test_design_rules() -> void:
 	_check("combo is three hits", combo.length() == 3)
 	_check("finisher commits (no chain out of hit 3)", not combo.hit_3.can_chain())
 	_check("hit 3 stops movement", is_zero_approx(combo.hit_3.move_speed_scale))
-	_check("hit 3 knockback in the 12–20px band",
-		combo.hit_3.knockback_distance >= 12.0 and combo.hit_3.knockback_distance <= 20.0,
+	_check("hit 3 knockback in the scaled 48–80px band",
+		combo.hit_3.knockback_distance >= 48.0 and combo.hit_3.knockback_distance <= 80.0,
 		"%.0fpx" % combo.hit_3.knockback_distance)
 	_check("screen shake on heavy hits only",
 		is_zero_approx(combo.hit_1.screen_shake) and is_zero_approx(combo.hit_2.screen_shake)

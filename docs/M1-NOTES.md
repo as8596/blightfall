@@ -64,6 +64,42 @@ drawn and mid-swing, for checking layout without a human present.
 
 ---
 
+## Sprite resolution: 64×96 (GDD §15, A1)
+
+The project runs at **1280×720 internal, 64×64 tiles, 64×96 characters** — a
+straight 4× on the GDD's original 320×180 / 16px / 16×24.
+
+Framing is unchanged: 20×11.2 tiles on screen, character at 13% of screen
+height. Everything spatial scaled by 4 and **nothing temporal changed**, because
+frame data is in seconds. If you are comparing against the GDD's original
+numbers, the mapping is:
+
+| | Was | Now |
+|---|---|---|
+| Move speed | 82 px/s | 328 px/s |
+| Dodge distance | 46px | 184px |
+| Hit 3 knockback | 16px | 64px |
+| Screen shake | 2px | 8px |
+| Knockback friction | 900 | 3600 |
+| Villager speed / aggro / lunge | 34 / 120 / 44 | 136 / 480 / 176 |
+
+Two consequences worth keeping in view:
+
+- **1080p is a 1.5× upscale.** 1280×720 is integer at 720p, 1440p and 4K, but
+  not at 1920×1080. At this pixel density the unevenness is subtle; the standard
+  fix is an "integer scaling only" video option that letterboxes. Worth folding
+  into the difficulty/accessibility options question (GDD §14) rather than
+  solving now.
+- **Art is ~4× the pixel work.** The sprite *count* in GDD §2 is unchanged; the
+  hours per sprite are not. The §11 milestone estimates predate this and should
+  be re-baselined before they're trusted.
+
+If you ever want to change resolution again, the values above are all `@export`ed
+and the smoke test measures them, so a mis-scaled number fails loudly rather
+than turning into a game that feels mysteriously sluggish.
+
+---
+
 ## Tuning notes — for the human
 
 ### 1. Stamina currently does nothing

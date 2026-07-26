@@ -22,15 +22,25 @@ sprite instead of ten.
 
 ## Step zero: lock the palette
 
-Before drawing anything. GDD §8: *"Palette: 32 colours, fixed. Use a pre-made
-one (Endesga 32 or similar, from lospec.com). Do not design your own — it's a
-week you don't have."*
+Before drawing anything. GDD §8: *"fixed, pre-made, from lospec.com. Do not
+design your own — it's a week you don't have."*
 
-1. Download Endesga 32 from
-   [lospec.com/palette-list/endesga-32](https://lospec.com/palette-list/endesga-32)
+**Size is an open decision (GDD §15, A2).** 32 colours was chosen when a
+character had 8 of them. The 64×96 reference uses 21 on its own, which would
+leave 11 for every environment, every other character and every effect. Either
+take a larger pre-made palette (Endesga 64 or similar), or keep 32 and commit to
+heavily shared ramps — skin and wood off the same warm browns, foliage and cloth
+off the same greens. Shared ramps are what good pixel art does anyway, but they
+do limit how distinct two characters can look, which is the reason the
+resolution went up in the first place.
+
+**Settle this before drawing the player.** Repalletting finished art is the
+expensive kind of rework.
+
+1. Download the chosen palette from [lospec.com](https://lospec.com/palette-list)
    as `.gpl` (GIMP palette — Pixelorama imports it directly).
 2. Commit it to `art/palettes/` so every machine and every future you uses the
-   identical 32 values.
+   identical values.
 3. Import it into Pixelorama and work from it exclusively.
 
 **If anything generates pixels rather than you drawing them** — Pixelorama's 3D
@@ -46,7 +56,7 @@ That rule only holds if nothing else in frame is saturated. One stray
 generated highlight competing with the blight accent costs you the visual
 language, and it is very hard to spot one asset at a time.
 
-Zone identity comes from **10-colour slices** of the same 32 — Ambry warm,
+Zone identity comes from **slices** of the same palette — Ambry warm,
 Orchardfall that warmth sickened, Stillwater cold, Hollowdeep near-monochrome —
 with the luminous yellow-green blight accent constant across all four. Consider
 saving each slice as its own Pixelorama palette so a zone's tileset can't
@@ -58,13 +68,23 @@ accidentally borrow a colour from another zone's.
 
 | Asset | Canvas |
 |---|---|
-| Tile | 16×16 |
-| Player | 16×24 |
-| Enemies | 16×16 to 32×32 |
-| Bosses | up to 64×64 |
+| Tile | 64×64 |
+| Player | 64×96 |
+| Enemies | 64×64 to 128×128 |
+| Bosses | up to 256×256 |
 
-Internal resolution is 320×180. A 16×24 character is about 13% of the screen
-height — sprites read small, so silhouette does the work, not detail.
+Internal resolution is 1280×720 (GDD §15, A1). A 64×96 character is 13% of the
+screen height and exactly one tile wide.
+
+At this size a sprite has ~6100 pixels, which is enough for a full ramp per
+material — shadow, base, highlight, specular — plus an iris, cloth folds and
+separated fingers. `art/sprites/scale_demo_64x96.png` is a reference of roughly
+what fits; `tests/size_comparison.tscn` shows it against the two sizes it
+replaced.
+
+**Watch the colour count.** That reference uses 21 colours on its own. Whatever
+palette size is settled on (GDD §15, A2), plan on sharing ramps between
+materials rather than giving each one its own.
 
 ## Animation budget
 
@@ -79,9 +99,13 @@ Straight from GDD §8. Treat it as a ceiling, not a target:
 | Hurt | 1 |
 | Death | 5 |
 
-**Left is a horizontal flip of right.** Draw three directions, not four. This is
-half the walk-cycle work for a difference nobody notices in a top-down game at
-this resolution.
+**Treat this as a hard ceiling now, not a target.** It was set when a frame was
+384 pixels; a frame is now 6144. Roughly 30 frames for the player alone is a
+different proposition at 64×96, and the honest mitigation is fewer frames drawn
+well rather than the same count drawn hastily.
+
+**Left is a horizontal flip of right.** Draw three directions, not four. Half
+the walk-cycle work for a difference nobody notices top-down.
 
 ---
 
@@ -118,10 +142,10 @@ Idle, walk and death are free-running and can use a normal looping
 **One horizontal strip per animation**, no padding, no trim:
 
 ```
-art/sprites/player/player_idle_down.png      2 frames  →  32×24
-art/sprites/player/player_walk_down.png      4 frames  →  64×24
-art/sprites/player/player_attack_1_down.png  3 frames  →  48×24
-art/sprites/enemies/villager_walk_down.png   4 frames  →  64×16
+art/sprites/player/player_idle_down.png      2 frames  →  128×96
+art/sprites/player/player_walk_down.png      4 frames  →  256×96
+art/sprites/player/player_attack_1_down.png  3 frames  →  192×96
+art/sprites/enemies/villager_walk_down.png   4 frames  →  256×64
 ```
 
 Strips rather than one big sheet per actor: re-exporting a single animation
@@ -133,7 +157,7 @@ Turn **off** any "trim empty space" option on export. Trimming makes each frame
 a different size and shifts the sprite's origin per frame, which produces a
 character that jitters as it animates.
 
-**Tilesets** export as one PNG grid, 16×16 cells, **no padding between tiles.**
+**Tilesets** export as one PNG grid, 64×64 cells, **no padding between tiles.**
 Padding exists to stop bleed under linear filtering; this project filters
 Nearest and has no bleed to stop. Use Pixelorama's tile mode while drawing so
 edges are seamless by construction.
@@ -156,7 +180,7 @@ pixel-art project goes quietly blurry:
   the first time it's used in a 3D context. Disabled outright.
 
 The project already sets Nearest filtering, pixel snapping for both transforms
-and vertices, and a 320×180 viewport (GDD §10).
+and vertices, and a 1280×720 viewport (GDD §10, as amended by §15).
 
 ---
 
