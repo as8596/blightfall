@@ -9,6 +9,9 @@ extends Node
 
 const ROOM: PackedScene = preload("res://levels/prototype/prototype_room.tscn")
 
+## `--scene=res://...` captures something other than the prototype room.
+var _scene_override: String = ""
+
 @export var settle_frames: int = 90
 @export var output_path: String = "user://frame.png"
 
@@ -24,7 +27,13 @@ var _room: Node
 
 
 func _ready() -> void:
-	_room = ROOM.instantiate()
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--scene="):
+			_scene_override = arg.trim_prefix("--scene=")
+	if _scene_override != "":
+		_room = (load(_scene_override) as PackedScene).instantiate()
+	else:
+		_room = ROOM.instantiate()
 	add_child(_room)
 	_capture.call_deferred()
 
