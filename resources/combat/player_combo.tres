@@ -1,0 +1,63 @@
+[gd_resource type="Resource" script_class="PlayerComboData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/player_combo_data.gd" id="1_combo"]
+[ext_resource type="Script" path="res://resources/combat/combo_step_data.gd" id="2_step"]
+
+[sub_resource type="Resource" id="Resource_hit1"]
+resource_name = "Hit 1"
+script = ExtResource("2_step")
+windup = 0.08
+active = 0.1
+recovery = 0.16
+damage = 4
+knockback_distance = 0.0
+cancel_into_next_at = 0.12
+move_speed_scale = 0.25
+hitstop = 0.05
+screen_shake = 0.0
+swing_sfx = &"swing_light"
+impact_sfx = &"impact_light"
+hitbox_size = Vector2(22, 20)
+hitbox_offset = 15.0
+
+[sub_resource type="Resource" id="Resource_hit2"]
+resource_name = "Hit 2"
+script = ExtResource("2_step")
+windup = 0.07
+active = 0.1
+recovery = 0.18
+damage = 4
+knockback_distance = 0.0
+cancel_into_next_at = 0.12
+move_speed_scale = 0.25
+hitstop = 0.05
+screen_shake = 0.0
+swing_sfx = &"swing_light"
+impact_sfx = &"impact_light"
+hitbox_size = Vector2(22, 20)
+hitbox_offset = 15.0
+
+[sub_resource type="Resource" id="Resource_hit3"]
+resource_name = "Hit 3 (commit)"
+script = ExtResource("2_step")
+windup = 0.14
+active = 0.12
+recovery = 0.32
+damage = 8
+knockback_distance = 16.0
+cancel_into_next_at = -1.0
+move_speed_scale = 0.0
+hitstop = 0.1
+screen_shake = 2.0
+swing_sfx = &"swing_heavy"
+impact_sfx = &"impact_heavy"
+hitbox_size = Vector2(28, 24)
+hitbox_offset = 17.0
+
+[resource]
+resource_name = "Player Light Combo"
+script = ExtResource("1_combo")
+hit_1 = SubResource("Resource_hit1")
+hit_2 = SubResource("Resource_hit2")
+hit_3 = SubResource("Resource_hit3")
+combo_window_after_recovery = 0.25

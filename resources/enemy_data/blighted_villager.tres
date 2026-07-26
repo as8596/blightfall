@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemy_data/enemy_data.gd" id="1_data"]
+
+[resource]
+resource_name = "Blighted Villager"
+script = ExtResource("1_data")
+display_name = "Blighted Villager"
+max_health = 12
+move_speed = 34.0
+contact_damage = 1
+xp_value = 5
+telegraph_time = 0.4
+telegraph_color = Color(0.87, 0.83, 0.36, 1)
+telegraph_scale = 1.25
+telegraph_sfx = &"enemy_telegraph"
+aggro_range = 120.0
+attack_range = 26.0
+lunge_distance = 44.0
+lunge_time = 0.18
+recover_time = 0.5
+attack_cooldown = 0.35
+stagger_time = 0.14
+separation_radius = 14.0
+separation_strength = 0.6
+knockback_resistance = 1.0
+death_time = 0.35
+body_size = Vector2(16, 16)
+base_color = Color(0.42, 0.4, 0.36, 1)
+hitbox_size = Vector2(20, 18)
+hitbox_offset = 12.0

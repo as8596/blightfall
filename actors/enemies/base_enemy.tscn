@@ -1,0 +1,103 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://actors/enemies/base_enemy.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://actors/components/health_component.gd" id="2_health"]
+[ext_resource type="Script" path="res://actors/components/knockback_component.gd" id="3_knockback"]
+[ext_resource type="Script" path="res://actors/components/flash_component.gd" id="4_flash"]
+[ext_resource type="Script" path="res://actors/components/hitbox.gd" id="5_hitbox"]
+[ext_resource type="Script" path="res://actors/components/hurtbox.gd" id="6_hurtbox"]
+[ext_resource type="Script" path="res://systems/state_machine/state_machine.gd" id="7_machine"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_idle_state.gd" id="8_idle"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_chase_state.gd" id="9_chase"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_telegraph_state.gd" id="10_telegraph"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_lunge_state.gd" id="11_lunge"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_recover_state.gd" id="12_recover"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_hurt_state.gd" id="13_hurt"]
+[ext_resource type="Script" path="res://actors/enemies/states/enemy_dead_state.gd" id="14_dead"]
+
+[sub_resource type="RectangleShape2D" id="Rect_enemy_body"]
+size = Vector2(12, 8)
+
+[sub_resource type="RectangleShape2D" id="Rect_enemy_hit"]
+size = Vector2(20, 18)
+
+[sub_resource type="RectangleShape2D" id="Rect_enemy_hurt"]
+size = Vector2(14, 14)
+
+[node name="BaseEnemy" type="CharacterBody2D"]
+collision_layer = 16
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_enemy")
+
+[node name="Visual" type="ColorRect" parent="."]
+offset_left = -8.0
+offset_top = -16.0
+offset_right = 8.0
+mouse_filter = 2
+color = Color(0.419608, 0.4, 0.360784, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("Rect_enemy_body")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2_health")
+max_health = 12
+
+[node name="KnockbackComponent" type="Node" parent="."]
+script = ExtResource("3_knockback")
+friction = 900.0
+
+[node name="FlashComponent" type="Node" parent="."]
+script = ExtResource("4_flash")
+target_path = NodePath("../Visual")
+flash_time = 0.08
+
+[node name="Hitbox" type="Area2D" parent="."]
+position = Vector2(0, -8)
+collision_layer = 32
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("5_hitbox")
+impact_sfx = &"impact_light"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(12, 0)
+shape = SubResource("Rect_enemy_hit")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+monitoring = false
+script = ExtResource("6_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(0, -8)
+shape = SubResource("Rect_enemy_hurt")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("7_machine")
+initial_state = &"Idle"
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("8_idle")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("9_chase")
+
+[node name="Telegraph" type="Node" parent="StateMachine"]
+script = ExtResource("10_telegraph")
+
+[node name="Lunge" type="Node" parent="StateMachine"]
+script = ExtResource("11_lunge")
+
+[node name="Recover" type="Node" parent="StateMachine"]
+script = ExtResource("12_recover")
+
+[node name="Hurt" type="Node" parent="StateMachine"]
+script = ExtResource("13_hurt")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("14_dead")

@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://actors/enemies/base_enemy.tscn" id="1_base"]
+[ext_resource type="Resource" path="res://resources/enemy_data/blighted_villager.tres" id="2_data"]
+
+[node name="BlightedVillager" instance=ExtResource("1_base")]
+data = ExtResource("2_data")

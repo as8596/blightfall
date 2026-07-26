@@ -1,0 +1,569 @@
+# Game Design Document — *Blightfall* (working title)
+
+**Genre:** Top-down action RPG, pixel art
+**Engine:** Godot 4.4+ (GDScript)
+**Team:** 1 developer
+**Platform:** PC (Windows/Linux), Steam or itch.io
+**Target playtime:** 2.5–4 hours
+**Status:** Working draft. Open questions marked 🔶
+
+---
+
+## 1. High Concept
+
+> A valley is dying of a rot nobody understands, and the frightened towns have started hanging anyone suspected of carrying it. You are on the gallows for a crime you don't have — and as the axe rises, the real thing arrives.
+
+**The hook:** You are condemned by people who turn out to be right about the danger and wrong about you. Then you go and fix it for them anyway.
+
+### Design pillars
+
+1. **Readable, snappy combat.** Every enemy telegraphs. Every death is the player's fault and they know it. No damage sponges.
+2. **Small world, dense with secrets.** A compact map the player learns by heart, not a large one they cross once.
+3. **Grim world, warm people.** The valley is rotting. The town is a genuine refuge — warm, safe, and worth saving. Warmth comes from kindness and steadiness, not humor.
+
+### Non-goals
+
+- ❌ Not a party-based RPG. One playable character.
+- ❌ No crafting system.
+- ❌ No procedural generation. Hand-authored maps only.
+- ❌ No voice acting.
+- ❌ No open world.
+- ⚠️ Co-op is a **stretch goal only** — see §12. Not designed for, not built for, not scoped.
+
+---
+
+## 2. Scope Contract
+
+Hard ceilings. Reread whenever a new idea seems exciting.
+
+| Content type | Budget |
+|---|---|
+| Playable characters | 1 |
+| Zones | 3 + 1 hub |
+| Enemy types | 10 (incl. 3 variant reskins) |
+| Bosses | 3 |
+| Tools / abilities | 4 |
+| NPCs with dialogue | 9 (incl. the fox) |
+| Music tracks | 6 |
+| Scripted sequences | 5 |
+| Unique sprites | ~47 |
+
+**Estimated solo timeline:** 12–18 months at 10 hrs/week.
+
+---
+
+## 3. The Antagonist — The Blight
+
+An **inhuman force**, deliberately not a character. It never speaks, never appears as a figure, and has no motive. It spreads.
+
+### Making an impersonal antagonist work
+
+Four techniques, all cheap, all mandatory:
+
+1. **It has a grammar, not a personality.** Consistent, legible rules the player learns. That legibility becomes its character.
+2. **Victims carry the drama.** The blight doesn't need to talk if the people it takes do. This is why pillar 3 exists.
+3. **Bosses are its products, not its avatars.** Each of the three is something it made, carrying a fragment of who they were.
+4. **Its screen time is environmental.** How far the rot has spread through the tilesets *is* its presence.
+
+Reference: *Hollow Knight*'s Infection is the best-executed version of exactly this.
+
+### What it does
+
+Transforms people and animals into monsters. Physical, visible, progressive — you can see how far gone something is by looking at it.
+
+### Reversibility — ASYMMETRIC (decided)
+
+Enemies you fight and people you save are deliberately decoupled:
+
+- **Nameless enemies are always beyond help.** Blighted Villagers, Rot Hounds, Husks — universally too far gone. Killing them is mercy. No guilt loop, no second-guessing, no pacifist route to design around.
+- **Named characters are individually saveable** through specific quests, choices, or reaching them before a story beat. Never on a real-time clock — story-gated only, so rescue never competes with the exploration pillar.
+
+The ending's tone scales with how many named characters were saved. **Boss 1 (the cellmate) is the emotional centerpiece** — whether they can be saved is the hardest optional objective in the game, and pays off the opening a second time.
+
+### Win condition
+
+**Destroy a physical heart/source.** Concrete, killable, satisfying. The three zones each contain something guarding or feeding it; the finale is reaching and destroying it.
+
+---
+
+## 4. The Opening Sequence
+
+Target runtime **6–8 minutes**. Structure follows Skyrim's Helgen opening, which works for reasons worth naming explicitly:
+
+- **No control for a long time.** Tension built by denying agency, then granting it.
+- **Exposition arrives sideways.** Nobody explains the world; you eavesdrop and assemble it.
+- **You are explicitly a nobody.** Condemned by clerical convenience. Petty injustice motivates better than epic tragedy.
+- **Someone else dies first, on screen.** Stakes demonstrated, not asserted.
+- **The world-level threat interrupts the personal one.**
+- **The tutorial is disguised as escape.**
+- **It ends on a real choice.**
+
+### Premise
+
+You are being executed as a **suspected blight carrier**. You aren't one. The valley is terrified, the infection is poorly understood, and the response has been to hang the accused. The people about to kill you are scared and wrong, not evil — which matters, because you'll come back to this town later and they'll help you.
+
+### Beat sheet
+
+| # | Beat | Duration | Control | Notes |
+|---|---|---|---|---|
+| 0 | Black screen, audio only | 0:15 | None | Cart wheels, crowd, a bell ×3. No title card. |
+| 1 | The cart | 2:00 | Move within cart | Three cellmates. All exposition happens here. |
+| 2 | Arrival & the ledger | 1:00 | None | Diegetic character creation. "You're not on this list." |
+| 3 | The first execution | 0:45 | None | The Liar dies, still protesting. Camera does not cut away. |
+| 4 | The walk | 0:30 | Forward only | Camera pushes in. Crowd audio drops. Music thins to one instrument. |
+| 5 | The block | 0:20 | None | Forced kneel. The axe rises. |
+| 6 | **The blight arrives** | 0:30 | None | It reaches the town mid-execution. Chaos. |
+| 7 | Escape (tutorial) | 2:00 | Full | Movement → attack → dodge, all under pressure. |
+| 8 | The offer | 0:45 | Dialogue choice | Two exits. Seeds later dialogue. |
+
+### The cellmates
+
+Each does a job:
+
+- **Wren (The Talker)** — terrified, cannot stop narrating. Delivers world exposition because his anxiety demands it.
+- **Halvard (The Stoic)** — says four things total, all load-bearing. Has made peace with dying.
+- **The Liar** (unnamed) — insists there's been a mistake, that someone is coming. Nobody comes. Dies first, so the player learns that protest doesn't work here.
+
+**Writing note:** none of them should address the player directly for the first 60 seconds. Let the player eavesdrop. The moment an NPC says "So, stranger, what brings *you* here?" the illusion collapses into a tutorial.
+
+**Payoff:** one cellmate survives the escape and becomes **Boss 1**, found transformed in Zone 1. Sprite already built, player already attached.
+
+### Build the intro LAST
+
+The most important production note in this document. The intro is the most fun part to design and the least important to validate. Schedule it at **M6**, prototype it as text placeholder cards during M2, and **make it skippable after first completion** — you will play it a hundred times in testing.
+
+---
+
+## 5. Combat Design
+
+Real-time, action-focused. Few verbs, demanding execution. Difficulty comes from enemy design, not moveset depth.
+
+### Player verbs
+
+| Verb | Input |
+|---|---|
+| Move | WASD / left stick |
+| Attack | J / X — 3-hit combo |
+| Dodge | Space / A — directional roll, i-frames |
+| Tool | K / Y — context-dependent |
+
+### Frame data
+
+Concrete starting values, all in seconds.
+
+**Attack (light combo)**
+
+| Hit | Windup | Active | Recovery | Damage | Cancel |
+|---|---|---|---|---|---|
+| 1 | 0.08 | 0.10 | 0.16 | 4 | into hit 2 from 0.12 |
+| 2 | 0.07 | 0.10 | 0.18 | 4 | into hit 3 from 0.12 |
+| 3 | 0.14 | 0.12 | 0.32 | 8 | none (commit) |
+
+- Combo window closes 0.25s after recovery begins
+- Attacks dodge-cancel during recovery only — the main skill expression
+- Movement during attack: 25% speed on hits 1–2, 0% on hit 3
+
+**Dodge**
+- Duration 0.36s · i-frames 0.04→0.24 · distance 46px · 0.12s cooldown after recovery
+
+**Player baseline**
+- Move speed 82 px/s (at 320×180) · full speed in 0.08s · 6 hearts start, 12 max · 0.8s i-frames on damage
+
+### Game feel checklist
+
+- **Hitstop:** 0.05s on hits 1–2, 0.10s on hit 3
+- **Screen shake:** 2px on heavy hits only
+- **Knockback:** 12–20px on final combo hit
+- **Hit flash:** white for 0.08s via shader, not `modulate`
+- **Sound layering:** every hit gets a swing sound *and* an impact sound
+
+### Enemy design rules
+
+1. Telegraph minimum **0.4s**, distinct colour and pose
+2. One attack pattern per enemy (bosses get three)
+3. Every enemy killable in ≤5 hits at matched gear
+4. No enemy attacks off-screen
+
+### Roster
+
+Everything is a corrupted human or animal — one humanoid rig plus one quadruped rig, with corruption variants, covers nearly the whole list.
+
+| Enemy | Zone | Behavior | HP |
+|---|---|---|---|
+| Blighted Villager | All | Slow walker, lunge | 12 |
+| Rotcrow | 1 | Erratic flight, dive attack | 8 |
+| Thornmass | 1 | Stationary, ranged volley | 16 |
+| Blighted Guard | 1 | Shielded front, flank to damage | 24 |
+| Hollow Stag | 2 | Charges in straight lines | 18 |
+| Fused Pair | 2 | Two victims grown together; splits at 50% HP | 28 |
+| Rot Hound | 2 | Fast, circles before lunging, packs of 3 | 14 |
+| Seeder | 3 | Spawns Villagers; must be rushed | 20 |
+| Grave Bloom | 3 | Heavy, ground-slam AoE, slow | 40 |
+| Husk | 3 | Long-transformed; unrecognizable, fast | 18 |
+
+### Bosses
+
+All three are corrupted named NPCs. Drama comes free.
+
+1. **Zone 1 — the surviving cellmate.** Direct payoff to the intro. Teaches dodge timing; forgiving, telegraph-heavy.
+2. **Zone 2 — the valley's protector.** The guard captain who tried to hold the line. Teaches crowd control.
+3. **Zone 3 — the first victim.** Transformed for generations, closest to the heart. Barely humanoid.
+
+---
+
+## 6. Progression
+
+**Item gates for world progression, light XP for numbers.** Item gates do all gating; XP only adjusts values.
+
+### XP rules (non-negotiable)
+
+Violate these and you've signed up for permanent tuning debt across every encounter:
+
+1. **Cap at 10–15 levels** across the whole game
+2. **Never scale enemies to level.** Levels make you absolutely stronger — grinding becomes an accessibility valve, not a treadmill
+3. **Weight XP toward bosses and exploration**, not trash kills
+4. **Levels gate nothing**
+
+### Tools (the four keys)
+
+Each is a combat option *and* a traversal unlock, so every acquisition opens the world.
+
+| Tool | Combat use | Traversal use |
+|---|---|---|
+| **Cinderflask** | Ignite enemies | Burn away blight growth blocking paths |
+| **Warden's Hook** | Pull an enemy toward you | Grapple across gaps |
+| **Clearwater Charm** | Stun corrupted enemies | Safely cross blighted water |
+| **Deeproot Sight** | Reveal Husks | Reveal hidden paths |
+
+**Acquisition order — DECIDED.** Four tools, one granted in the intro, then one per zone:
+
+| Where | Tool | Opens |
+|---|---|---|
+| Intro escape | Cinderflask | — (tutorial verb) |
+| Orchardfall | Warden's Hook | Stillwater |
+| Stillwater | Clearwater Charm | Hollowdeep |
+| Hollowdeep | Deeproot Sight | the finale |
+
+Strictly linear; each zone teaches exactly one new verb. Cinderflask is grabbed while fleeing the burning town, so the escape tutorial covers move, attack, dodge, and one tool.
+
+⚠️ **Production dependency:** the intro is built at M6, so M1–M5 need a debug flag granting Cinderflask. Ten minutes of work, but easy to forget until it blocks you.
+
+### Found upgrades
+
+Placed by hand as rewards for exploration or challenge rooms. Never random drops.
+
+- **Heart Shards** — 4 = 1 container. 24 hidden (6 hearts total)
+- **Whetstones** — +2 base damage. 3 in the world
+
+### Stamina — DODGE ONLY (decided)
+
+- **Attacks never cost stamina.** They stay free and snappy; the frame data already prevents mashing via commit windows and combo timeouts.
+- **Dodge costs stamina.** Generous pool (4 consecutive dodges), fast regen (full in ~1.5s).
+- It functions as a rhythm limiter that stops panic-rolling, not a resource to manage.
+
+Rationale: *Hyper Light Drifter*, the closest reference for this game's feel, has an unlimited dash, and that's a large part of why it plays as well as it does. Gating 0.08s-windup attacks behind a meter would fight pillar 1 directly. Validate the pool size at M1 — if dodging ever feels like budgeting, the pool is too small.
+
+---
+
+## 7. World Structure
+
+```
+                    ┌──────────────┐
+                    │    AMBRY     │  ← the town that condemned you
+                    │   (the hub)  │     NPCs, shops, save point
+                    └──────┬───────┘
+            ┌──────────────┼──────────────┐
+      ┌─────▼─────┐  ┌─────▼─────┐  ┌─────▼─────┐
+      │ ORCHARD-  │  │ STILL-    │  │ HOLLOW-   │
+      │   FALL    │  │  WATER    │  │   DEEP    │
+      │           │  │           │  │           │
+      │ recently  │  │   long    │  │  origin   │
+      │  taken    │  │  taken    │  │           │
+      │           │  │           │  │           │
+      │ Cellmate  │  │ Protector │  │  First    │
+      │           │  │           │  │  Victim   │
+      └───────────┘  └───────────┘  └───────────┘
+```
+
+### Zone identities
+
+Not biomes. Each zone is **a place with a former function, consumed at a different stage** — the organizing axis is how long the blight has been there. This gives visual identity from the old architecture, environmental storytelling from what's left, and enemy logic from who was standing there when it happened.
+
+**Orchardfall — recently taken.** Farmland and orchards on the valley floor, an hour's walk from Ambry. Fruit rotting unpicked, doors standing open, a plough left mid-furrow. The most emotionally legible zone precisely *because* it's still recognizable — everyone knows what a farm should look like, so the player reads the loss without being told.
+
+Palette: **the hub's warm colours, sickened.** Ochre sliding to yellow-green, warm browns going grey. Corruption of the familiar, not a new biome — Orchardfall should feel adjacent to safety.
+Enemies: Blighted Villagers, Blighted Guards, Rotcrows, Thornmass. People you might recognize.
+
+**Stillwater — long taken.** The valley's lower reach, flooded: a river dammed by rot until the water rose over a mill and the buildings around it. Roofs above the waterline, a mill wheel still turning because nothing told it to stop.
+
+Palette: cold. Blue-grey, teal, deep green, black water.
+Enemies: the human vanishes and the wild takes over — Hollow Stags, Rot Hounds, the Fused Pair.
+
+**Hollowdeep — the origin.** A sinkhole in the high valley. The ground gave way and revealed caverns that were always under the farmland, and the thing in them has been there far longer than the town has. The player descends.
+
+Palette: near-monochrome, tightly narrowed, with the blight accent as almost the only colour in frame.
+Enemies: Seeders, Grave Blooms, Husks. Barely anything reads as human.
+
+The horror is retroactive: the valley was always sitting on top of it.
+
+**Zone template** — identical for all three. Consistency is a solo dev's ally.
+
+- 15–20 screens
+- 1 mini-boss / challenge room
+- 1 tool acquisition room
+- 3–4 hidden Heart Shards
+- 2 shortcuts back to the entrance, unlocked from the far side
+- Save point every 5–6 rooms
+- Boss arena
+
+### The hub
+
+Narratively the most important location, and where the warmth lives. The zones are grim; the town is warm, safe, and worth saving. Concentrating emotional investment into one reusable scene is cheap and effective.
+
+**Tone: warm, not funny.** Humor is deliberately not used. Warmth comes from three other sources:
+
+1. **Kindness at cost.** Not people being nice — people helping when helping is expensive for them, and not mentioning it.
+2. **Continued domesticity.** Ordinary rituals persisting through catastrophe. Bread still baked, clothes still mended, a song still sung at the same hour. Costs one line and one idle animation.
+3. **Safety as a sensory quality.** Not a writing problem — art, audio, and pacing. The player's body should register the hub as safe before they read a word:
+   - **Palette:** the hub is the *only* location using the warm end of the 32 colours. Zones get the cold slice. Entering town should feel like temperature changing.
+   - **Music:** zones get drones and ambience; the hub gets melody and real instrumentation.
+   - **Zero pressure:** no enemies, no timers, no fail states, no screen shake, slower camera. Mechanically incapable of hurting you, and the player feels it within ten seconds.
+   - **Light is hearths, not glare.** Fire, lamps, windows.
+
+Get those right and the NPCs can be written completely straight.
+
+**It changes as the blight advances.** After each zone: more refugees, fewer shops open, walls further reinforced. The same handful of NPCs under increasing pressure, getting *more* screen time rather than less.
+
+### Cast
+
+Each character is defined by how they're kind under strain, not by a comic bit. Varied in age, temperament, and relationship to your condemnation.
+
+| NPC | Warmth expressed as | Note |
+|---|---|---|
+| The magistrate | Doing things for you unasked, never mentioning it | Read your sentence. Can't look at you |
+| The smith | Work. Upgrades gear, refuses payment, changes the subject | Few words, elderly |
+| The innkeeper | A made bed and hot food, every time | Keeps the inn open though nobody comes |
+| The child | Treating you as ordinary | Not afraid of you. Asks about the world outside |
+| The apothecary | Taking you seriously | Methodical, out of her depth, honest about it |
+| The hidden case | Warmth curdling into dread | Infected, concealing it |
+| The reluctant guard | Practical protection | Opposed the hanging, was overruled |
+| The unrepentant | None — and that's the point | Still believes you're a carrier |
+| **The fox** | Unambiguous, uncomplicated gentleness | See below |
+
+The unrepentant is load-bearing: a town that fully forgives itself never really condemned you.
+
+**Implementation:** 5–8 rotating idle lines per NPC, cycling per visit. Trivial to build, enormous perceived depth. Nobody thanks the player until late — earned gratitude lands, free gratitude is noise.
+
+### The fox 🔶 *(name TBD)*
+
+A fox that talks. **The game never explains this and no NPC ever remarks on it.** The moment it's justified it stops being charming and becomes a lore item.
+
+**Role: guide.** Solves the structural problem that an antagonist which never speaks still needs someone to convey its grammar — without turning a human NPC into an exposition dispenser.
+
+**Source of authority is observation, not wisdom.** It goes where people can't: small, unafraid, has been through the whole valley, and notices the rot before people do — better senses, not magic. This makes it credible *and* frequently uncertain, which is warmer than being oracular.
+
+**Guide rules** (the difference between beloved and despised):
+
+1. **Player-initiated only.** Speaks when spoken to. Never interrupts, never auto-triggers, never pops up.
+2. **Never repeats.** Track what it has said.
+3. **Observes, doesn't instruct.** "The rot's thicker by the water than it was" — not "go to the lake and use the Charm."
+4. **Warmth through presence, not chatter.** It waits. It doesn't fill silence.
+
+**Placement, not companionship.** A following companion costs pathfinding, geometry snags, combat interference, camera problems, and special handling in every cutscene — weeks of bugs for a solo dev. Instead the fox **appears at fixed points, sitting, waiting**: in the hub, plus 2–3 placed spots per zone. Finding it already there inside a rotting zone extends the hub's safety into hostile space at controlled intervals. Cost: a static NPC placement.
+
+**It is never harmed.** Not sentiment — design. "Warm and safe" is a stated goal, and in a game about a valley being taken from people, exactly one thing that *cannot* be taken is what makes safety feel real instead of provisional. Never threatened, never infected, never at risk. Like the talking, never addressed.
+
+---
+
+## 8. Art Direction
+
+- **Internal resolution:** 320×180 (scales to 720p, 1080p, 1440p)
+- **Tile size:** 16×16
+- **Character sprite:** 16×24; enemies 16×16 to 32×32; bosses up to 64×64
+- **Palette:** 32 colours, fixed. Use a pre-made one (Endesga 32 or similar, from lospec.com). Do not design your own — it's a week you don't have
+- **Animation budget:** idle 2 · walk 4 (×4 dir) · attack 3/hit · dodge 4 · hurt 1 · death 5
+
+### Visual language
+
+- **Corruption is the one saturated colour.** Everything else muted — greys, browns, sick greens. The blight is the only thing that glows.
+- **Transformation is readable at a glance.** Corruption stage visible in silhouette, so players judge threat instantly.
+- **Zone identity via palette subsets.** Same 32 colours, different 10-colour slices per zone: Ambry warm (amber, ochre, cream, ember); Orchardfall the same warmth sickened (yellow-green, grey-brown); Stillwater cold (blue-grey, teal, black water); Hollowdeep near-monochrome. The blight accent — one luminous yellow-green — is constant across all four and is the only saturated colour in the game.
+- **Readability rule:** enemies carry one accent colour no environment tile uses.
+
+### Production order
+
+1. Player sprite, all animations
+2. One enemy (Blighted Villager) — proves the pipeline
+3. Zone 1 tileset (~40 tiles)
+4. UI
+5. Everything else
+6. Intro-specific assets **last**
+
+---
+
+## 9. Audio
+
+| Asset | Count |
+|---|---|
+| Music tracks | 6 |
+| SFX | ~45 |
+| Ambience | 4 |
+
+Unless audio is a genuine strength, license or commission. Budget $300–800 for six tracks.
+
+**Cheap wins:** pitch-randomise every SFX ±10% on playback — one footstep becomes infinite footsteps, two lines of code. And the intro's most powerful audio moment is silence, which is free.
+
+---
+
+## 10. Technical Architecture (Godot 4)
+
+### Project structure
+
+```
+res://
+├── actors/
+│   ├── player/  (player.tscn, player.gd, states/)
+│   ├── enemies/ (base_enemy.tscn, per-enemy folders)
+│   └── components/  (Hurtbox, Health, Knockback, Input)
+├── systems/  (state_machine/, dialogue/, sequencer/, save/)
+├── resources/  (enemy_data/, items/, dialogue/)
+├── levels/  (intro/, hub/, zone_01/…)
+├── ui/ · art/ · audio/ · autoloads/
+```
+
+### Core patterns
+
+**1. Component-based actors.** `HealthComponent`, `Hurtbox` (Area2D), `Hitbox` (Area2D), `KnockbackComponent`, `StateMachine`. An enemy = `CharacterBody2D` + sprite + components + one behavior script. Enemy #7 takes an afternoon, not a week.
+
+**2. Player finite state machine.** States: `Idle`, `Move`, `Attack`, `Dodge`, `Hurt`, `Dead`, `UsingTool`, `Cutscene`. Each its own script with `enter()`, `exit()`, `update()`, `physics_update()`. The `Cutscene` state is what makes the intro tractable — without it you scatter input-disable flags through every other state.
+
+**3. Custom Resources for data.**
+
+```gdscript
+class_name EnemyData extends Resource
+
+@export var display_name: String = ""
+@export var max_health: int = 10
+@export var move_speed: float = 40.0
+@export var contact_damage: int = 1
+@export var xp_value: int = 5
+@export var telegraph_time: float = 0.4
+```
+
+Each enemy becomes a `.tres` you tune without touching code.
+
+**4. Autoload event bus.** One `Events.gd` singleton with global signals — `player_died`, `boss_defeated`, `item_acquired`, `xp_gained`. Prevents deep node-path coupling.
+
+**5. Physics layers.** Assign day one; renaming in month six is genuinely painful.
+
+| Layer | Name |
+|---|---|
+| 1 | World |
+| 2 | Player |
+| 3 | PlayerHitbox |
+| 4 | PlayerHurtbox |
+| 5 | Enemy |
+| 6 | EnemyHitbox |
+| 7 | EnemyHurtbox |
+| 8 | Interactable |
+
+### Cutscene sequencer
+
+The intro is ~8 minutes of linear beats. Don't build it from nested timers and signal spaghetti — use a coroutine sequencer on Godot 4's `await`. Reads like a screenplay, editable a year later:
+
+```gdscript
+func play_intro() -> void:
+    player.state_machine.transition_to("Cutscene")
+    await Seq.play_audio("cart_wheels")
+    await Seq.wait(15.0)
+    await Seq.fade_from_black(2.0)
+    await Seq.camera_to(cart_marker, 0.0)
+    await Seq.dialogue("intro_cart_01")
+    # ...
+```
+
+`Seq` is an autoload where each method returns when its effect completes. ~200 lines, pays for itself across all five scripted sequences. Build skip support at the same time, not later.
+
+### Pixel-perfect setup
+
+- **Viewport** 320×180, **Window** 1280×720
+- **Stretch Mode:** `canvas_items` + **Snap 2D Transforms to Pixel**
+- **Default Texture Filter:** `Nearest`
+- **Snap 2D Vertices to Pixel:** on
+
+### Top-down specifics
+
+- **Y-sorting** on the level root and object `TileMapLayer`; sprite offset so sort origin sits at the feet
+- **Use `TileMapLayer`** (Godot 4.3+), not deprecated `TileMap`. Layers: Ground, Objects (y-sorted), Overhead, Collision
+- **Camera2D** with smoothing ~5.0, per-room limits via `Area2D` triggers
+
+### Save system
+
+JSON, not `ResourceSaver` — loading arbitrary `.tres` at runtime is a code-execution vector and a versioning headache. Save to `user://save_01.json` on save-point rest and zone transition.
+
+---
+
+## 11. Milestones
+
+| # | Milestone | Deliverable | Est. |
+|---|---|---|---|
+| **M1** | **Combat prototype** | Grey boxes. Move, attack, dodge. One enemy. **Is it fun?** | 3–4 wks |
+| **M2** | **Vertical slice** | One polished room. Final art, sound, hitstop. Intro as text placeholders | 6–8 wks |
+| **M3** | Orchardfall complete | Farmland, Warden's Hook, cellmate boss, Ambry v1 | 10–12 wks |
+| **M4** | Stillwater complete | Flooded mill, Clearwater Charm, protector boss | 8–10 wks |
+| **M5** | Hollowdeep + ending | The sinkhole, final tool, first victim, finale | 8–10 wks |
+| **M6** | **Intro sequence** | Full opening, bespoke art, sequencer, skip support | 5–7 wks |
+| **M7** | Content complete | Secrets placed, dialogue written, audio in | 4–6 wks |
+| **M8** | Polish & ship | Playtesting, balance, options, controller, store page | 6–8 wks |
+
+**Gate at M1:** if combat isn't fun with grey boxes, no amount of pixel art or story will save it. Be willing to spend another month here or change the design. Cheapest possible place to learn the game doesn't work.
+
+---
+
+## 12. Co-op (Stretch Goal — Not Scoped)
+
+Deferred. Nothing in the current design depends on it. If revisited, the intended shape was: **online, host's world, host keeps progress, solo remains first-class** — the Dark Souls summon model, where guests visit and help.
+
+### Architecture insurance
+
+These cost nothing now and prevent a rewrite later. Follow them regardless of whether co-op ever happens; they're good practice anyway.
+
+1. **Never make the player a singleton.** No `Player` autoload, no `Global.player`. Player state lives on the player node; systems receive a reference. This is the big one — a global player reference means retrofitting multiple players is a from-scratch rewrite.
+2. **No `get_first_node_in_group("player")` scattered through enemy code.** Enemies ask "who is my nearest valid target?" through one targeting helper.
+3. **Isolate input behind a component.** An `InputComponent` producing an intent struct the state machine consumes. The player script never calls `Input.is_action_pressed()` directly.
+4. **Keep camera logic out of the player.** A separate rig that follows a target.
+5. **Route all combat randomness through one seeded RNG.**
+
+### Known problem if revisited
+
+The frame data in §5 is tuned tighter than naive netcode supports — an 80ms attack windup is shorter than typical network round-trip. Solving it means either separate co-op timing values (cheap) or client-side prediction with reconciliation (4–8 weeks, genuinely hard).
+
+---
+
+## 13. Risk Register
+
+| Risk | Likelihood | Mitigation |
+|---|---|---|
+| **Building the intro first** | Very high | It's the most fun part to make. §11 schedules it at M6 |
+| **Scope creep** | Very high | §2 is a hard ceiling. New ideas go in `sequel.md` |
+| **Premise churn after art exists** | Medium | Lock §1 and §3 before M2. Changing them after tilesets exist is expensive |
+| **Art becomes the bottleneck** | High | Fixed palette, low frame counts, corruption variants over unique enemies |
+| **Motivation collapse in the long middle** | High | M2 gives you something showable. Post progress publicly |
+| **Combat isn't fun** | Medium | M1 gate |
+| **XP creates permanent tuning debt** | Medium | The four rules in §6. Especially: never scale enemies to level |
+| **Audio never gets done** | Medium | Outsource. Budget now |
+| **Co-op creeps back in** | Medium | §12 is a stretch goal. Revisit only after M8 ships |
+
+---
+
+## 14. Open Questions
+
+- 🔶 The fox's name (§7)
+- 🔶 Does the Beat 8 choice have mechanical consequences or purely narrative ones?
+- 🔶 Difficulty options? (Recommend: yes, as accessibility)
+
+See `BUILD-PLAN.md` for the operational M1 plan.
+
+---
+
+*Living document. Revisit §2 monthly.*
