@@ -1,7 +1,8 @@
 # Blightfall
 
 Top-down action RPG in Godot 4.6. See [`docs/GDD.md`](docs/GDD.md) for the design
-and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule.
+and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule. Art conventions
+live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md).
 
 **Current milestone: M1 — combat prototype.** Grey boxes, one enemy, one room.
 The only question it exists to answer is whether the combat is fun before any
@@ -66,6 +67,7 @@ resources/
 autoloads/         Events, Rng, HitStop, Sfx, DebugSettings
 levels/prototype/  the one hand-placed box room
 camera/            the camera rig, which is not a child of the player
+art/               shaders, and sprites/tilesets/palettes once M2 starts
 ui/                debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             placeholder SFX generator

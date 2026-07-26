@@ -28,6 +28,27 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 
+[importer_defaults]
+
+; Pixel-art defaults for every texture, so sprites exported from Pixelorama
+; import correctly without touching the Import tab per file.
+;
+; fix_alpha_border bleeds colour outward into transparent pixels to stop seams
+; under linear filtering. This project filters Nearest, so there are no seams to
+; stop — and the bleed writes colours that aren't in the 32-colour palette into
+; the edge pixels of every sprite.
+;
+; detect_3d/compress_to silently switches a texture to VRAM compression the
+; first time it's used in a 3D context, which turns crisp pixels to mush. It is
+; the single most common way a pixel-art project mysteriously goes blurry.
+texture={
+"compress/mode": 0,
+"detect_3d/compress_to": 0,
+"mipmaps/generate": false,
+"process/fix_alpha_border": false,
+"process/premult_alpha": false
+}
+
 [input]
 
 move_up={
