@@ -7,6 +7,11 @@ extends Node2D
 ##
 ##     godot --path . tests/screenshot.tscn -- --scene=res://tests/scale_reference.tscn --shot=/tmp/scale.png
 
+## A hand-drawn 16x24 humanoid, so "does this size hold any detail" is a
+## question you answer by looking rather than by arguing. Placeholder art —
+## not in the palette, not used by the game.
+const DEMO: Texture2D = preload("res://art/sprites/scale_demo_16x24.png")
+
 const BASELINE: float = 132.0
 const GRID: int = 16
 
@@ -53,5 +58,18 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0.86, 0.90, 0.76))
 	draw_string(font, Vector2(8, 26), "grid = 16px tiles",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.7))
+	# The same 16x24 sprite at 1x (true in-game size) and 3x (to inspect it).
+	var demo_x := 236.0
+	draw_texture(DEMO, Vector2(demo_x, BASELINE - 24.0))
+	draw_string(font, Vector2(demo_x - 4.0, BASELINE + 9.0), "16x24",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76))
+	draw_string(font, Vector2(demo_x - 4.0, BASELINE + 17.0), "actual",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76))
+	draw_texture_rect(DEMO, Rect2(demo_x + 26.0, BASELINE - 72.0, 48.0, 72.0), false)
+	draw_string(font, Vector2(demo_x + 26.0, BASELINE + 9.0), "same,",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.8))
+	draw_string(font, Vector2(demo_x + 26.0, BASELINE + 17.0), "3x zoom",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.8))
+
 	draw_string(font, Vector2(8, 172), "a 64x64 boss is 36% of screen height; the player is 13%",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.75))
