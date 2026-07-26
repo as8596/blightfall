@@ -1,57 +1,69 @@
 extends Node2D
-## 16×24 vs 32×48 at true scale, against the 16px tile grid they have to live in.
+## The same character at three resolutions, each with the tile size it implies.
 ##
 ## Sprite size is not a local decision. A character has to fit through a
-## doorway, and doorways are made of tiles, so the character's width sets the
+## doorway, doorways are built from tiles, so the character's width sets the
 ## tile size — and the tile size sets the cost of every tileset in the game.
-## This scene draws that consequence instead of describing it.
+## Each panel below draws a character against the grid it would actually live
+## on, so that coupling is visible rather than argued about.
 ##
 ##     godot --path . tests/screenshot.tscn -- --scene=res://tests/size_comparison.tscn --shot=/tmp/sizes.png
 
-const SMALL: Texture2D = preload("res://art/sprites/scale_demo_16x24.png")
-const LARGE: Texture2D = preload("res://art/sprites/scale_demo_32x48.png")
+const SPRITES: Array[Texture2D] = [
+	preload("res://art/sprites/scale_demo_16x24.png"),
+	preload("res://art/sprites/scale_demo_32x48.png"),
+	preload("res://art/sprites/scale_demo_64x96.png"),
+]
 
-const TILE: int = 16
-const WALL := Color(0.302, 0.286, 0.271)
+## sprite index, tile size, then two lines of caption under each panel.
+const PANELS: Array = [
+	[0, 16, "16x24", "384px / 8 col"],
+	[1, 32, "32x48", "1536px / 16 col"],
+	[2, 64, "64x96", "6144px / 21 col"],
+]
+
+const BASELINE: float = 152.0
+const PANEL_W: float = 100.0
+const PANEL_TOP: float = 22.0
 const INK := Color(0.86, 0.90, 0.76)
+const FLOOR := Color(0.223, 0.231, 0.247)
 
 
 func _draw() -> void:
 	var font := ThemeDB.fallback_font
-	draw_rect(Rect2(0, 0, 320, 180), Color(0.184, 0.192, 0.208), true)
-
-	var grid_color := Color(1, 1, 1, 0.05)
-	for x in range(0, 321, TILE):
-		draw_line(Vector2(x, 0), Vector2(x, 180), grid_color, 1.0)
-	for y in range(0, 181, TILE):
-		draw_line(Vector2(0, y), Vector2(320, y), grid_color, 1.0)
-
-	draw_string(font, Vector2(6, 12), "same character, both at true scale — grid is 16px tiles",
+	draw_rect(Rect2(0, 0, 320, 180), Color(0.145, 0.152, 0.168), true)
+	draw_string(font, Vector2(6, 12), "one character, three resolutions - all at true 1:1 scale",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
 
-	# ---- left: 16x24 through a one-tile doorway
-	_wall(16, 48, 128, 64, 80)
-	draw_texture(SMALL, Vector2(80, 72))
-	draw_string(font, Vector2(22, 116), "16x24", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
-	draw_string(font, Vector2(22, 126), "384 px", HORIZONTAL_ALIGNMENT_LEFT, -1, 7, INK)
-	draw_string(font, Vector2(22, 136), "fits a 1-tile gap", HORIZONTAL_ALIGNMENT_LEFT, -1, 7, INK)
-	draw_string(font, Vector2(22, 146), "16px tiles", HORIZONTAL_ALIGNMENT_LEFT, -1, 7, INK)
-
-	# ---- right: 32x48 against the same doorway
-	_wall(176, 48, 288, 64, 240)
-	draw_texture(LARGE, Vector2(232, 72))
-	draw_string(font, Vector2(182, 136), "32x48", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
-	draw_string(font, Vector2(182, 146), "1536 px — 4x the work", HORIZONTAL_ALIGNMENT_LEFT, -1, 7, INK)
-	draw_string(font, Vector2(182, 156), "needs a 2-tile gap", HORIZONTAL_ALIGNMENT_LEFT, -1, 7,
-		Color(0.90, 0.55, 0.45))
-	draw_string(font, Vector2(182, 166), "-> 32px tiles -> 4x every tileset", HORIZONTAL_ALIGNMENT_LEFT, -1, 7,
-		Color(0.90, 0.55, 0.45))
+	var x := 6.0
+	for panel in PANELS:
+		_panel(font, x, SPRITES[panel[0]], panel[1], panel[2], panel[3])
+		x += PANEL_W + 4.0
 
 
-## A tile wall from x1 to x2 with a one-tile doorway at `gap_x`.
-func _wall(x1: int, y: int, x2: int, y2: int, gap_x: int) -> void:
-	for x in range(x1, x2, TILE):
-		if x == gap_x:
-			continue
-		draw_rect(Rect2(x, y, TILE, y2 - y), WALL, true)
-		draw_rect(Rect2(x, y, TILE, y2 - y), Color(0, 0, 0, 0.35), false, 1.0)
+func _panel(font: Font, x: float, texture: Texture2D, tile: int, title: String, sub: String) -> void:
+	var area := Rect2(x, PANEL_TOP, PANEL_W, BASELINE - PANEL_TOP)
+
+	# Each panel stands on its own tile grid, so what is being compared is the
+	# character-to-tile ratio rather than an abstract pixel count.
+	draw_rect(area, FLOOR, true)
+	var grid_color := Color(1, 1, 1, 0.08)
+	var gx := x
+	while gx <= area.end.x:
+		draw_line(Vector2(gx, area.position.y), Vector2(gx, area.end.y), grid_color, 1.0)
+		gx += tile
+	var gy := BASELINE
+	while gy >= area.position.y:
+		draw_line(Vector2(x, gy), Vector2(area.end.x, gy), grid_color, 1.0)
+		gy -= tile
+	draw_line(Vector2(x, BASELINE), Vector2(area.end.x, BASELINE), Color(1, 1, 1, 0.25), 1.0)
+
+	var size := texture.get_size()
+	draw_texture(texture, Vector2(x + roundf((PANEL_W - size.x) * 0.5), BASELINE - size.y))
+
+	draw_string(font, Vector2(x + 2.0, BASELINE + 11.0), title,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 8, INK)
+	draw_string(font, Vector2(x + 2.0, BASELINE + 21.0), sub,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.86, 0.90, 0.76, 0.75))
+	draw_string(font, Vector2(x + 56.0, BASELINE + 21.0), "%dpx tiles" % tile,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0.78, 0.84, 0.62, 0.9))
