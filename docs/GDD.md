@@ -326,7 +326,7 @@ Narratively the most important location, and where the warmth lives. The zones a
 1. **Kindness at cost.** Not people being nice — people helping when helping is expensive for them, and not mentioning it.
 2. **Continued domesticity.** Ordinary rituals persisting through catastrophe. Bread still baked, clothes still mended, a song still sung at the same hour. Costs one line and one idle animation.
 3. **Safety as a sensory quality.** Not a writing problem — art, audio, and pacing. The player's body should register the hub as safe before they read a word:
-   - **Palette:** the hub is the *only* location using the warm end of the 32 colours. Zones get the cold slice. Entering town should feel like temperature changing.
+   - **Palette:** the hub is the *only* location using the warm end of the 64 colours. Zones get the cold slice. Entering town should feel like temperature changing.
    - **Music:** zones get drones and ambience; the hub gets melody and real instrumentation.
    - **Zero pressure:** no enemies, no timers, no fail states, no screen shake, slower camera. Mechanically incapable of hurting you, and the player feels it within ten seconds.
    - **Light is hearths, not glare.** Fire, lamps, windows.
@@ -381,14 +381,14 @@ A fox that talks. **The game never explains this and no NPC ever remarks on it.*
 - **Internal resolution:** 1280×720 (1× at 720p, 2× at 1440p, 3× at 4K; 1080p lands on 1.5× — see §15)
 - **Tile size:** 64×64
 - **Character sprite:** 64×96; enemies 64×64 to 128×128; bosses up to 256×256
-- **Palette:** fixed, pre-made, from lospec.com. Do not design your own — it's a week you don't have. **Size is open (🔶):** one 64×96 character already uses 21 colours, so a 32-colour global palette only works with aggressively shared ramps. See §15
+- **Palette:** **64 colours**, fixed. Use a pre-made one (Endesga 64 or similar, from lospec.com). Do not design your own — it's a week you don't have. The extra 32 over the original budget are for more *tones per material*, not more hues — see §15 A2
 - **Animation budget:** idle 2 · walk 4 (×4 dir) · attack 3/hit · dodge 4 · hurt 1 · death 5
 
 ### Visual language
 
 - **Corruption is the one saturated colour.** Everything else muted — greys, browns, sick greens. The blight is the only thing that glows.
 - **Transformation is readable at a glance.** Corruption stage visible in silhouette, so players judge threat instantly.
-- **Zone identity via palette subsets.** Same 32 colours, different 10-colour slices per zone: Ambry warm (amber, ochre, cream, ember); Orchardfall the same warmth sickened (yellow-green, grey-brown); Stillwater cold (blue-grey, teal, black water); Hollowdeep near-monochrome. The blight accent — one luminous yellow-green — is constant across all four and is the only saturated colour in the game.
+- **Zone identity via palette subsets.** Same 64 colours, different ~20-colour slices per zone: Ambry warm (amber, ochre, cream, ember); Orchardfall the same warmth sickened (yellow-green, grey-brown); Stillwater cold (blue-grey, teal, black water); Hollowdeep near-monochrome. The blight accent — one luminous yellow-green — is constant across all four and is the only saturated colour in the game.
 - **Readability rule:** enemies carry one accent colour no environment tile uses.
 
 ### Production order
@@ -601,21 +601,34 @@ shake 2→8px, and every range in `EnemyData` ×4.
   letterboxes — worth folding into the §14 difficulty/accessibility options
   question rather than solving now.
 
-### A2 — Palette size reopened (🔶, affects §8)
+### A2 — Palette raised to 64 colours (supersedes §8) — DECIDED
 
-32 colours was chosen when a character had 8. The drawn 64×96 reference uses 21
-on its own, which leaves 11 for every environment, every other character and
-every effect. Either move to a larger pre-made palette (Endesga 64 or similar),
-or keep 32 and commit to heavily shared ramps — skin and wood off the same warm
-browns, foliage and cloth off the same greens.
+**Was:** 32 colours. **Now:** 64.
 
-Shared ramps are what good pixel art does anyway and would keep the game
-visually tight, but it is a real constraint on how distinct characters can look,
-which is the whole reason the resolution went up. **Decide before drawing the
-player**, because repalletting finished art is the expensive kind of rework.
+32 was chosen when a character had 8 of them. The drawn 64×96 reference uses 21
+on its own, which would have left 11 for every environment, every other
+character and every effect in the game. At A1's resolution that is not a
+discipline, it is a wall.
 
-The one rule that does not bend either way: the blight accent stays the only
-saturated colour in the game.
+**The extra 32 are for tones, not hues.** A material at 64×96 wants a four-step
+ramp — shadow, base, highlight, specular — where at 16×24 it wanted one flat
+colour. That is where the budget goes. It is *not* licence for more distinct
+hues, and the rule that does not bend is unchanged:
+
+> Corruption is the one saturated colour. The blight is the only thing that glows.
+
+Doubling the palette doubles the rope. Endesga 64 contains plenty of saturated
+colours; most must stay unused or stay at very low coverage, or the luminous
+yellow-green stops being the thing the eye goes to, and the antagonist loses the
+only screen presence §3 gives it.
+
+Zone slices (§8) go from ~10 colours to ~20 each.
+
+**Enforcement:** `tools/check_palette.py` scans every sprite and tileset against
+the committed palette and fails on anything off it, reporting the nearest entry
+and a delta — so a filter that nudged one tone by 1 is as visible as a stray
+magenta. Off-palette colours never announce themselves otherwise, and by the
+time forty sprites exist they are no longer cheap to fix.
 
 ---
 

@@ -25,23 +25,16 @@ sprite instead of ten.
 Before drawing anything. GDD §8: *"fixed, pre-made, from lospec.com. Do not
 design your own — it's a week you don't have."*
 
-**Size is an open decision (GDD §15, A2).** 32 colours was chosen when a
-character had 8 of them. The 64×96 reference uses 21 on its own, which would
-leave 11 for every environment, every other character and every effect. Either
-take a larger pre-made palette (Endesga 64 or similar), or keep 32 and commit to
-heavily shared ramps — skin and wood off the same warm browns, foliage and cloth
-off the same greens. Shared ramps are what good pixel art does anyway, but they
-do limit how distinct two characters can look, which is the reason the
-resolution went up in the first place.
+**64 colours** (GDD §15, A2). The extra 32 over the original budget are for
+more *tones per material* — a four-step ramp where 16×24 had one flat colour —
+not for more hues.
 
-**Settle this before drawing the player.** Repalletting finished art is the
-expensive kind of rework.
-
-1. Download the chosen palette from [lospec.com](https://lospec.com/palette-list)
-   as `.gpl` (GIMP palette — Pixelorama imports it directly).
+1. Download [Endesga 64](https://lospec.com/palette-list/endesga-64) as `.gpl`
+   (GIMP palette — Pixelorama imports it directly).
 2. Commit it to `art/palettes/` so every machine and every future you uses the
-   identical values.
+   identical 64 values. See `art/palettes/README.md`.
 3. Import it into Pixelorama and work from it exclusively.
+4. `python3 tools/check_palette.py` before committing art.
 
 **If anything generates pixels rather than you drawing them** — Pixelorama's 3D
 layers, a filter, an imported reference, a gradient — quantise it back to the
@@ -52,9 +45,13 @@ direction rests on:
 > **Corruption is the one saturated colour.** Everything else muted — greys,
 > browns, sick greens. The blight is the only thing that glows. (GDD §8)
 
-That rule only holds if nothing else in frame is saturated. One stray
-generated highlight competing with the blight accent costs you the visual
-language, and it is very hard to spot one asset at a time.
+That rule only holds if nothing else in frame is saturated, and 64 colours is
+twice the rope 32 was. Endesga 64 contains plenty of saturated hues; most of
+them must stay unused. One stray generated highlight competing with the blight
+accent costs you the visual language, and it is very hard to spot one asset at a
+time — which is what `tools/check_palette.py` exists for. It reports the nearest
+palette entry and a delta, so a filter that shifted one tone by 1 shows up as
+plainly as a stray magenta.
 
 Zone identity comes from **slices** of the same palette — Ambry warm,
 Orchardfall that warmth sickened, Stillwater cold, Hollowdeep near-monochrome —
@@ -82,9 +79,11 @@ separated fingers. `art/sprites/scale_demo_64x96.png` is a reference of roughly
 what fits; `tests/size_comparison.tscn` shows it against the two sizes it
 replaced.
 
-**Watch the colour count.** That reference uses 21 colours on its own. Whatever
-palette size is settled on (GDD §15, A2), plan on sharing ramps between
-materials rather than giving each one its own.
+**Watch the colour count.** That reference uses 21 colours on its own, against
+a 64-colour project budget — so roughly three characters' worth of ramps if
+nothing is shared. Share ramps between materials (skin and wood off the same
+warm browns, foliage and cloth off the same greens) rather than giving each
+material its own.
 
 ## Animation budget
 

@@ -23,6 +23,9 @@ is the main scene.
 # headless self-check — 69 assertions over the M1 systems
 godot --headless --path . tests/m1_smoke_test.tscn
 
+# verify every sprite is on the project palette
+python3 tools/check_palette.py
+
 # capture a frame (needs a display; xvfb-run works)
 godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --attack=6
 ```
@@ -73,7 +76,7 @@ camera/            the camera rig, which is not a child of the player
 art/               shaders, and sprites/tilesets/palettes once M2 starts
 ui/                debug overlay
 tests/             headless smoke test + screenshot tool
-tools/             placeholder SFX generator
+tools/             placeholder SFX generator, palette checker, size study
 ```
 
 ## Standing rules
