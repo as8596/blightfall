@@ -83,7 +83,10 @@ scale.
 |---|---|---|
 | **Player** | 64×96 | 128×128 |
 | NPCs (8) | 64×96 | 128×128 |
-| The fox | 64×48 | 64×64 |
+| The fox | 64×80 | 128×128 |
+
+The fox is bipedal and built on the humanoid rig (GDD §15, A3) — shorter than a
+person, but the same construction, so it is a variant rather than a new rig.
 
 ### Enemies (GDD §5 roster)
 
@@ -103,8 +106,9 @@ scale.
 Six of the ten are 128×128 frames and four of those are the same 64×96 humanoid
 body. That is deliberate and it is GDD §5's own plan — *"one humanoid rig plus
 one quadruped rig, with corruption variants, covers nearly the whole list."*
-Draw the Villager properly and the Guard, the Husk and most NPCs are variants of
-it rather than new sprites.
+Draw the Villager properly and the Guard, the Husk, every NPC and the fox are
+variants of it rather than new sprites. That single rig now covers the player,
+8 NPCs, the fox and 4 enemies — 14 of the roughly 47 sprites in the §2 budget.
 
 ### Bosses
 

@@ -630,6 +630,37 @@ and a delta — so a filter that nudged one tone by 1 is as visible as a stray
 magenta. Off-palette colours never announce themselves otherwise, and by the
 time forty sprites exist they are no longer cheap to fix.
 
+### A3 — The fox is bipedal (affects §7, §8)
+
+Built on the humanoid rig, standing on two legs, same construction as any other
+character. **Body 64×80, frame canvas 128×128** — shorter than a person, same
+rig.
+
+**Production:** this is the cheap direction. The humanoid rig now covers the
+player, 8 NPCs, the fox and 4 enemies — 14 of the ~47 sprites in §2 — where a
+quadruped fox would have been a one-off rig used exactly once, for a character
+that has no walk cycle because §7 places it sitting.
+
+**Two things it changes that are worth holding onto:**
+
+- **"Small" is load-bearing.** §7 grounds the fox's credibility in observation,
+  not wisdom: *"It goes where people can't: small, unafraid."* If it stands at
+  human height that reasoning quietly stops working — it can go exactly where a
+  person can. Hence 64×80 rather than the full 64×96: still unmistakably
+  smaller, still able to be somewhere a person could not have reached, but on
+  the humanoid rig. If it ends up person-height, §7's justification for why it
+  knows things needs rewriting.
+- **It raises the register.** A normal-looking fox that happens to talk is
+  uncanny and charming, and §7 depends on never explaining it: *"The moment it's
+  justified it stops being charming and becomes a lore item."* A bipedal fox is
+  more overtly fantastical, and the more obviously impossible it looks, the more
+  the silence around it has to carry. The rule doesn't change — nobody remarks
+  on it, ever — but it is doing more work now.
+
+Everything else in §7 is untouched: player-initiated dialogue only, never
+repeats, observes rather than instructs, placed rather than following, and never
+harmed.
+
 ---
 
 *Living document. Revisit §2 monthly.*

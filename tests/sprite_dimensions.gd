@@ -14,6 +14,7 @@ const DEMO: Texture2D = preload("res://art/sprites/scale_demo_64x96.png")
 ## label, body size, frame canvas size.
 const CLASSES: Array = [
 	["player\nNPCs", Vector2(64, 96), Vector2(128, 128)],
+	["the fox\nbipedal", Vector2(64, 80), Vector2(128, 128)],
 	["humanoid\nenemy", Vector2(64, 96), Vector2(128, 128)],
 	["quadruped\nRot Hound", Vector2(96, 64), Vector2(128, 128)],
 	["large\nStag, Bloom", Vector2(128, 128), Vector2(192, 192)],
