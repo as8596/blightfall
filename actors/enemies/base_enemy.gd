@@ -71,13 +71,15 @@ func _apply_data() -> void:
 
 	# Derived from body_size rather than hard-coded, so changing the sprite
 	# resolution moves the collider with it instead of silently leaving a
-	# 16px-era footprint under a 64px character.
+	# 16px-era footprint under a 64px character. Depth follows the footprint
+	# *width*: a top-down feet collider is a footprint, and keying it to sprite
+	# height would give a 96-tall humanoid a 48-deep one.
 	var body_rect := body_shape.shape as RectangleShape2D
 	if body_rect != null:
 		body_rect = body_rect.duplicate()
-		body_rect.size = Vector2(data.body_size.x * 0.75, data.body_size.y * 0.5)
+		body_rect.size = Vector2(data.body_size.x * 0.75, data.body_size.x * 0.5)
 		body_shape.shape = body_rect
-		body_shape.position = Vector2(0, -data.body_size.y * 0.25)
+		body_shape.position = Vector2(0, -data.body_size.x * 0.25)
 
 	hitbox.damage = data.contact_damage
 	hitbox.position = Vector2(0, -data.body_size.y * 0.5)

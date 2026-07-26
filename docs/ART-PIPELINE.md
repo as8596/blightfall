@@ -36,6 +36,11 @@ not for more hues.
 3. Import it into Pixelorama and work from it exclusively.
 4. `python3 tools/check_palette.py` before committing art.
 
+`tests/palette_sheet.tscn` renders the committed palette as a labelled swatch
+sheet and marks every colour above 65% saturation as **HOT** — the ones that
+will compete with the blight accent for the player's eye. Open it with F6 before
+picking colours for a new asset.
+
 **If anything generates pixels rather than you drawing them** — Pixelorama's 3D
 layers, a filter, an imported reference, a gradient — quantise it back to the
 palette before it lands in the repo. Off-palette colours don't announce
@@ -63,15 +68,117 @@ accidentally borrow a colour from another zone's.
 
 ## Sizes
 
-| Asset | Canvas |
+Internal resolution is 1280×720 (GDD §15, A1). Tiles are 64×64, and the player
+is exactly one tile wide.
+
+Two numbers per actor: the **body**, which is how big the character is, and the
+**frame canvas**, which is the size of every exported frame. They are not the
+same, and the difference is the single most useful thing on this page — see
+"Frame canvas" below. `tests/sprite_dimensions.tscn` draws all of this at true
+scale.
+
+### Actors
+
+| | Body | Frame canvas |
+|---|---|---|
+| **Player** | 64×96 | 128×128 |
+| NPCs (8) | 64×96 | 128×128 |
+| The fox | 64×48 | 64×64 |
+
+### Enemies (GDD §5 roster)
+
+| Enemy | Zone | Body | Frame canvas |
+|---|---|---|---|
+| Blighted Villager | all | 64×96 | 128×128 |
+| Blighted Guard | 1 | 64×96 | 128×128 |
+| Husk | 3 | 64×96 | 128×128 |
+| Rotcrow | 1 | 48×48 | 64×64 |
+| Rot Hound | 2 | 96×64 | 128×128 |
+| Thornmass | 1 | 96×96 | 128×128 |
+| Seeder | 3 | 96×96 | 128×128 |
+| Hollow Stag | 2 | 128×128 | 192×192 |
+| Fused Pair | 2 | 128×128 | 192×192 |
+| Grave Bloom | 3 | 128×128 | 192×192 |
+
+Six of the ten are 128×128 frames and four of those are the same 64×96 humanoid
+body. That is deliberate and it is GDD §5's own plan — *"one humanoid rig plus
+one quadruped rig, with corruption variants, covers nearly the whole list."*
+Draw the Villager properly and the Guard, the Husk and most NPCs are variants of
+it rather than new sprites.
+
+### Bosses
+
+| Boss | Body | Frame canvas |
+|---|---|---|
+| Zone 1 — the cellmate | 160×160 | 256×256 |
+| Zone 2 — the protector | 192×192 | 256×256 |
+| Zone 3 — the first victim | 256×256 | 320×320 |
+
+They grow across the game because the blight has had longer. The cellmate is
+recently taken and still nearly the size of a person, which is what makes the
+fight land; the first victim has been transformed for generations.
+
+### Tiles and UI
+
+| | Size |
 |---|---|
 | Tile | 64×64 |
-| Player | 64×96 |
-| Enemies | 64×64 to 128×128 |
-| Bosses | up to 256×256 |
+| Tileset sheet | grid of 64×64 cells, no padding |
+| Heart / UI icon | 32×32 |
 
-Internal resolution is 1280×720 (GDD §15, A1). A 64×96 character is 13% of the
-screen height and exactly one tile wide.
+---
+
+## Frame canvas
+
+**Every frame of every animation for an actor is the same size, and that size is
+bigger than the body.**
+
+An attack frame has to put the swing somewhere. If you crop each animation to
+its own content, every animation ends up a different size, the sprite's origin
+shifts between them, and the character visibly jitters as it animates. This is
+the same trap as the "turn trim off" warning below, and it bites hardest on
+attacks — which are exactly the frames whose timing has to be exact.
+
+So: one canvas per actor, body centred horizontally, **feet on a fixed anchor**.
+
+For the player's 128×128 frame with a 64×96 body:
+
+```
+    0                 64                128
+  0 ┌─────────────────────────────────────┐
+    │           (swing room)              │
+ 16 │        ┌───────────────┐            │   body top
+    │        │               │            │
+    │        │    64 x 96    │            │
+    │        │               │            │
+112 │        └───────•───────┘            │   feet anchor (64, 112)
+    │           (shadow room)             │
+128 └─────────────────────────────────────┘
+```
+
+In Godot, one rule puts the feet on the node origin for every actor:
+
+```gdscript
+sprite.centered = true
+sprite.offset = Vector2(0, -body_height / 2.0)    # player: (0, -48)
+```
+
+That works out to (0, −48) for a 96-tall body, (0, −64) for 128, (0, −128) for a
+256 boss. Feet-on-origin is what makes y-sorting correct, and it is already how
+the grey-box actors are set up.
+
+### Strip sizes
+
+Frames × frame width, at the animation budget below:
+
+| Animation | Frames | Player strip |
+|---|---|---|
+| Idle | 2 | 256×128 |
+| Walk | 4 | 512×128 |
+| Attack (per hit) | 3 | 384×128 |
+| Dodge | 4 | 512×128 |
+| Hurt | 1 | 128×128 |
+| Death | 5 | 640×128 |
 
 At this size a sprite has ~6100 pixels, which is enough for a full ramp per
 material — shadow, base, highlight, specular — plus an iris, cloth folds and
@@ -141,10 +248,10 @@ Idle, walk and death are free-running and can use a normal looping
 **One horizontal strip per animation**, no padding, no trim:
 
 ```
-art/sprites/player/player_idle_down.png      2 frames  →  128×96
-art/sprites/player/player_walk_down.png      4 frames  →  256×96
-art/sprites/player/player_attack_1_down.png  3 frames  →  192×96
-art/sprites/enemies/villager_walk_down.png   4 frames  →  256×64
+art/sprites/player/player_idle_down.png      2 frames  →  256×128
+art/sprites/player/player_walk_down.png      4 frames  →  512×128
+art/sprites/player/player_attack_1_down.png  3 frames  →  384×128
+art/sprites/enemies/villager_walk_down.png   4 frames  →  512×128
 ```
 
 Strips rather than one big sheet per actor: re-exporting a single animation
