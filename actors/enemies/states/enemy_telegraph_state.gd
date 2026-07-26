@@ -20,14 +20,17 @@ var _t: float = 0.0
 func enter(_msg: Dictionary = {}) -> void:
 	_t = 0.0
 	enemy.motion_velocity = Vector2.ZERO
-	enemy.visual.color = data.telegraph_color
+	# modulate rather than a flat colour, so this still reads once the box is a
+	# sprite: a tinted wind-up frame on top of a pose change (GDD enemy rule 1
+	# wants colour *and* pose, because either alone is invisible to someone).
+	enemy.visual.modulate = data.telegraph_color
 	enemy.visual.scale = Vector2.ONE * data.telegraph_scale
 	if data.telegraph_sfx != &"":
 		Sfx.play(data.telegraph_sfx)
 
 
 func exit() -> void:
-	enemy.visual.color = data.base_color
+	enemy.visual.modulate = enemy.animation.base_modulate()
 	enemy.visual.scale = Vector2.ONE
 
 

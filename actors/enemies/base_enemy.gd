@@ -20,7 +20,8 @@ extends CharacterBody2D
 @onready var flash: FlashComponent = $FlashComponent
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
-@onready var visual: ColorRect = $Visual
+@onready var visual: Sprite2D = $Visual
+@onready var animation: AnimationComponent = $AnimationComponent
 @onready var state_machine: StateMachine = $StateMachine
 @onready var body_shape: CollisionShape2D = $CollisionShape2D
 @onready var hitbox_shape: CollisionShape2D = $Hitbox/CollisionShape2D
@@ -42,6 +43,7 @@ func _ready() -> void:
 	_apply_data()
 	hitbox.source = self
 	hurtbox.owner_actor = self
+	animation.bind(state_machine)
 	hurtbox.hit_taken.connect(_on_hit_taken)
 	health.died.connect(_on_died)
 	state_machine.start()
@@ -61,13 +63,11 @@ func _apply_data() -> void:
 	health.reset()
 	knockback.resistance_scale = data.knockback_resistance
 
-	visual.color = data.base_color
-	visual.offset_left = -data.body_size.x * 0.5
-	visual.offset_right = data.body_size.x * 0.5
-	visual.offset_top = -data.body_size.y
-	visual.offset_bottom = 0.0
-	# Scale the telegraph "pose" about the feet, not the top-left corner.
-	visual.pivot_offset = Vector2(data.body_size.x * 0.5, data.body_size.y)
+	# The animation component owns the sprite: it sizes the placeholder box when
+	# there is no art, and sets the offset that puts the feet on the origin
+	# either way.
+	animation.body_height = data.body_size.y
+	animation.set_placeholder(data.body_size, data.base_color)
 
 	# Derived from body_size rather than hard-coded, so changing the sprite
 	# resolution moves the collider with it instead of silently leaving a

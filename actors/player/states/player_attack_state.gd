@@ -52,6 +52,17 @@ func physics_update(delta: float) -> void:
 	elif _t >= active_end and _hitbox_on:
 		_stop_hitbox()
 
+	# The sprite is driven off the same boundaries as the hitbox, never off a
+	# frame rate. If the swing had its own clock it would finish before its own
+	# active frames did, and the picture would start disagreeing with the hitbox
+	# about when the player is about to be hit.
+	var phase := 0
+	if _t >= active_end:
+		phase = 2
+	elif _t >= active_start:
+		phase = 1
+	player.animation.set_manual_frame(phase)
+
 	player.apply_motion(delta, player.desired_walk_velocity(_step.move_speed_scale))
 
 	# Dodge-cancel: recovery only.
@@ -92,6 +103,7 @@ func _start_step() -> void:
 	_stop_hitbox()
 	player.face(player.input.intent.move)
 	player.configure_hitbox(_step)
+	player.animation.play_attack(_index)
 	if _step.swing_sfx != &"":
 		Sfx.play(_step.swing_sfx)
 

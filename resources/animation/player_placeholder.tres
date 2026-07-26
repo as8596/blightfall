@@ -1,0 +1,120 @@
+[gd_resource type="Resource" script_class="ActorAnimationSet" load_steps=35 format=3]
+
+[ext_resource type="Script" path="res://resources/animation/actor_animation_set.gd" id="1_set"]
+[ext_resource type="Script" path="res://resources/animation/sprite_animation.gd" id="2_clip"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_idle_down.png" id="3_idle_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_idle_up.png" id="4_idle_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_idle_side.png" id="5_idle_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_walk_down.png" id="6_walk_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_walk_up.png" id="7_walk_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_walk_side.png" id="8_walk_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_1_down.png" id="9_attack_1_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_1_up.png" id="10_attack_1_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_1_side.png" id="11_attack_1_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_2_down.png" id="12_attack_2_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_2_up.png" id="13_attack_2_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_2_side.png" id="14_attack_2_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_3_down.png" id="15_attack_3_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_3_up.png" id="16_attack_3_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_attack_3_side.png" id="17_attack_3_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_dodge_down.png" id="18_dodge_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_dodge_up.png" id="19_dodge_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_dodge_side.png" id="20_dodge_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_hurt_down.png" id="21_hurt_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_hurt_up.png" id="22_hurt_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_hurt_side.png" id="23_hurt_side"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_death_down.png" id="24_death_down"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_death_up.png" id="25_death_up"]
+[ext_resource type="Texture2D" path="res://art/sprites/player/player_death_side.png" id="26_death_side"]
+
+[sub_resource type="Resource" id="Res_idle"]
+resource_name = "idle"
+script = ExtResource("2_clip")
+down = ExtResource("3_idle_down")
+up = ExtResource("4_idle_up")
+side = ExtResource("5_idle_side")
+frames = 2
+fps = 3.0
+loop = true
+
+[sub_resource type="Resource" id="Res_walk"]
+resource_name = "walk"
+script = ExtResource("2_clip")
+down = ExtResource("6_walk_down")
+up = ExtResource("7_walk_up")
+side = ExtResource("8_walk_side")
+frames = 4
+fps = 10.0
+loop = true
+
+[sub_resource type="Resource" id="Res_attack_1"]
+resource_name = "attack_1"
+script = ExtResource("2_clip")
+down = ExtResource("9_attack_1_down")
+up = ExtResource("10_attack_1_up")
+side = ExtResource("11_attack_1_side")
+frames = 3
+fps = 0.0
+loop = false
+
+[sub_resource type="Resource" id="Res_attack_2"]
+resource_name = "attack_2"
+script = ExtResource("2_clip")
+down = ExtResource("12_attack_2_down")
+up = ExtResource("13_attack_2_up")
+side = ExtResource("14_attack_2_side")
+frames = 3
+fps = 0.0
+loop = false
+
+[sub_resource type="Resource" id="Res_attack_3"]
+resource_name = "attack_3"
+script = ExtResource("2_clip")
+down = ExtResource("15_attack_3_down")
+up = ExtResource("16_attack_3_up")
+side = ExtResource("17_attack_3_side")
+frames = 3
+fps = 0.0
+loop = false
+
+[sub_resource type="Resource" id="Res_dodge"]
+resource_name = "dodge"
+script = ExtResource("2_clip")
+down = ExtResource("18_dodge_down")
+up = ExtResource("19_dodge_up")
+side = ExtResource("20_dodge_side")
+frames = 4
+fps = 11.0
+loop = false
+
+[sub_resource type="Resource" id="Res_hurt"]
+resource_name = "hurt"
+script = ExtResource("2_clip")
+down = ExtResource("21_hurt_down")
+up = ExtResource("22_hurt_up")
+side = ExtResource("23_hurt_side")
+frames = 1
+fps = 1.0
+loop = false
+
+[sub_resource type="Resource" id="Res_death"]
+resource_name = "death"
+script = ExtResource("2_clip")
+down = ExtResource("24_death_down")
+up = ExtResource("25_death_up")
+side = ExtResource("26_death_side")
+frames = 5
+fps = 10.0
+loop = false
+
+[resource]
+resource_name = "Player placeholder animations"
+script = ExtResource("1_set")
+idle = SubResource("Res_idle")
+walk = SubResource("Res_walk")
+attack_1 = SubResource("Res_attack_1")
+attack_2 = SubResource("Res_attack_2")
+attack_3 = SubResource("Res_attack_3")
+dodge = SubResource("Res_dodge")
+hurt = SubResource("Res_hurt")
+death = SubResource("Res_death")

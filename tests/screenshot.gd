@@ -23,6 +23,10 @@ var _pull_enemies_close: bool = false
 var _attack: bool = false
 var _attack_delay: int = 6
 
+## `--anim` assigns the placeholder animation set, so the pipeline can be
+## checked without changing what the project ships with by default.
+var _use_placeholder_animations: bool = false
+
 var _room: Node
 
 
@@ -46,6 +50,8 @@ func _capture() -> void:
 			settle_frames = arg.trim_prefix("--frames=").to_int()
 		elif arg.begins_with("--boxes"):
 			DebugSettings.show_boxes = true
+		elif arg.begins_with("--anim"):
+			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
 		elif arg.begins_with("--attack="):
@@ -58,6 +64,10 @@ func _capture() -> void:
 		await get_tree().process_frame
 
 	var player := _room.get_node_or_null("Player") as Player
+	if _use_placeholder_animations and player != null:
+		player.animation.animations = load("res://resources/animation/player_placeholder.tres")
+		await _wait_ticks(2)
+
 	if _pull_enemies_close and player != null:
 		for node in get_tree().get_nodes_in_group(Targeting.ENEMY_GROUP):
 			var enemy := node as BaseEnemy

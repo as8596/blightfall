@@ -48,6 +48,7 @@ func _run() -> void:
 	await _test_stamina()
 	await _test_damage_and_death()
 	await _test_enemy_behaviour()
+	await _test_animation()
 	_test_design_rules()
 
 	print("\n%d checks, %d failed\n" % [_checks, _failures])
@@ -458,6 +459,77 @@ func _test_enemy_behaviour() -> void:
 		enemy.queue_free()
 	camera.queue_free()
 	await _ticks(2)
+
+
+func _test_animation() -> void:
+	print("\nAnimation (state → clip; attacks driven by frame data)")
+	await _reset_player()
+	var anim := _player.animation
+
+	# With no art assigned the actor still runs, on a generated box.
+	_check("runs with no art", not anim.has_art() and anim.sprite.texture != null)
+	_check("placeholder is body-sized",
+		anim.sprite.texture.get_size() == Vector2(64, 96),
+		str(anim.sprite.texture.get_size()))
+	_check("feet sit on the node origin", anim.sprite.offset.is_equal_approx(Vector2(0, -48)),
+		str(anim.sprite.offset))
+
+	var set: ActorAnimationSet = load("res://resources/animation/player_placeholder.tres")
+	_check("placeholder animation set loads", set != null and set.idle != null)
+	if set == null:
+		return
+
+	anim.animations = set
+	await _ticks(2)
+	# The placeholder carried its colour in modulate; real art must not inherit it.
+	_check("assigning art clears the placeholder tint",
+		anim.sprite.modulate.is_equal_approx(Color.WHITE), str(anim.sprite.modulate))
+	_check("idle strip is sliced into frames", anim.sprite.hframes == 2, str(anim.sprite.hframes))
+
+	# Facing picks the strip and the flip.
+	_player.facing = Vector2.RIGHT
+	await _ticks(2)
+	_check("facing east uses the side strip, unflipped",
+		anim.sprite.texture == set.idle.side and not anim.sprite.flip_h)
+	_player.facing = Vector2.LEFT
+	await _ticks(2)
+	_check("facing west flips the side strip", anim.sprite.flip_h)
+	_player.facing = Vector2.UP
+	await _ticks(2)
+	_check("facing north uses the up strip", anim.sprite.texture == set.idle.up)
+
+	# The load-bearing one: attack frames track the combo's phase boundaries,
+	# not a frame rate. Hit 1 is windup 0.08 / active 0.10 / recovery 0.16.
+	_player.facing = Vector2.RIGHT
+	await _press(&"attack")
+	if not await _await_state(&"Attack"):
+		_check("attack animation could not start", false)
+		return
+	_check("attack uses its own strip", anim.sprite.texture == set.attack_1.side)
+
+	var seen_windup := false
+	var seen_active := false
+	var frame_when_hitbox_on := -1
+	for i in range(1, 40):
+		await get_tree().physics_frame
+		var t := float(i) * TICK
+		if t < 0.08:
+			seen_windup = seen_windup or anim.current_frame() == 0
+		if _player.hitbox.is_active() and frame_when_hitbox_on < 0:
+			frame_when_hitbox_on = anim.current_frame()
+		if t >= 0.08 and t < 0.18:
+			seen_active = seen_active or anim.current_frame() == 1
+		if not _player.state_machine.is_in(&"Attack"):
+			break
+
+	_check("frame 0 during windup", seen_windup)
+	_check("frame 1 during the active window", seen_active)
+	_check("the strike frame is showing exactly when the hitbox opens",
+		frame_when_hitbox_on == 1, "frame %d" % frame_when_hitbox_on)
+
+	anim.animations = null
+	await _ticks(2)
+	_check("clearing art restores the placeholder", not anim.has_art())
 
 
 func _test_design_rules() -> void:

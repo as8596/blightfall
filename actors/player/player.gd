@@ -35,7 +35,8 @@ extends CharacterBody2D
 @onready var hitbox: Hitbox = $Hitbox
 @onready var hurtbox: Hurtbox = $Hurtbox
 @onready var state_machine: StateMachine = $StateMachine
-@onready var visual: ColorRect = $Visual
+@onready var visual: Sprite2D = $Visual
+@onready var animation: AnimationComponent = $AnimationComponent
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -69,6 +70,7 @@ func _ready() -> void:
 	hitbox.source = self
 	hurtbox.owner_actor = self
 
+	animation.bind(state_machine)
 	health.died.connect(_on_died)
 	health.changed.connect(func(current: int, maximum: int) -> void:
 		Events.player_health_changed.emit(current, maximum))
