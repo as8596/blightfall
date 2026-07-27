@@ -36,6 +36,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_F5:
 			reset()
 			get_viewport().set_input_as_handled()
+		KEY_F6:
+			print("save slot 1: %s" % ("ok" if SaveGame.save_slot(1) else SaveGame.last_error()))
+			get_viewport().set_input_as_handled()
+		KEY_F7:
+			print("load slot 1: %s" % ("ok" if SaveGame.load_slot(1) else SaveGame.last_error()))
+			get_viewport().set_input_as_handled()
 
 
 func spawn_enemies(count: int) -> void:

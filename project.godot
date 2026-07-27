@@ -19,6 +19,7 @@ Rng="*res://autoloads/rng.gd"
 HitStop="*res://autoloads/hit_stop.gd"
 Sfx="*res://autoloads/sfx.gd"
 DebugSettings="*res://autoloads/debug_settings.gd"
+SaveGame="*res://systems/save/save_game.gd"
 
 [display]
 

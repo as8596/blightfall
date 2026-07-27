@@ -140,8 +140,9 @@ func _enemy_line() -> String:
 
 
 func _hint_line() -> String:
-	return "F1 overlay  F2 boxes  F3 slowmo%s  F4 spawn  F5 reset" % [
+	return "F1 overlay  F2 boxes  F3 slowmo%s  F4 spawn  F5 reset  F6/F7 save/load%s" % [
 		" ON" if DebugSettings.slow_motion else "",
+		"  [slot 1]" if SaveGame.has_save(1) else "",
 	]
 
 

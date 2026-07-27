@@ -100,6 +100,52 @@ than turning into a game that feels mysteriously sluggish.
 
 ---
 
+## Save/load
+
+JSON at `user://save_NN.json`, not `ResourceSaver`. A `.tres` can name a script,
+so loading one at runtime executes whatever it points at — and a save file is
+the one file in the game a player can hand-edit or download from a friend, which
+makes it the worst possible place to accept that. There is a test asserting the
+written file contains no reference to a script.
+
+Built now, while it persists almost nothing, because the point is the shape
+rather than the contents. A node opts in by joining the `saveable` group and
+implementing three methods:
+
+```gdscript
+func save_id() -> StringName: return &"player"
+func save_data() -> Dictionary: return {"health": health.current}
+func load_data(data: Dictionary) -> void: ...
+```
+
+Adding heart shards, tools, whetstones, quest flags or which lines the fox has
+already used is then two methods on whichever node owns that state, and no
+change to the save system at all. Ids are stable strings rather than node paths,
+so moving a node in the scene tree can't invalidate saves.
+
+Four things it already handles, all of which are miserable to add later:
+
+- **Versioning.** Every file carries a schema version and there is a `_migrate`
+  hook. Refuses to open a file from a newer build rather than half-applying it.
+- **Atomic writes.** Writes to `.tmp` and renames over the real file, keeping
+  the previous save as `.bak`. A save interrupted by alt-F4 or a full disk
+  cannot destroy the save the player already had.
+- **Corruption recovery.** A truncated or hand-edited file falls back to the
+  backup instead of reporting the run as lost.
+- **Typed reads.** JSON has one number type, so every integer comes back as a
+  float and any field can be missing or the wrong type in a file someone has
+  edited. `SaveGame.read_int` / `read_float` / `read_vector2` are the only way
+  values should come out of a save entry.
+
+There is no save *point* yet — that is level content. `SaveGame.save_slot(1)` is
+on F6 and load on F7 in the prototype room.
+
+One ordering trap worth knowing, because there is a test pinning it: restore
+`max_health` **before** `current`, or a save with more heart containers than the
+default silently clamps down to the default on load.
+
+---
+
 ## Tuning notes — for the human
 
 ### 1. Stamina currently does nothing

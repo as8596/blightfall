@@ -59,6 +59,7 @@ var _spawn_position: Vector2
 
 func _ready() -> void:
 	add_to_group(Targeting.TARGET_GROUP)
+	add_to_group(SaveGame.GROUP)
 	_spawn_position = global_position
 
 	_hitbox_shape = get_node_or_null(combo_hitbox_shape_path) as CollisionShape2D
@@ -166,7 +167,58 @@ func _on_died() -> void:
 	state_machine.transition_to(&"Dead")
 
 
-## Debug respawn (F5 in the prototype room). No save system in M1.
+# ------------------------------------------------------------------ saving
+#
+# Three methods and a group membership — see systems/save/save_game.gd. Adding
+# tools, heart shards or whetstones later means extending `save_data` and
+# `load_data`, and touching nothing else.
+
+func save_id() -> StringName:
+	return &"player"
+
+
+func save_data() -> Dictionary:
+	return {
+		"position": SaveGame.write_vector2(global_position),
+		"facing": SaveGame.write_vector2(facing),
+		"health": health.current,
+		"max_health": health.max_health,
+		"max_stamina": stamina.max_stamina,
+	}
+
+
+func load_data(data: Dictionary) -> void:
+	global_position = SaveGame.read_vector2(data, "position", global_position)
+	facing = SaveGame.read_vector2(data, "facing", facing)
+
+	# Order matters: raise the ceiling before restoring current, or a save with
+	# more heart containers than the default clamps down to the default.
+	health.set_max_health(SaveGame.read_int(data, "max_health", health.max_health), false)
+	health.current = clampi(SaveGame.read_int(data, "health", health.current), 0, health.max_health)
+	health.changed.emit(health.current, health.max_health)
+
+	stamina.max_stamina = SaveGame.read_float(data, "max_stamina", stamina.max_stamina)
+	stamina.refill()
+
+	# Whatever the player was doing when they saved, they are standing still now.
+	motion_velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
+	knockback.clear()
+	hurtbox.clear_iframes()
+	input.clear_buffers()
+	next_combo_index = 0
+	combo_window_remaining = 0.0
+	dodge_cooldown_remaining = 0.0
+	if health.is_alive():
+		hurtbox.disabled = false
+		input.enabled = true
+		flash.clear()
+		state_machine.transition_to(&"Idle")
+	else:
+		state_machine.transition_to(&"Dead")
+
+
+## Debug respawn (F5 in the prototype room).
 func respawn() -> void:
 	global_position = _spawn_position
 	motion_velocity = Vector2.ZERO

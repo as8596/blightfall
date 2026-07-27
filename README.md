@@ -20,7 +20,7 @@ Open the project in Godot 4.6+ and press F5. `levels/prototype/prototype_room.ts
 is the main scene.
 
 ```
-# headless self-check — 69 assertions over the M1 systems
+# headless self-check — 103 assertions over the M1 systems
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # verify every sprite is on the project palette
@@ -56,6 +56,7 @@ because none of those are things you can see by squinting at a 0.10s window.
 | F3 | slow motion — how you read frame data with your eyes |
 | F4 | spawn another enemy |
 | F5 | reset the room |
+| F6 / F7 | save / load slot 1 |
 
 ## Layout
 
@@ -67,6 +68,7 @@ actors/
 systems/
   state_machine/   generic FSM — the player and every enemy use the same one
   targeting/       the single answer to "who do I attack?"
+  save/            JSON save/load; nodes opt in via the `saveable` group
 resources/
   combat/          the player's combo, as a tunable .tres
   enemy_data/      one .tres per enemy

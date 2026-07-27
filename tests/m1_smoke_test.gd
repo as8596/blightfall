@@ -49,6 +49,7 @@ func _run() -> void:
 	await _test_damage_and_death()
 	await _test_enemy_behaviour()
 	await _test_animation()
+	await _test_save_load()
 	_test_design_rules()
 
 	print("\n%d checks, %d failed\n" % [_checks, _failures])
@@ -530,6 +531,84 @@ func _test_animation() -> void:
 	anim.animations = null
 	await _ticks(2)
 	_check("clearing art restores the placeholder", not anim.has_art())
+
+
+func _test_save_load() -> void:
+	print("\nSave/load (JSON, versioned, atomic)")
+	const SLOT := 9
+	SaveGame.delete_save(SLOT)
+	await _reset_player()
+
+	_check("player is registered as saveable", _player.is_in_group(SaveGame.GROUP))
+	_check("empty slot reports no save", not SaveGame.has_save(SLOT))
+	_check("loading an empty slot fails cleanly", not SaveGame.load_slot(SLOT))
+
+	# Put the player in a distinctive state, save, disturb it, load it back.
+	_player.global_position = Vector2(1234, 567)
+	_player.facing = Vector2.LEFT
+	_player.health.take_damage(2)
+	var saved_position := _player.global_position
+	var saved_health := _player.health.current
+
+	_check("save writes", SaveGame.save_slot(SLOT), SaveGame.last_error())
+	_check("slot now exists", SaveGame.has_save(SLOT))
+
+	_player.global_position = Vector2(10, 10)
+	_player.facing = Vector2.DOWN
+	_player.health.heal(99)
+
+	_check("load reads back", SaveGame.load_slot(SLOT), SaveGame.last_error())
+	_check("position restored", _player.global_position.is_equal_approx(saved_position),
+		str(_player.global_position))
+	_check("facing restored", _player.facing.is_equal_approx(Vector2.LEFT))
+	_check("health restored", _player.health.current == saved_health,
+		"%d vs %d" % [_player.health.current, saved_health])
+	_check("player is idle after loading", _player.state_machine.is_in(&"Idle"))
+
+	# The file is data, and readable data at that.
+	var raw := FileAccess.open(SaveGame.slot_path(SLOT), FileAccess.READ)
+	var text := raw.get_as_text() if raw != null else ""
+	if raw != null:
+		raw.close()
+	var parsed: Variant = JSON.parse_string(text)
+	_check("file is valid JSON", parsed is Dictionary)
+	_check("file carries a schema version",
+		parsed is Dictionary and int((parsed as Dictionary).get("version", -1)) == SaveGame.VERSION)
+	_check("file records the scene", parsed is Dictionary
+		and String((parsed as Dictionary).get("scene", "")) != "")
+	_check("file contains no script reference", not text.contains("script"),
+		"a save must never be able to name code")
+
+	# A larger heart container must survive a round trip — the classic ordering
+	# bug is restoring current health before raising the maximum.
+	_player.health.set_max_health(12)
+	_player.health.current = 11
+	_check("save with a raised max", SaveGame.save_slot(SLOT), SaveGame.last_error())
+	_player.health.set_max_health(6)
+	SaveGame.load_slot(SLOT)
+	_check("raised max health restored", _player.health.max_health == 12,
+		str(_player.health.max_health))
+	_check("current health not clamped to the old max", _player.health.current == 11,
+		str(_player.health.current))
+
+	# Corruption: a truncated or hand-edited file falls back to the backup
+	# rather than losing the run.
+	SaveGame.save_slot(SLOT)
+	var vandal := FileAccess.open(SaveGame.slot_path(SLOT), FileAccess.WRITE)
+	vandal.store_string("{ this is not json")
+	vandal.close()
+	var recovered := SaveGame.read_slot(SLOT)
+	_check("corrupt save recovers from backup", not recovered.is_empty(), SaveGame.last_error())
+
+	# A save from a future version is refused rather than half-applied.
+	var future := FileAccess.open(SaveGame.slot_path(SLOT), FileAccess.WRITE)
+	future.store_string(JSON.stringify({"version": SaveGame.VERSION + 5, "entries": {}}))
+	future.close()
+	_check("newer-version save is refused", SaveGame.read_slot(SLOT).is_empty())
+
+	SaveGame.delete_save(SLOT)
+	_check("delete removes the slot", not SaveGame.has_save(SLOT))
+	await _reset_player()
 
 
 func _test_design_rules() -> void:
