@@ -23,12 +23,14 @@ var intent := InputIntent.new()
 var _attack_buffer: float = 0.0
 var _dodge_buffer: float = 0.0
 var _tool_buffer: float = 0.0
+var _interact_buffer: float = 0.0
 
 
 func _process(delta: float) -> void:
 	_attack_buffer = maxf(_attack_buffer - delta, 0.0)
 	_dodge_buffer = maxf(_dodge_buffer - delta, 0.0)
 	_tool_buffer = maxf(_tool_buffer - delta, 0.0)
+	_interact_buffer = maxf(_interact_buffer - delta, 0.0)
 
 	if not enabled:
 		intent.move = Vector2.ZERO
@@ -47,6 +49,8 @@ func _process(delta: float) -> void:
 		_dodge_buffer = buffer_time
 	if Input.is_action_just_pressed(&"tool"):
 		_tool_buffer = buffer_time
+	if Input.is_action_just_pressed(&"interact"):
+		_interact_buffer = buffer_time
 	intent.attack_held = Input.is_action_pressed(&"attack")
 	_refresh_flags()
 
@@ -55,6 +59,7 @@ func _refresh_flags() -> void:
 	intent.attack_buffered = _attack_buffer > 0.0
 	intent.dodge_buffered = _dodge_buffer > 0.0
 	intent.tool_buffered = _tool_buffer > 0.0
+	intent.interact_buffered = _interact_buffer > 0.0
 
 
 ## Take the buffered attack, if there is one. Returns true once per press.
@@ -82,10 +87,19 @@ func consume_tool() -> bool:
 	return true
 
 
+func consume_interact() -> bool:
+	if _interact_buffer <= 0.0:
+		return false
+	_interact_buffer = 0.0
+	intent.interact_buffered = false
+	return true
+
+
 func clear_buffers() -> void:
 	_attack_buffer = 0.0
 	_dodge_buffer = 0.0
 	_tool_buffer = 0.0
+	_interact_buffer = 0.0
 	_refresh_flags()
 
 

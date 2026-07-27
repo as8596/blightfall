@@ -23,13 +23,7 @@ the main scene — the village, with the wall to the north and the gate south.
 (GDD §7). For the combat prototype, open
 `levels/prototype/prototype_room.tscn` and press **F6** to run just that scene.
 
-| | |
-|---|---|
-| Move | WASD or arrows |
-| Attack | J *(gamepad: X / square)* |
-| Dodge | Space *(gamepad: A / cross)* |
-| Tool | K *(gamepad: Y / triangle)* |
-| Debug | F1 overlay · F2 hitboxes · F3 slow-mo · F4 spawn · F5 reset · F6/F7 save/load |
+Controls and debug keys are below.
 
 **First run on a new machine:** Godot builds its `.godot/` import cache the
 first time it *opens the project in the editor*, and that cache is gitignored,
@@ -46,10 +40,10 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 143 assertions over the M1 systems and Ambry
+# headless self-check — 154 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
-# walks the player through a door and back out, carrying materials
+# opens a door with the interact key and comes back out, carrying materials
 godot --headless --path . tests/doorway_test.tscn
 
 # colour discipline: profile every group, enforce the reserved blight accent
@@ -73,7 +67,12 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Move | WASD / arrows | left stick |
 | Attack | J | X |
 | Dodge | Space | A |
+| Interact | E | B |
 | Tool | K | Y |
+
+`interact` opens doors. It is the general verb — `world/interactable.gd` is the
+base class talking, building, resting and the chest will all use — but doors are
+its only user so far.
 
 `tool` is mapped but not wired to anything — M1 has no tools, not even the
 Cinderflask (BUILD-PLAN). The action exists so the input map is complete on day
@@ -108,13 +107,14 @@ systems/
 resources/
   combat/          the player's combo, as a tunable .tres
   enemy_data/      one .tres per enemy
-autoloads/         Events, Rng, HitStop, Sfx, DebugSettings
+autoloads/         Events, Rng, HitStop, Sfx, DebugSettings, SaveGame, ScreenFade
 levels/
   level.gd         composes a map with a player and a camera
   ambry/           the village, greyboxed — map + level scene
   prototype/       the hand-placed box room (combat test bed)
 camera/            the camera rig, which is not a child of the player
 art/               shaders, and sprites/tilesets/palettes once M2 starts
+world/             pickups, the haul cache, interactables and doorways
 ui/                debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, greybox builder

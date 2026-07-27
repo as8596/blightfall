@@ -21,6 +21,11 @@ const HOME := "res://levels/ambry/interiors/home_level.tscn"
 var _failures: int = 0
 var _checks: int = 0
 
+## Darkest the screen got during the last transition. The fade is the feature;
+## asserting only that it *ends* clear would pass just as happily if it never
+## started.
+var _darkest: float = 0.0
+
 
 func _ready() -> void:
 	Engine.max_fps = 250
@@ -53,13 +58,31 @@ func _run() -> void:
 	var door_out := ambry.find_marker("Door_home")
 	_check("Ambry has the spot outside your door", door_out != Vector2.INF)
 
-	# Walk in. Driving the input rather than calling travel() directly is the
-	# point: it also proves the Area2D's layers and mask line up with the
-	# player's body.
-	ambry.player.global_position = door_out + Vector2(0, 32.0)
+	# Stand at the door and press. Driving real input rather than calling
+	# travel() directly is the point: it also proves the interactor's mask lines
+	# up with the Interactable layer, and that standing next to a door is enough
+	# to be offered it.
+	ambry.player.global_position = door_out
 	await _ticks(20)
-	var arrived := await _walk_until_scene_changes(&"move_up", HOME)
-	_check("walking into the door opens your home", arrived, get_tree().current_scene.scene_file_path)
+	var offered := ambry.player.interactor.target()
+	_check("standing at the door offers a prompt",
+		offered != null and offered is Doorway, "%s" % offered)
+	_check("and the prompt is a verb", offered != null and offered.prompt == "Enter",
+		offered.prompt if offered != null else "-")
+
+	# Walking past must not open it. This is the whole reason doors are pressed
+	# rather than touched now: a transition that fades the screen firing by
+	# accident is much worse than one that only moves you.
+	var walked := await _walk_until_scene_changes(&"move_up", HOME, 40)
+	_check("walking into the door does NOT open it", not walked,
+		get_tree().current_scene.scene_file_path)
+	ambry.player.global_position = door_out
+	await _ticks(10)
+
+	var arrived := await _press_until_scene_changes(HOME)
+	_check("pressing interact opens your home", arrived, get_tree().current_scene.scene_file_path)
+	_check("and the screen faded to black on the way", _darkest >= 0.99,
+		"darkest %.2f" % _darkest)
 	if not arrived:
 		return _finish()
 
@@ -75,9 +98,17 @@ func _run() -> void:
 	var chest := home.poi("home_chest")
 	_check("the chest is in the room", not chest.is_empty())
 
-	# And back out.
-	var left := await _walk_until_scene_changes(&"move_down", AMBRY)
-	_check("walking into the door leaves again", left, get_tree().current_scene.scene_file_path)
+	_check("the screen is clear again once you arrive", not ScreenFade.is_covered(),
+		"alpha %.2f" % ScreenFade.alpha())
+
+	# And back out. Walk down onto the door tile first, since the interior spawn
+	# is deliberately two tiles clear of it.
+	Input.action_press(&"move_down")
+	await _ticks(30)
+	Input.action_release(&"move_down")
+	await _ticks(4)
+	var left := await _press_until_scene_changes(AMBRY)
+	_check("pressing interact leaves again", left, get_tree().current_scene.scene_file_path)
 	if not left:
 		return _finish()
 
@@ -92,9 +123,9 @@ func _run() -> void:
 	_finish()
 
 
-func _walk_until_scene_changes(action: StringName, expected: String) -> bool:
+func _walk_until_scene_changes(action: StringName, expected: String, ticks: int = 240) -> bool:
 	Input.action_press(action)
-	for i in 240:
+	for i in ticks:
 		await get_tree().physics_frame
 		var current := get_tree().current_scene
 		if current != null and current.scene_file_path == expected:
@@ -102,6 +133,29 @@ func _walk_until_scene_changes(action: StringName, expected: String) -> bool:
 			await _ticks(4)
 			return true
 	Input.action_release(action)
+	await _ticks(2)
+	return false
+
+
+## Tap interact, then wait out the fade. The transition is deliberately not
+## instant, so a test that gives up after two frames would report a working door
+## as broken.
+func _press_until_scene_changes(expected: String) -> bool:
+	_darkest = 0.0
+	Input.action_press(&"interact")
+	await _ticks(2)
+	Input.action_release(&"interact")
+	for i in 240:
+		await get_tree().physics_frame
+		_darkest = maxf(_darkest, ScreenFade.alpha())
+		var current := get_tree().current_scene
+		if current != null and current.scene_file_path == expected:
+			# Let the fade finish before anything is measured.
+			for j in 60:
+				await get_tree().process_frame
+				if not ScreenFade.is_covered() and ScreenFade.alpha() <= 0.01:
+					break
+			return true
 	return false
 
 

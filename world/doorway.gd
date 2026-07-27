@@ -1,14 +1,16 @@
 class_name Doorway
-extends Area2D
+extends Interactable
 ## A threshold between two scenes — a building's door, and the way back out.
 ##
-## Walked through, not interacted with. The interact verb is for things worth
-## stopping for; a door you have to press a button at is a door that costs a
-## decision every time you use it, and the player will use these hundreds of
-## times.
+## **Pressed, not walked through.** Doors used to trigger on contact, which is
+## cheaper for the player, but a transition that fades the screen must never
+## fire by accident: brushing a doorway on the way past would blank the view and
+## move you somewhere you did not choose to go. Once there is a fade, the
+## deliberate press *is* the safety, not a tax.
 ##
-## Placed by `Level` from `Doorways` markers in the map, so `tools/build_greybox.gd`
-## can stay a thing that emits data rather than a thing that builds nodes.
+## Placed by `Level` from `Doorways` markers in the map, so
+## `tools/build_greybox.gd` can stay a thing that emits data rather than a thing
+## that builds nodes.
 
 signal used(target_scene: String, target_spawn: String)
 
@@ -20,52 +22,31 @@ signal used(target_scene: String, target_spawn: String)
 ## tile outside each one. Either way you never arrive standing in a doorway.
 @export var target_spawn: String = "PlayerSpawn"
 
-## Seconds before this will fire. Arriving next to a door and being bounced
-## straight back through it is the one failure mode a threshold really has.
-@export var arm_delay: float = 0.25
-
 ## One transition at a time, across every doorway in the tree. Two overlapping
 ## `change_scene_to_file` calls leave the tree in a state nothing here can
 ## reason about.
 static var _travelling: bool = false
 
-var _armed: bool = false
-
 
 func _ready() -> void:
-	monitoring = true
-	monitorable = false
-	body_entered.connect(_on_body_entered)
-	if arm_delay > 0.0:
-		get_tree().create_timer(arm_delay).timeout.connect(arm)
-	else:
-		arm.call_deferred()
+	if prompt == "Examine":
+		prompt = "Enter"
+	super()
 
 
-## Live now, including for anything already standing on it.
-##
-## The sweep is the same one `world/pickup.gd` needs and for the same reason:
-## there is no *entry* event for a body that never left, so a doorway that only
-## listens to `body_entered` does nothing at all for a player who loads a save
-## standing on it.
-func arm() -> void:
-	_armed = true
-	if not is_inside_tree():
+func can_interact(actor: Node) -> bool:
+	return super(actor) and not _travelling and not target_scene.is_empty()
+
+
+func interact(actor: Node) -> void:
+	if not can_interact(actor):
 		return
-	for body in get_overlapping_bodies():
-		_on_body_entered(body)
-
-
-func _on_body_entered(body: Node2D) -> void:
-	if not _armed or _travelling or target_scene.is_empty():
-		return
-	if not (body is Player):
-		return
-	# Claimed here rather than inside travel(): `body_entered` can fire for two
-	# doorways in the same physics step, and the second one must find the door
-	# already taken.
+	# Claimed here rather than inside travel(): two doorways can be in range at
+	# once, and the second must find the door already taken.
 	_travelling = true
+	set_highlighted(false)
 	used.emit(target_scene, target_spawn)
+	super(actor)
 	# Out of the physics callback before changing scene. Swapping scenes frees
 	# the collision objects this callback is running inside, which the engine
 	# refuses to do mid-step — and the refusal is a warning, not a crash, so the
@@ -83,13 +64,13 @@ func _open() -> void:
 	_travel_claimed(get_tree(), target_scene, target_spawn)
 
 
-## Change scene, carrying the run across.
+## Change scene, carrying the run across, behind a fade.
 ##
 ## The save system already knows how to collect everything a node owns and hand
 ## it back — that is the whole point of the `saveable` group — so a threshold
 ## does not need a second, parallel notion of "what the player is carrying".
-## Walking into the inn with a full satchel and walking out empty would be a
-## bug nobody would think to look for here.
+## Walking into the inn with a full satchel and walking out empty would be a bug
+## nobody would think to look for here.
 static func travel(tree: SceneTree, scene_path: String, spawn: String = "") -> bool:
 	if _travelling:
 		return false
@@ -103,11 +84,17 @@ static func _travel_claimed(tree: SceneTree, scene_path: String, spawn: String) 
 		push_error("Doorway: no scene at %s" % scene_path)
 		return false
 
+	# Black first. Everything below happens where the player cannot see it,
+	# which is the point: the loaded scene gets a frame to place the player
+	# before anyone looks at it.
+	await ScreenFade.fade_out()
+
 	var carried := SaveGame.capture()
 	var error := tree.change_scene_to_file(scene_path)
 	if error != OK:
 		_travelling = false
 		push_error("Doorway: could not open %s (%d)" % [scene_path, error])
+		await ScreenFade.fade_in()
 		return false
 
 	# change_scene_to_file is deferred; the new tree is not up until the next
@@ -123,6 +110,12 @@ static func _travel_claimed(tree: SceneTree, scene_path: String, spawn: String) 
 	if scene != null and not spawn.is_empty() and scene.has_method(&"place_player_at"):
 		scene.call(&"place_player_at", spawn)
 
+	# One more frame so the camera has snapped to the player before the fade
+	# lifts. Without it the first frame the player sees is the camera still
+	# sliding into place.
+	await tree.process_frame
+
 	_travelling = false
 	Events.doorway_used.emit(scene_path, spawn)
+	await ScreenFade.fade_in()
 	return true

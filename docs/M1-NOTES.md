@@ -47,7 +47,7 @@ Two things from the GDD that also aren't here, on purpose:
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 143 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 154 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -56,10 +56,16 @@ and buffering, stamina rules, the damage exchange end to end, the enemy's full
 behaviour loop, save/load, the haul, Ambry's twenty locations and ten NPCs, and
 the design rules that live in `.tres` files.
 
-`godot --headless --path . tests/doorway_test.tscn` — 9 assertions. Walks the
-player through their front door and back out, carrying materials. Separate
-because it is the one test that changes scenes, and `change_scene_to_file` frees
-whatever the current scene is — including a test living inside it.
+`godot --headless --path . tests/doorway_test.tscn` — 14 assertions. Stands the
+player at their front door, presses interact, and checks they arrive inside with
+their materials and come back out where they went in. Separate because it is the
+one test that changes scenes, and `change_scene_to_file` frees whatever the
+current scene is — including a test living inside it.
+
+It also asserts the two halves of the fade: that the screen reaches **full**
+black mid-transition, and that walking into a door does *not* open it. The first
+would pass just as happily against a fade that never started; the second is the
+reason doors are pressed at all.
 
 It cannot answer the M1 gate. "Is this fun" needs hands on a keyboard, and then
 two or three other people's hands. What it does is stop the numbers in the code

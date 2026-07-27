@@ -42,6 +42,7 @@ extends CharacterBody2D
 @onready var visual: Sprite2D = $Visual
 @onready var animation: AnimationComponent = $AnimationComponent
 @onready var inventory: InventoryComponent = $InventoryComponent
+@onready var interactor: InteractorComponent = $Interactor
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -93,6 +94,25 @@ func _process(delta: float) -> void:
 		combo_window_remaining = maxf(combo_window_remaining - delta, 0.0)
 		if combo_window_remaining == 0.0:
 			next_combo_index = 0
+
+	_try_interact()
+
+
+## Interacting is handled here rather than in a state, because it is not a state
+## the player enters — nothing about the character changes, the world just
+## responds. Gated to standing and walking: mid-swing and mid-roll you have
+## already committed to something else, and a door that opens out of a dodge
+## would make dodging near a building unusable.
+func _try_interact() -> void:
+	if not (state_machine.is_in(&"Idle") or state_machine.is_in(&"Move")):
+		return
+	if not input.consume_interact():
+		return
+	if not interactor.try_interact():
+		# Nothing in range. The press is spent either way — holding a stale
+		# interact that fires the moment you walk up to a door is worse than
+		# dropping it.
+		pass
 
 
 ## Accelerate toward `desired` and move. Knockback rides on top rather than

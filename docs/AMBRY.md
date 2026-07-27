@@ -245,13 +245,22 @@ Four rooms: `levels/ambry/interiors/{home,inn,forge,magistrate_hall}.tscn`, each
 wrapped by a `*_level.tscn` that composes it with a player and a camera exactly
 the way `ambry_level.tscn` does.
 
-Doors are **walked through, not interacted with** — the interact verb is for
-things worth stopping for, and the player will use these hundreds of times.
-`world/doorway.gd` carries the run across the threshold using
-`SaveGame.capture()` / `apply()`, so walking into the inn with a full satchel
-and walking out empty is a bug that cannot happen quietly.
+Doors are **pressed, not walked through**, behind a 0.22s fade. They were
+contact-triggered at first, on the reasoning that a button press hundreds of
+times a run is a tax — and that was right up until the transition acquired a
+fade. A door that blanks the screen and moves you somewhere must never fire
+because you brushed past it on the way to the square. Once there is a fade, the
+deliberate press *is* the safety rather than the tax.
 
-Two orderings inside it are load-bearing and both have tests:
+`world/doorway.gd` extends `world/interactable.gd` and carries the run across
+the threshold using `SaveGame.capture()` / `apply()`, so walking into the inn
+with a full satchel and walking out empty is a bug that cannot happen quietly.
+
+Three orderings inside it are load-bearing and all three have tests:
+
+- The screen goes **fully black before anything moves**, and only lifts a frame
+  after the camera has snapped to the arrived player. Without that last frame,
+  the first thing the player sees is the camera still sliding into place.
 
 - The carried payload includes the player's **position**, so it has to be
   applied *before* the level places them, or every door drops you back where you
@@ -306,14 +315,23 @@ build script now refuses to place anything opaque over a walkable cell.
 | Building plots with id, state, district, project cost | **Built** — `Level.building_plots()` |
 | POIs and NPC markers | **Built** — `Level.points_of_interest()`, `npc_markers()`, all ten placed |
 | Four interiors, doors that work both ways | **Built** — `world/doorway.gd`, `tests/doorway_test.tscn` |
-| Interact verb | **Not built.** Blocks every POI that isn't walked over |
+| Interact verb | **Built** — `world/interactable.gd`, `actors/components/interactor_component.gd`, bound to E |
+| Fade transitions | **Built** — `autoloads/screen_fade.gd` |
+| Prompts on anything but doors | **Not built.** The base class is there; nothing else uses it yet |
 | Rebuild transaction (spend → change state) | **Not built** |
 | Dialogue | **Not built.** NPCs are markers |
 | Village state in saves | **Not built** — the save system takes it with no changes; a `village` node joins the `saveable` group |
 
-**The interact verb is still the bottleneck.** Talking, building, resting,
-opening the chest and reading the ledger are all the same button, and none of
-them exist. It is small, and it unblocks everything above.
+**The interact verb exists now, and doors are its first user.** Talking,
+building, resting, opening the chest and reading the ledger are the same button
+and the same base class — `Interactable`, with `can_interact()` and
+`interact()` to override. Each of those is now its own small piece of work
+rather than all of them waiting on one missing verb.
+
+The bottleneck moved: **the haul loop has no source and no sink.** No `Pickup`
+is placed in any level, and nothing reads `building_plots()` outside the tests,
+so the satchel can be neither filled nor spent. Closing that — gather outside
+the gate, carry back, build your home — is the slice that actually tests A4.
 
 ### What the build script asserts
 

@@ -791,10 +791,32 @@ func _test_village() -> void:
 			doors.append(door)
 	_check("four doorways placed", doors.size() == 4, "%d" % doors.size())
 	var targets_exist := true
+	var prompts_are_verbs := true
 	for door in doors:
 		if not ResourceLoader.exists(door.target_scene):
 			targets_exist = false
+		if door.prompt != "Enter":
+			prompts_are_verbs = false
 	_check("every doorway leads to a scene that exists", targets_exist)
+	_check("and offers a verb", prompts_are_verbs)
+
+	# ---- the interact verb. Doors are pressed, not walked through: a
+	# transition that blanks the screen must never fire by accident.
+	_check("interact is bound", InputMap.has_action(&"interact"))
+	_check("the player has an interactor", level.player.interactor != null)
+	_check("which looks for the Interactable layer",
+		level.player.interactor.collision_mask == Interactable.LAYER,
+		"mask %d, layer %d" % [level.player.interactor.collision_mask, Interactable.LAYER])
+	# Pickups share the layer but are walked over, so they must stay invisible to
+	# a search. They manage that by never being monitorable — worth pinning,
+	# because a stray `monitorable = true` would put a prompt on every twig.
+	var pickup: Node = load("res://world/pickup.tscn").instantiate()
+	add_child(pickup)
+	await _ticks(2)
+	_check("pickups are walked over, not prompted", not (pickup as Area2D).monitorable)
+	pickup.queue_free()
+	_check("doorways are interactable", doors.is_empty() or doors[0] is Interactable)
+	_check("the fade starts clear", not ScreenFade.is_covered() and ScreenFade.alpha() == 0.0)
 
 	# ---- draw order. z_index is checked *before* y-sorting, so a props layer
 	# sitting one above the player draws over them from every position — walk up

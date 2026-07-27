@@ -17,5 +17,9 @@ var attack_buffered: bool = false
 var dodge_buffered: bool = false
 var tool_buffered: bool = false
 
+## True while an interact sits in the buffer. Buffered like the rest so pressing
+## it a frame before you finish walking into range still opens the door.
+var interact_buffered: bool = false
+
 ## Held state, for future charge attacks.
 var attack_held: bool = false

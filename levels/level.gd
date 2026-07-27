@@ -80,6 +80,7 @@ func _spawn_doorways() -> void:
 		door.name = marker.name
 		door.target_scene = String(marker.get_meta("target_scene", ""))
 		door.target_spawn = String(marker.get_meta("target_spawn", "PlayerSpawn"))
+		door.prompt = String(marker.get_meta("prompt", "Enter"))
 		add_child(door)
 		door.global_position = marker.global_position
 

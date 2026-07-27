@@ -687,6 +687,7 @@ func _add_markers(root: Node2D) -> void:
 		door.position = _centre(cell)
 		door.set_meta("target_scene", target)
 		door.set_meta("target_spawn", "PlayerSpawn")
+		door.set_meta("prompt", "Enter")
 		doors.add_child(door)
 		door.owner = root
 
@@ -789,6 +790,10 @@ func _build_interior(tileset: TileSet, entry: Array) -> void:
 	out.position = _centre(door)
 	out.set_meta("target_scene", VILLAGE_PATH.replace("ambry.tscn", "ambry_level.tscn"))
 	out.set_meta("target_spawn", "Door_" + _plot_for_interior(id))
+	# Not "Enter". The same node on the other side of the same door wants the
+	# opposite verb, and a prompt that reads "Enter" while you are stood in
+	# somebody's kitchen is the kind of small wrongness that adds up.
+	out.set_meta("prompt", "Leave")
 	doors.add_child(out)
 	out.owner = root
 
