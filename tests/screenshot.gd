@@ -27,6 +27,10 @@ var _attack_delay: int = 6
 ## checked without changing what the project ships with by default.
 var _use_placeholder_animations: bool = false
 
+## `--fit` zooms the camera out to frame the whole level, for judging a layout
+## rather than playing it.
+var _fit_level: bool = false
+
 var _room: Node
 
 
@@ -50,6 +54,8 @@ func _capture() -> void:
 			settle_frames = arg.trim_prefix("--frames=").to_int()
 		elif arg.begins_with("--boxes"):
 			DebugSettings.show_boxes = true
+		elif arg.begins_with("--fit"):
+			_fit_level = true
 		elif arg.begins_with("--anim"):
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
@@ -62,6 +68,23 @@ func _capture() -> void:
 
 	for i in settle_frames:
 		await get_tree().process_frame
+
+	var level := _room as Level
+	if _fit_level and level != null:
+		var bounds := level.world_bounds()
+		var view := get_viewport().get_visible_rect().size
+		var camera := level.camera
+		if camera != null and bounds.size != Vector2.ZERO:
+			# Unbound the camera first — room limits would clamp the framing.
+			camera.limit_left = -100000
+			camera.limit_top = -100000
+			camera.limit_right = 100000
+			camera.limit_bottom = 100000
+			camera.set_target(null)
+			camera.position_smoothing_enabled = false
+			camera.zoom = Vector2.ONE * minf(view.x / bounds.size.x, view.y / bounds.size.y)
+			camera.global_position = bounds.get_center()
+		await _wait_ticks(4)
 
 	var player := _room.get_node_or_null("Player") as Player
 	if _use_placeholder_animations and player != null:

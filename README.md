@@ -26,6 +26,13 @@ godot --headless --path . tests/m1_smoke_test.tscn
 # verify every sprite is on the project palette
 python3 tools/check_palette.py
 
+# regenerate the greybox tileset and rebuild the village
+python3 tools/gen_greybox_tileset.py
+godot --headless --path . --script res://tools/build_greybox.gd
+
+# look at a level's whole layout rather than playing it
+godot --path . tests/screenshot.tscn -- --scene=res://levels/ambry/ambry_level.tscn --shot=/tmp/plan.png --fit
+
 # capture a frame (needs a display; xvfb-run works)
 godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --attack=6
 ```
@@ -73,7 +80,10 @@ resources/
   combat/          the player's combo, as a tunable .tres
   enemy_data/      one .tres per enemy
 autoloads/         Events, Rng, HitStop, Sfx, DebugSettings
-levels/prototype/  the one hand-placed box room
+levels/
+  level.gd         composes a map with a player and a camera
+  ambry/           the village, greyboxed — map + level scene
+  prototype/       the hand-placed box room (combat test bed)
 camera/            the camera rig, which is not a child of the player
 art/               shaders, and sprites/tilesets/palettes once M2 starts
 ui/                debug overlay
