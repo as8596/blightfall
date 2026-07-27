@@ -28,7 +28,11 @@ import zlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PALETTE_DIR = os.path.join(ROOT, "art", "palettes")
-SEARCH_DIRS = [os.path.join(ROOT, "art", "sprites"), os.path.join(ROOT, "art", "tilesets")]
+SEARCH_DIRS = [
+    os.path.join(ROOT, "art", "sprites"),
+    os.path.join(ROOT, "art", "tilesets"),
+    os.path.join(ROOT, "art", "icons"),
+]
 
 # Placeholders that are deliberately not in the palette. Keep this list short —
 # every entry is a file the checker is blind to.
