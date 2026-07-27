@@ -16,12 +16,35 @@ built, what is deliberately missing, and what needs tuning by hand.
 
 ## Running it
 
-Open the project in Godot 4.6+ and press F5. `levels/prototype/prototype_room.tscn`
-is the main scene.
+Open the project in Godot 4.6+ and press F5. `levels/ambry/ambry_level.tscn` is
+the main scene — the village, with the wall to the north and the gate south.
+
+**Ambry has no enemies**, by design: it is mechanically incapable of hurting you
+(GDD §7). For the combat prototype, open
+`levels/prototype/prototype_room.tscn` and press **F6** to run just that scene.
+
+| | |
+|---|---|
+| Move | WASD or arrows |
+| Attack | J *(gamepad: X / square)* |
+| Dodge | Space *(gamepad: A / cross)* |
+| Tool | K *(gamepad: Y / triangle)* |
+| Debug | F1 overlay · F2 hitboxes · F3 slow-mo · F4 spawn · F5 reset · F6/F7 save/load |
+
+**First run on a new machine:** Godot builds its `.godot/` import cache the
+first time it *opens the project in the editor*, and that cache is gitignored,
+so a fresh clone does not have one. Let the import progress bar finish before
+pressing F5 — running the game first creates a half-built cache that then never
+rebuilds itself, and every `class_name` in the project fails to resolve. The
+symptom is a scene that loads with no player in it. The fix is to delete
+`.godot/` and reopen the editor.
 
 ```
-# headless self-check — 103 assertions over the M1 systems
+# headless self-check — 143 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
+
+# walks the player through a door and back out, carrying materials
+godot --headless --path . tests/doorway_test.tscn
 
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
