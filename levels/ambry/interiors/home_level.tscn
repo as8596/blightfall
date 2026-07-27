@@ -1,0 +1,24 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://levels/level.gd" id="1_level"]
+[ext_resource type="PackedScene" path="res://levels/ambry/interiors/home.tscn" id="2_map"]
+[ext_resource type="PackedScene" path="res://actors/player/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://camera/camera_rig.tscn" id="4_camera"]
+[ext_resource type="PackedScene" path="res://ui/debug_overlay.tscn" id="5_overlay"]
+
+[node name="HomeLevel" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_level")
+map_path = NodePath("Map")
+player_path = NodePath("Player")
+camera_path = NodePath("CameraRig")
+spawn_marker = "PlayerSpawn"
+
+[node name="Map" parent="." instance=ExtResource("2_map")]
+
+[node name="Player" parent="." instance=ExtResource("3_player")]
+
+[node name="CameraRig" parent="." instance=ExtResource("4_camera")]
+
+[node name="DebugOverlay" parent="." instance=ExtResource("5_overlay")]
+player_path = NodePath("../Player")

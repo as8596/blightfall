@@ -44,7 +44,7 @@ Hard ceilings. Reread whenever a new idea seems exciting.
 | Enemy types | 10 (incl. 3 variant reskins) |
 | Bosses | 3 |
 | Tools / abilities | 4 |
-| NPCs with dialogue | 9 (incl. the fox) |
+| NPCs with dialogue | 10 (incl. the fox and the carpenter — §15 A6) |
 | Music tracks | 6 |
 | Scripted sequences | 5 |
 | Unique sprites | ~47 |
@@ -815,6 +815,43 @@ required to be subsets of anything, only to be recognisably unlike each other.
 
 **Still true, and now the only hard rule:** corruption is the one saturated
 colour. Everything else muted. The blight is the only thing that glows.
+
+### A6 — Ambry, in two halves (extends §7 and §15 A4; amends §2)
+
+**Was:** one village, a stockpile in the square to bank hauls into, a "wall"
+project that pushed the blight edge back as a number, nine NPCs.
+**Now:** twenty locations across two districts, storage in a house you build,
+the wall as a district unlock, and a tenth NPC. See `docs/AMBRY.md`.
+
+Four changes, each with a reason:
+
+1. **The player rebuilds their own home, and it is the first build.** The
+   magistrate put a derelict's deed in their name and never mentioned it —
+   which is his §7 characterisation exactly, and it ties the first mechanical
+   lesson to the most loaded relationship in the cast. It is cheap (timber from
+   just outside the gate), it is the only build anyone explains, and the payoff
+   is a room the player uses for the rest of the game.
+
+2. **Storage moves into the home, and there is none before it.** The stockpile
+   in the square is gone. Until the home exists the satchel is all the player
+   has, which is what makes the first build worth making and the first zone run
+   genuinely all-or-nothing. The save point moves with it: the inn's made bed
+   first, your own bed after.
+
+3. **The wall is a gate, not a stat.** Repairing the breach opens a sealed
+   northern district — the graves, the archive, the old shrine, a second road
+   out — rather than decrementing a blight counter. It is the most expensive
+   project and the largest payoff, and it puts one project (the archive) behind
+   another, which gives the rebuild loop a shape instead of a shopping list.
+
+4. **§2's cast goes 9 → 10.** The carpenter. He stands at whatever can be built
+   next, which is a quest marker with no quest log attached. One more speaking
+   role is a real cost against §2's budget; the alternative was teaching the
+   game's central mechanic through a menu.
+
+**What this does not change:** eight projects remains the ceiling (A4), three
+material types remains the cap, and the gallows remains the project that costs
+materials and grants nothing.
 
 ---
 

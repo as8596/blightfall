@@ -28,6 +28,10 @@ extends Node2D
 ## fail states (GDD §7).
 @export var is_safe: bool = true
 
+## Instanced onto every `Doorways` marker the map carries. The map stays data —
+## markers with metadata — and the level is what turns that data into nodes.
+const DOORWAY_SCENE: PackedScene = preload("res://world/doorway.tscn")
+
 @onready var map: Node2D = get_node_or_null(map_path) as Node2D
 @onready var player: Player = get_node_or_null(player_path) as Player
 @onready var camera: CameraRig = get_node_or_null(camera_path) as CameraRig
@@ -40,13 +44,44 @@ func _ready() -> void:
 
 	var bounds := world_bounds()
 	if camera != null and bounds.size != Vector2.ZERO:
-		camera.apply_room_bounds(bounds.grow(camera_margin))
+		camera.apply_room_bounds(_frameable(bounds.grow(camera_margin)))
 
-	if player != null:
-		var spawn := find_marker(spawn_marker)
-		player.global_position = spawn if spawn != Vector2.INF else bounds.get_center()
-		if camera != null:
-			camera.set_target(player)
+	place_player_at(spawn_marker)
+	_spawn_doorways()
+
+
+## Put the player on a named marker and point the camera at them.
+##
+## Public because arriving is not only a start-of-scene event: `Doorway.travel`
+## calls this *after* the save payload has been applied, since restoring a
+## player also restores the position they had in the scene they just left.
+func place_player_at(marker_name: String) -> bool:
+	if player == null:
+		return false
+	var where := find_marker(marker_name)
+	var found := where != Vector2.INF
+	if not found:
+		where = world_bounds().get_center()
+	player.global_position = where
+	if camera != null:
+		camera.set_target(player)
+	return found
+
+
+func _spawn_doorways() -> void:
+	var root := map.find_child("Doorways", true, false) if map != null else null
+	if root == null:
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var door: Doorway = DOORWAY_SCENE.instantiate()
+		door.name = marker.name
+		door.target_scene = String(marker.get_meta("target_scene", ""))
+		door.target_spawn = String(marker.get_meta("target_spawn", "PlayerSpawn"))
+		add_child(door)
+		door.global_position = marker.global_position
 
 
 ## Union of every TileMapLayer's used rect, in world pixels.
@@ -68,6 +103,17 @@ func world_bounds() -> Rect2:
 	return bounds
 
 
+## Camera limits smaller than the screen fight each other — the left limit
+## pushes the view right and the right limit pushes it straight back — and the
+## room ends up pinned to a corner instead of centred. A one-room interior is
+## smaller than 1280×720, so the limit rect grows to at least a screen around
+## the room's centre and the empty margin is allowed to show.
+func _frameable(bounds: Rect2) -> Rect2:
+	var view := get_viewport_rect().size
+	var size := Vector2(maxf(bounds.size.x, view.x), maxf(bounds.size.y, view.y))
+	return Rect2(bounds.get_center() - size * 0.5, size)
+
+
 func _layers() -> Array[TileMapLayer]:
 	var found: Array[TileMapLayer] = []
 	if map == null:
@@ -87,39 +133,55 @@ func find_marker(marker_name: String) -> Vector2:
 	return node.global_position if node != null else Vector2.INF
 
 
-## Every building plot, as {id, state, position}. The rebuild system will read
-## this; for now it is what makes the plots inspectable rather than decorative.
+## Every building plot, as {id, state, district, position} — plus {project,
+## cost, requires} on the ones that are rebuild projects. The rebuild system
+## will read this; for now it is what makes the plots inspectable rather than
+## decorative.
 func building_plots() -> Array[Dictionary]:
-	var plots: Array[Dictionary] = []
-	if map == null:
-		return plots
-	var root := map.find_child("BuildingPlots", true, false)
-	if root == null:
-		return plots
-	for child in root.get_children():
-		var marker := child as Marker2D
-		if marker == null:
-			continue
-		plots.append({
-			"id": marker.get_meta("plot_id", marker.name),
-			"state": marker.get_meta("state", "empty"),
-			"position": marker.global_position,
-		})
-	return plots
+	return _markers_under("BuildingPlots", "plot_id", ["state", "district"])
 
 
-## Every permanent point of interest, as {id, note, position} — hearth,
-## stockpile, well, gallows, gate. See docs/AMBRY.md.
+## Every permanent point of interest, as {id, note, district, position} —
+## hearth, well, bell, gallows, gate, the breach. See docs/AMBRY.md.
 func points_of_interest() -> Array[Dictionary]:
-	return _markers_under("PointsOfInterest", "poi_id", "note")
+	return _markers_under("PointsOfInterest", "poi_id", ["note", "district"])
 
 
 ## Every placed NPC marker, as {id, position}.
 func npc_markers() -> Array[Dictionary]:
-	return _markers_under("NpcMarkers", "npc_id", "")
+	return _markers_under("NpcMarkers", "npc_id", [])
 
 
-func _markers_under(group_name: String, id_key: String, extra_key: String) -> Array[Dictionary]:
+## A single POI or building plot by id, or an empty dictionary. Ids are unique
+## across both — `home` is a plot, `bell` is a POI, and nothing is both.
+func poi(id: String) -> Dictionary:
+	for entry in points_of_interest() + building_plots():
+		if String(entry.get("id", "")) == id:
+			return entry
+	return {}
+
+
+## Which half of the village something is in: "south" (open from the start),
+## "north" (behind the breach), "wall" (the breach itself, worked on from the
+## south side), or "" if there is no such id here.
+func district_of(id: String) -> String:
+	return String(poi(id).get("district", ""))
+
+
+## Every rebuild project placed in this level, as its plot or POI entry.
+func rebuild_projects() -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for entry in points_of_interest() + building_plots():
+		if bool(entry.get("project", false)):
+			found.append(entry)
+	return found
+
+
+## Markers under a named group node, with `id_key` read as `id` and each of
+## `extra_keys` copied across when present. Project metadata comes along
+## automatically, so adding a field to the build script does not mean editing
+## a reader here as well.
+func _markers_under(group_name: String, id_key: String, extra_keys: Array) -> Array[Dictionary]:
 	var markers: Array[Dictionary] = []
 	if map == null:
 		return markers
@@ -134,7 +196,10 @@ func _markers_under(group_name: String, id_key: String, extra_key: String) -> Ar
 			"id": marker.get_meta(id_key, marker.name),
 			"position": marker.global_position,
 		}
-		if extra_key != "":
-			entry[extra_key] = marker.get_meta(extra_key, "")
+		for key in extra_keys:
+			entry[key] = marker.get_meta(key, "")
+		for key in ["project", "cost", "requires"]:
+			if marker.has_meta(key):
+				entry[key] = marker.get_meta(key)
 		markers.append(entry)
 	return markers

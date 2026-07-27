@@ -47,13 +47,19 @@ Two things from the GDD that also aren't here, on purpose:
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 69 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 143 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
 distance, i-frame boundaries), the combo window outliving its state, chaining
 and buffering, stamina rules, the damage exchange end to end, the enemy's full
-behaviour loop, and the design rules that live in `.tres` files.
+behaviour loop, save/load, the haul, Ambry's twenty locations and ten NPCs, and
+the design rules that live in `.tres` files.
+
+`godot --headless --path . tests/doorway_test.tscn` — 9 assertions. Walks the
+player through their front door and back out, carrying materials. Separate
+because it is the one test that changes scenes, and `change_scene_to_file` frees
+whatever the current scene is — including a test living inside it.
 
 It cannot answer the M1 gate. "Is this fun" needs hands on a keyboard, and then
 two or three other people's hands. What it does is stop the numbers in the code
@@ -166,9 +172,11 @@ Pickups are walked over, not interacted with — materials are routine, and a
 button press forty times a run is a tax rather than a decision. The interact
 verb, when it exists, is for things worth stopping for.
 
-**Not yet built:** anywhere to spend a haul. The building plots in Ambry are
-markers with metadata and nothing reads them. That is the other half of the
-loop and the obvious next piece.
+**Not yet built:** anywhere to spend a haul, and — until the player's home is
+rebuilt — anywhere to put one down. Both are deliberate (GDD §15 A6): storage
+lives in the home chest, the home is the first rebuild project, and the rebuild
+transaction is the next piece. The plots carry their id, state, district, cost
+tier and prerequisite as metadata; nothing reads them yet.
 
 **What still needs your hands:** whether losing a haul stings the right amount.
 Capacity, and whether the cache should decay, are both single numbers. My guess

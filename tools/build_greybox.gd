@@ -1,11 +1,11 @@
 extends SceneTree
-## Builds the greybox TileSet and the Ambry village scene.
+## Builds the greybox TileSet, the Ambry village scene, and its interiors.
 ##
 ##     godot --headless --path . --script res://tools/build_greybox.gd
 ##
-## Run after `python3 tools/gen_greybox_tileset.py`. Both outputs are committed,
+## Run after `python3 tools/gen_greybox_tileset.py`. All outputs are committed,
 ## so this only needs re-running when the tile list or the village layout below
-## changes — and after that, the scene is a normal Godot scene you can open and
+## changes — and after that, the scenes are normal Godot scenes you can open and
 ## edit by hand.
 ##
 ## Why a script instead of hand-written `.tres` / `.tscn`: a TileSet's atlas
@@ -20,6 +20,7 @@ const ATLAS_COLS := 4
 const TILESET_PATH := "res://resources/tilesets/greybox.tres"
 const TEXTURE_PATH := "res://art/tilesets/greybox_64.png"
 const VILLAGE_PATH := "res://levels/ambry/ambry.tscn"
+const INTERIOR_DIR := "res://levels/ambry/interiors"
 
 # Must match tools/gen_greybox_tileset.py, in order.
 const TILES: Array = [
@@ -28,84 +29,223 @@ const TILES: Array = [
 	["door", false], ["window", true], ["hearth", false], ["well", true],
 	["plot_empty", false], ["plot_ruined", false], ["stockpile", true], ["bed_save", false],
 	["gate", true], ["npc_marker", false], ["blight_creep", true], ["void", true],
+	["bell", true], ["garden", false], ["tent", true], ["rubble_wall", true],
+	["chest", true], ["shrine", true],
 ]
 
 # --------------------------------------------------------------------------
-# Ambry.
+# Ambry — two districts. See docs/AMBRY.md.
 #
 # Laid out rather than drawn: buildings are rects with a door, paths are runs
 # between them. That keeps the layout editable as intent ("move the smith two
 # tiles east") instead of as a wall of characters.
 #
 # The shape is doing narrative work. The gate is south, so the player arrives
-# from the valley and the blight is always behind them at the north edge,
-# visible and closer than anyone would like. The square with its well and hearth
-# is dead centre, because the warmth pillar wants a place the player returns to
-# without being sent. Ruined plots sit on the north side — the town has already
-# lost ground, and rebuilding pushes back toward the thing.
+# from the valley and the blight is always beyond the north edge. The square
+# with its well, hearth and bell is dead centre, because the warmth pillar wants
+# a place the player returns to without being sent.
+#
+# The load-bearing structure is the wall at WALL_ROW. Ambry lost its northern
+# half early; the breach was packed with rubble and everything behind it
+# abandoned. **The north district is sealed until the breach is rebuilt** — the
+# wall is a gate, not a stat, and repairing it is the largest single payoff in
+# the game. There is an assertion below that it really is sealed, because a
+# north district that is accidentally walkable from day one would be invisible
+# to everything except a person walking it.
 # --------------------------------------------------------------------------
 
-const MAP_W := 40
-const MAP_H := 30
+const MAP_W := 48
+const MAP_H := 42
 
-## name, rect (x, y, w, h), door offset along the south wall, plot id, state
-## state: "built" | "ruined" | "empty"
+## The wall dividing the village. Everything north of these rows is the locked
+## district; everything south is where the player starts.
+##
+## Two rows thick, not one. A town wall the same thickness as a cottage's back
+## wall does not read as the thing the whole northern half is lost behind — and
+## at this zoom the difference between 64px and 128px of masonry is the
+## difference between a boundary and a decision.
+const WALL_ROWS: Array[int] = [14, 15]
+const WALL_ROW := 14
+
+## Where the wall is broken and packed with rubble. Rebuild project #5 opens it.
+const BREACH_X: Array[int] = [22, 23, 24, 25]
+
+## The spine. Runs the whole height of the village, gate to gate, and carries
+## every entrance and exit in the game.
+const ROAD_X: Array[int] = [23, 24]
+
+## East–west paths. The player should never have to cross open ground to reach
+## a door.
+const SOUTH_RINGS: Array[int] = [16, 23, 31, 37]
+const NORTH_RING := 12
+
+## What came through the breach and was never pushed back. Kept off the north
+## spine and off the north ring, so the district is genuinely walkable the day
+## the wall goes up — the payoff has to be a place, not another obstacle.
+const CREEP_PATCHES: Array = [
+	Vector2i(19, 13), Vector2i(20, 13), Vector2i(21, 13), Vector2i(21, 11),
+	Vector2i(26, 13), Vector2i(27, 13), Vector2i(28, 13), Vector2i(26, 11),
+	Vector2i(4, 5), Vector2i(5, 5), Vector2i(4, 6),
+	Vector2i(30, 6), Vector2i(31, 6), Vector2i(31, 7),
+	Vector2i(41, 5), Vector2i(42, 6), Vector2i(43, 5),
+	Vector2i(9, 11), Vector2i(33, 13), Vector2i(13, 13),
+]
+
+## name, rect (x, y, w, h), door offset along the south wall, plot id, state,
+## district, interior scene ("" for a facade).
+##
+## state: "built" | "ruined" | "empty" | "derelict"
 const BUILDINGS: Array = [
-	["inn",         Rect2i(4, 17, 8, 6),  3, "inn",         "built"],
-	["forge",       Rect2i(28, 17, 7, 6), 3, "forge",       "built"],
-	["magistrate",  Rect2i(15, 4, 10, 6), 4, "magistrate",  "built"],
-	["apothecary",  Rect2i(3, 5, 7, 5),   3, "apothecary",  "ruined"],
-	["archive",     Rect2i(30, 5, 6, 5),  2, "archive",     "ruined"],
-	["market",      Rect2i(5, 24, 6, 4),  2, "market",      "empty"],
-	["watchpost",   Rect2i(29, 24, 5, 4), 2, "watchpost",   "empty"],
+	# The first thing you build. The magistrate put a derelict's deed in your
+	# name and never mentioned it; the carpenter was told to expect you and
+	# assumes you already knew.
+	["home",        Rect2i(3, 25, 8, 6),  3, "home",        "derelict", "south",
+		INTERIOR_DIR + "/home_level.tscn"],
+	["inn",         Rect2i(3, 32, 8, 5),  3, "inn",         "built",    "south",
+		INTERIOR_DIR + "/inn_level.tscn"],
+	["forge",       Rect2i(36, 25, 8, 6), 4, "forge",       "built",    "south",
+		INTERIOR_DIR + "/forge_level.tscn"],
+	["magistrate",  Rect2i(27, 18, 10, 5), 4, "magistrate", "built",    "south",
+		INTERIOR_DIR + "/magistrate_hall_level.tscn"],
+	["apothecary",  Rect2i(4, 18, 7, 5),  3, "apothecary",  "ruined",   "south", ""],
+	["market",      Rect2i(13, 32, 6, 4), 2, "market",      "empty",    "south", ""],
+	["watchpost",   Rect2i(36, 32, 5, 4), 2, "watchpost",   "empty",    "south", ""],
 	# Shut door, drawn curtain. Nothing to interact with for most of the game,
 	# and that is the interaction.
-	["hidden_case", Rect2i(12, 23, 5, 4), 2, "hidden_case", "built"],
+	["hidden_case", Rect2i(26, 32, 5, 5), 2, "hidden_case", "built",    "south", ""],
+	# Behind the wall: a project behind a project.
+	["archive",     Rect2i(15, 6, 8, 5),  3, "archive",     "ruined",   "north", ""],
 ]
 
-## Permanent points of interest. id, tile, tile to paint, note.
+## Permanent points of interest: id, cell, note, district.
+##
+## The cell is where the player **stands**, not where the object is — a marker
+## sitting inside the well tile is a marker nobody can ever walk to, and the
+## reachability assertion below would (correctly) refuse to build the village.
 const POIS: Array = [
-	["hearth",    Vector2i(22, 15), "hearth",     "save + rest"],
-	["stockpile", Vector2i(24, 15), "stockpile",  "bank the haul"],
-	["well",      Vector2i(18, 13), "well",       "the child, the fox"],
+	["gate",       Vector2i(23, 40), "to the valley",                 "south"],
 	# Between the gate and the town, so it is passed going out and coming back,
 	# every run. Nobody makes the player look at it; it is where the road goes.
-	["gallows",   Vector2i(21, 27), "plot_ruined", "sentenced here"],
-	["gate",      Vector2i(19, 29), "gate",       "to the valley"],
+	["gallows",    Vector2i(27, 39), "sentenced here",                "south"],
+	["well",       Vector2i(19, 28), "the child, the fox",            "south"],
+	["hearth",     Vector2i(26, 26), "the town's fire",               "south"],
+	["bell",       Vector2i(22, 25), "rang three times that morning", "south"],
+	["allotment",  Vector2i(17, 19), "what the town still grows",     "south"],
+	["lean_tos",   Vector2i(32, 27), "the visible cost of losing",    "south"],
+	# District "wall": you stand on the *south* side to work on it, but it is
+	# counted with the northern five in docs/AMBRY.md because it is the thing
+	# that opens them.
+	["breach",     Vector2i(23, 16), "rebuild: opens the north",      "wall"],
+	["graves",     Vector2i(9, 9),   "the Liar is here",              "north"],
+	["shrine",     Vector2i(38, 10), "older than the town",           "north"],
+	["north_road", Vector2i(23, 5),  "the short way to Orchardfall",  "north"],
 ]
 
-## The graves. North edge, nearest the blight — the list grows if the player is
-## slow, which is the cheapest pressure mechanic available: no timer, no fail
-## state, just a row that gets longer.
+## The eight rebuild projects (GDD §15 A4 caps it at eight). id matches either a
+## building plot or a POI; `requires` is another project id or "".
+##
+## The gallows is the important one: it costs materials, grants no capability,
+## and what it buys is the town's reaction. Never dismantling it has to read as
+## clearly as dismantling it — it is not a good/evil switch, and nothing scores
+## it.
+const PROJECTS: Array = [
+	["home",       "trivial", ""],
+	["apothecary", "low",     ""],
+	["market",     "medium",  ""],
+	["watchpost",  "medium",  ""],
+	["breach",     "high",    ""],
+	["archive",    "medium",  "breach"],
+	["forge",      "high",    ""],
+	["gallows",    "low",     ""],
+]
+
+## The graves, in the northern district, nearest the thing that made them. The
+## list grows if the player is slow, which is the cheapest pressure mechanic
+## available: no timer, no fail state, just a row that gets longer.
 const GRAVES: Array = [
-	Vector2i(6, 3), Vector2i(8, 3), Vector2i(10, 3),
+	Vector2i(6, 8), Vector2i(8, 8), Vector2i(10, 8), Vector2i(12, 8),
 ]
 
-## Where each named NPC stands. Ids match the §7 cast.
+## Refugee lean-tos, pitched in the open ground east of the square where the
+## fire is. Also a growing list: this is what losing looks like from inside the
+## one place that is meant to be safe.
+const LEAN_TOS: Array = [
+	Vector2i(31, 26), Vector2i(34, 26), Vector2i(31, 29), Vector2i(34, 29),
+]
+
+## The town's stacked repair materials, piled against a breach it cannot afford
+## to close. They are the reason the player knows what the wall wants.
+const MATERIAL_PILES: Array = [
+	Vector2i(20, 17), Vector2i(21, 17), Vector2i(26, 17),
+]
+
+## Interiors. id, room size in tiles, door offset along the south wall,
+## features [tile, cell], points of interest [id, cell, note].
+##
+## Four rooms, not three: the home holds the chest and the bed and will be the
+## most-visited room in the game. If four ever turns out to be one too many, the
+## magistrate's hall is the one to drop back to a facade — it is narrative
+## rather than mechanical.
+const INTERIORS: Array = [
+	["home", Vector2i(9, 7), 4,
+		[["chest", Vector2i(2, 2)], ["bed_save", Vector2i(6, 2)]],
+		[
+			["home_chest", Vector2i(2, 3), "store the haul"],
+			["home_bed", Vector2i(6, 3), "save + rest"],
+		]],
+	["inn", Vector2i(12, 8), 5,
+		[["hearth", Vector2i(2, 2)], ["stockpile", Vector2i(5, 2)],
+			["bed_save", Vector2i(8, 2)], ["bed_save", Vector2i(10, 2)]],
+		[["inn_bed", Vector2i(8, 3), "save + rest, until your home is yours"]]],
+	["forge", Vector2i(10, 7), 4,
+		[["hearth", Vector2i(7, 2)], ["stockpile", Vector2i(2, 2)]],
+		[["anvil", Vector2i(7, 3), "weapon damage, then reach"]]],
+	["magistrate_hall", Vector2i(11, 7), 5,
+		[["chest", Vector2i(5, 2)]],
+		[["ledger", Vector2i(5, 3), "your name, wrongly, still open on the desk"]]],
+]
+
+## Where each named NPC stands: id, which map, cell. Ten of them — §2's cast
+## plus the carpenter (GDD §15 A6).
+##
+## The carpenter stands at whatever you can build next, which makes him the
+## quest marker without a quest log. He starts at your derelict.
 const NPCS: Array = [
-	["magistrate", Vector2i(20, 11)],          # his hall
-	["smith", Vector2i(31, 24)],               # the forge
-	["innkeeper", Vector2i(8, 24)],            # the inn
-	["child", Vector2i(17, 15)],               # the well
-	# Works out of the inn until her own building is rebuilt. Rebuilding
-	# visibly moves a person rather than unlocking a menu.
-	["apothecary", Vector2i(10, 24)],
-	["reluctant_guard", Vector2i(18, 28)],     # the gate
-	["unrepentant", Vector2i(23, 27)],         # the gallows, of course
-	["hidden_case", Vector2i(14, 27)],         # own doorway
-	["fox", Vector2i(20, 13)],                 # the well's edge
+	["carpenter",       "ambry", Vector2i(7, 31)],
+	["child",           "ambry", Vector2i(18, 28)],
+	["fox",             "ambry", Vector2i(21, 27)],
+	["reluctant_guard", "ambry", Vector2i(22, 40)],
+	["unrepentant",     "ambry", Vector2i(25, 39)],
+	["hidden_case",     "ambry", Vector2i(28, 37)],
+	["magistrate",      "magistrate_hall", Vector2i(5, 3)],
+	["smith",           "forge", Vector2i(6, 3)],
+	["innkeeper",       "inn", Vector2i(4, 3)],
+	# Works out of the inn until her own building is rebuilt. Rebuilding visibly
+	# moves a person rather than unlocking a menu.
+	["apothecary",      "inn", Vector2i(7, 4)],
 ]
 
 var _index := {}
+var _project := {}
+var _failures := 0
 
 
 func _init() -> void:
 	for i in TILES.size():
 		_index[TILES[i][0]] = Vector2i(i % ATLAS_COLS, i / ATLAS_COLS)
+	for entry in PROJECTS:
+		_project[entry[0]] = {"cost": entry[1], "requires": entry[2]}
 
 	var tileset := _build_tileset()
 	_save(tileset, TILESET_PATH)
 	_build_village(tileset)
+	for entry in INTERIORS:
+		_build_interior(tileset, entry)
+
+	if _failures > 0:
+		push_error("build_greybox: %d assertion(s) failed" % _failures)
+		quit(1)
+		return
 	quit()
 
 
@@ -124,6 +264,17 @@ func _build_tileset() -> TileSet:
 	# Layer 1 is World (GDD §10). Static geometry collides with nothing itself.
 	tileset.set_physics_layer_collision_layer(0, 1)
 	tileset.set_physics_layer_collision_mask(0, 0)
+
+	# The atlas has to be big enough for the tile list, and Godot's importer
+	# caches the old image — adding tiles to the Python generator without
+	# reimporting leaves the last row missing. create_tile() then fails per tile
+	# with an error that scrolls past, and everything downstream keeps going.
+	var rows: int = ceili(float(TILES.size()) / ATLAS_COLS)
+	var wanted := Vector2i(ATLAS_COLS * TILE, rows * TILE)
+	if texture.get_size() != Vector2(wanted):
+		_fail("%s is %s, expected %s for %d tiles — rerun tools/gen_greybox_tileset.py, then `godot --headless --path . --import`"
+			% [TEXTURE_PATH, texture.get_size(), wanted, TILES.size()])
+		return null
 
 	var source := TileSetAtlasSource.new()
 	source.texture = texture
@@ -156,10 +307,10 @@ func _build_tileset() -> TileSet:
 	# every way that mattered.
 	var expected_solid: int = TILES.filter(func(t): return t[1]).size()
 	if solid != expected_solid:
-		push_error("collision missing: %d of %d solid tiles have polygons" % [solid, expected_solid])
+		_fail("collision missing: %d of %d solid tiles have polygons" % [solid, expected_solid])
 	else:
 		print("collision: %d/%d solid tiles have polygons" % [solid, expected_solid])
-	print("tileset: %d tiles, %d solid" % [TILES.size(), TILES.filter(func(t): return t[1]).size()])
+	print("tileset: %d tiles, %d solid" % [TILES.size(), expected_solid])
 	return tileset
 
 
@@ -171,46 +322,72 @@ func _build_village(tileset: TileSet) -> void:
 	var overhead := _new_layer("Overhead", tileset, 2)
 	objects.y_sort_enabled = true
 
-	# Ground: grass everywhere, then a cobbled square, then paths.
+	# Ground. Grass first, then roads, then the square on top of them — the
+	# square should read as one cobbled surface, not as a road crossing it.
 	_fill(ground, Rect2i(0, 0, MAP_W, MAP_H), "grass_yard")
-	_fill(ground, Rect2i(13, 11, 14, 9), "cobble")
 
-	# The blight has already reached the north edge. It is visible from the
-	# square, which is the point — the threat is never off-screen in the one
-	# place that is supposed to feel safe.
+	for row in SOUTH_RINGS:
+		_fill(ground, Rect2i(2, row, MAP_W - 4, 1), "dirt_path")
+	_fill(ground, Rect2i(2, NORTH_RING, MAP_W - 4, 1), "dirt_path")
+	for x in ROAD_X:
+		_fill(ground, Rect2i(x, 0, 1, MAP_H), "dirt_path")
+
+	_fill(ground, Rect2i(17, 24, 13, 7), "cobble")
+	_fill(ground, Rect2i(14, 18, 7, 4), "garden")
+
+	# The blight beyond the north edge, and the tongue of it that came through
+	# the breach and has never been pushed back.
 	_fill(ground, Rect2i(0, 0, MAP_W, 2), "blight_creep")
 	for x in range(0, MAP_W, 3):
 		_put(ground, Vector2i(x, 2), "blight_creep")
+	for x in ROAD_X:
+		# The north road still runs out through it.
+		_fill(ground, Rect2i(x, 0, 1, 3), "dirt_path")
+	for cell in CREEP_PATCHES:
+		_put(ground, cell, "blight_creep")
 
-	# Roads: a spine from the south gate to the square, and a ring around it.
-	_fill(ground, Rect2i(19, 20, 2, 10), "dirt_path")
-	_fill(ground, Rect2i(2, 10, MAP_W - 4, 1), "dirt_path")
-	_fill(ground, Rect2i(2, 16, MAP_W - 4, 1), "dirt_path")
+	# ---- the wall, the whole width, rubble where it is broken.
+	for row in WALL_ROWS:
+		for x in range(1, MAP_W - 1):
+			_put(objects, Vector2i(x, row), "wall")
+		for x in BREACH_X:
+			_put(objects, Vector2i(x, row), "rubble_wall")
+	for cell in MATERIAL_PILES:
+		_put(objects, cell, "stockpile")
 
-	# Town edge: fences along the sides, a gate south.
-	for x in range(1, MAP_W - 1):
-		_put(objects, Vector2i(x, MAP_H - 1), "fence")
-	for y in range(3, MAP_H - 1):
+	# ---- edges. Fences inside, void outside: the outer columns are what stops
+	# a player simply walking around the end of the wall.
+	for y in range(MAP_H):
+		_put(objects, Vector2i(0, y), "void")
+		_put(objects, Vector2i(MAP_W - 1, y), "void")
+	for y in range(4, MAP_H - 1):
+		if y in WALL_ROWS:
+			continue
 		_put(objects, Vector2i(1, y), "fence")
 		_put(objects, Vector2i(MAP_W - 2, y), "fence")
-	for x in [19, 20]:
-		_put(objects, Vector2i(x, MAP_H - 1), "gate")
-		_put(ground, Vector2i(x, MAP_H - 1), "dirt_path")
+	for x in range(1, MAP_W - 1):
+		_put(objects, Vector2i(x, MAP_H - 1), "fence")   # south edge
+		_put(objects, Vector2i(x, 3), "fence")           # north edge
+	for x in ROAD_X:
+		_put(objects, Vector2i(x, MAP_H - 1), "gate")    # to the valley
+		_put(objects, Vector2i(x, 3), "gate")            # the north road
 
-	# The square. Hearth and stockpile sit together so banking a haul and saving
-	# are one trip — a run should end in a single gesture, not a lap of errands.
-	_fill(objects, Rect2i(18, 13, 2, 2), "well")
-	_fill(objects, Rect2i(21, 15, 2, 2), "hearth")
-	_fill(objects, Rect2i(24, 15, 2, 2), "stockpile")
+	# ---- the square. Well and hearth flank the spine so the player walks
+	# between them on the way in from the gate.
+	_fill(objects, Rect2i(19, 26, 2, 2), "well")
+	_fill(objects, Rect2i(26, 26, 2, 2), "hearth")
+	_put(objects, Vector2i(22, 24), "bell")
 
-	# The gallows, on the road between the gate and the town.
-	_fill(ground, Rect2i(21, 26, 3, 2), "plot_ruined")
-	_put(objects, Vector2i(22, 26), "fence")
+	# ---- the gallows, on the road between the gate and the town.
+	_fill(ground, Rect2i(26, 38, 3, 2), "plot_ruined")
+	_put(objects, Vector2i(27, 38), "fence")
 
-	# The graves, north edge, nearest the thing that made them.
 	for cell in GRAVES:
 		_put(ground, cell, "plot_ruined")
 		_put(objects, cell, "fence")
+	for cell in LEAN_TOS:
+		_put(objects, cell, "tent")
+	_fill(objects, Rect2i(38, 8, 2, 2), "shrine")
 
 	for entry in BUILDINGS:
 		_place_building(ground, objects, overhead, entry)
@@ -224,7 +401,9 @@ func _build_village(tileset: TileSet) -> void:
 
 	_add_markers(root)
 
-	_assert_road_clear(objects)
+	var layers: Array[TileMapLayer] = [ground, objects, overhead]
+	_assert_road_clear(layers)
+	_assert_layout(layers)
 
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -233,26 +412,133 @@ func _build_village(tileset: TileSet) -> void:
 	# them and the engine reports leaked RIDs on exit.
 	root.free()
 	print("village: %dx%d tiles (%dx%d px), %d buildings, %d POIs, %d npc markers"
-		% [MAP_W, MAP_H, MAP_W * TILE, MAP_H * TILE, BUILDINGS.size(), POIS.size(), NPCS.size()])
+		% [MAP_W, MAP_H, MAP_W * TILE, MAP_H * TILE, BUILDINGS.size(), POIS.size(),
+			_npcs_in("ambry").size()])
 
 
 ## The spine from the south gate to the square carries every entrance and exit
 ## in the game. Nothing may stand on it.
-func _assert_road_clear(objects: TileMapLayer) -> void:
+func _assert_road_clear(layers: Array[TileMapLayer]) -> void:
 	var blocked: Array[Vector2i] = []
-	for y in range(20, MAP_H - 1):
-		for x in [19, 20]:
+	for y in range(int(WALL_ROWS.max()) + 1, MAP_H - 1):
+		for x in ROAD_X:
 			var cell := Vector2i(x, y)
-			var atlas := objects.get_cell_atlas_coords(cell)
-			if atlas == Vector2i(-1, -1):
-				continue
-			var index := atlas.y * ATLAS_COLS + atlas.x
-			if index < TILES.size() and TILES[index][1]:
+			if _solid_at(layers, cell):
 				blocked.append(cell)
 	if blocked.is_empty():
 		print("road from the gate: clear")
 	else:
-		push_error("road from the gate is blocked at %s" % [blocked])
+		_fail("road from the gate is blocked at %s" % [blocked])
+
+
+## Two things a screenshot cannot tell you, both of which would look completely
+## correct until somebody walked them:
+##
+## 1. Every door in the south district is reachable on foot from the spawn.
+## 2. The north district is **not** — it is behind an unrepaired breach, and if
+##    it were accidentally open the whole point of the wall would be gone with
+##    no visible symptom.
+func _assert_layout(layers: Array[TileMapLayer]) -> void:
+	var spawn := Vector2i(ROAD_X[0], MAP_H - 3)
+	var reached := _flood(layers, spawn)
+	if reached.is_empty():
+		_fail("the player spawn at %s is inside a wall" % [spawn])
+		return
+
+	var unreachable: Array[String] = []
+	for entry in BUILDINGS:
+		if String(entry[5]) != "south":
+			continue
+		var door := _door_cell(entry)
+		if not reached.has(door):
+			unreachable.append("%s door %s" % [entry[0], door])
+	for entry in POIS:
+		if String(entry[3]) == "north":
+			continue
+		if not reached.has(entry[1]):
+			unreachable.append("poi %s %s" % [entry[0], entry[1]])
+	if unreachable.is_empty():
+		print("every south door and POI: reachable")
+	else:
+		_fail("unreachable from the gate: %s" % [unreachable])
+
+	var leaked: Array[Vector2i] = []
+	for cell in reached:
+		if cell.y < WALL_ROW:
+			leaked.append(cell)
+	if leaked.is_empty():
+		print("north district: sealed (%d cells reachable, none past the wall)" % reached.size())
+	else:
+		_fail("the north district is walkable from the start — %d cells, e.g. %s"
+			% [leaked.size(), leaked.slice(0, 6)])
+
+	# ...and the other half of that promise: once the breach is repaired, every
+	# northern POI has to actually be standable. The most expensive project in
+	# the game opening onto a district you cannot cross would be a very quiet
+	# way to waste the player's whole mid-game.
+	var opened := {}
+	for row in WALL_ROWS:
+		for x in BREACH_X:
+			opened[Vector2i(x, row)] = true
+	var after := _flood(layers, spawn, opened)
+	var stranded: Array[String] = []
+	for entry in POIS:
+		if String(entry[3]) != "north":
+			continue
+		if not after.has(entry[1]):
+			stranded.append("%s %s" % [entry[0], entry[1]])
+	for entry in BUILDINGS:
+		if String(entry[5]) != "north":
+			continue
+		var rect: Rect2i = entry[1]
+		var front := Vector2i(rect.position.x + int(entry[2]), rect.end.y)
+		if not after.has(front):
+			stranded.append("%s front %s" % [entry[0], front])
+	if stranded.is_empty():
+		print("north district: reachable once the breach is repaired (+%d cells)"
+			% (after.size() - reached.size()))
+	else:
+		_fail("repairing the breach would not reach: %s" % [stranded])
+
+
+## Four-way flood fill over everything not blocked by a solid tile on any layer.
+## Cells in `opened` are treated as clear, which is how a rebuild is simulated
+## without editing the map and putting it back.
+func _flood(layers: Array[TileMapLayer], from: Vector2i, opened: Dictionary = {}) -> Dictionary:
+	var seen := {}
+	if _solid_at(layers, from, opened):
+		return seen
+	var queue: Array[Vector2i] = [from]
+	seen[from] = true
+	while not queue.is_empty():
+		var cell: Vector2i = queue.pop_back()
+		for step in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			var next: Vector2i = cell + step
+			if next.x < 0 or next.y < 0 or next.x >= MAP_W or next.y >= MAP_H:
+				continue
+			if seen.has(next) or _solid_at(layers, next, opened):
+				continue
+			seen[next] = true
+			queue.append(next)
+	return seen
+
+
+func _solid_at(layers: Array[TileMapLayer], cell: Vector2i, opened: Dictionary = {}) -> bool:
+	if opened.has(cell):
+		return false
+	for layer in layers:
+		var atlas := layer.get_cell_atlas_coords(cell)
+		if atlas == Vector2i(-1, -1):
+			continue
+		var index: int = atlas.y * ATLAS_COLS + atlas.x
+		if index < TILES.size() and TILES[index][1]:
+			return true
+	return false
+
+
+static func _door_cell(entry: Array) -> Vector2i:
+	var rect: Rect2i = entry[1]
+	return Vector2i(rect.position.x + int(entry[2]), rect.end.y - 1)
 
 
 func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: TileMapLayer,
@@ -273,19 +559,28 @@ func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: Tile
 			_put(objects, Vector2i(x, rect.position.y), "wall_inner")
 		return
 
-	# Standing building: floor, walls, a door in the south face, roof above.
-	_fill(ground, rect, "floorboards")
-	for x in range(rect.position.x, rect.end.x):
-		_put(objects, Vector2i(x, rect.position.y), "wall")
-		_put(objects, Vector2i(x, rect.end.y - 1), "wall")
-	for y in range(rect.position.y, rect.end.y):
-		_put(objects, Vector2i(rect.position.x, y), "wall")
-		_put(objects, Vector2i(rect.end.x - 1, y), "wall")
+	var is_derelict := state == "derelict"
 
-	var door := Vector2i(rect.position.x + door_offset, rect.end.y - 1)
+	# A derelict is a shell: footings on all four sides, a door frame, no roof
+	# and no glass. It is a building you finish rather than a plot you conjure,
+	# which is the whole difference between "your home" and "a construction
+	# site" — and the reason the first build lands personally.
+	var wall_tile := "wall_inner" if is_derelict else "wall"
+	_fill(ground, rect, "plot_ruined" if is_derelict else "floorboards")
+	for x in range(rect.position.x, rect.end.x):
+		_put(objects, Vector2i(x, rect.position.y), wall_tile)
+		_put(objects, Vector2i(x, rect.end.y - 1), wall_tile)
+	for y in range(rect.position.y, rect.end.y):
+		_put(objects, Vector2i(rect.position.x, y), wall_tile)
+		_put(objects, Vector2i(rect.end.x - 1, y), wall_tile)
+
+	var door := _door_cell(entry)
 	_put(objects, door, "door")
-	_put(ground, door, "floorboards")
+	_put(ground, door, "plot_ruined" if is_derelict else "floorboards")
 	_put(ground, door + Vector2i(0, 1), "dirt_path")
+
+	if is_derelict:
+		return
 
 	# Windows either side of the door, so a facade reads as a facade.
 	if door_offset >= 2:
@@ -299,10 +594,7 @@ func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: Tile
 
 
 func _add_markers(root: Node2D) -> void:
-	var plots := Node2D.new()
-	plots.name = "BuildingPlots"
-	root.add_child(plots)
-	plots.owner = root
+	var plots := _group(root, "BuildingPlots")
 	for entry in BUILDINGS:
 		var rect: Rect2i = entry[1]
 		var marker := Marker2D.new()
@@ -313,43 +605,188 @@ func _add_markers(root: Node2D) -> void:
 		)
 		marker.set_meta("plot_id", entry[3])
 		marker.set_meta("state", entry[4])
+		marker.set_meta("district", entry[5])
+		_stamp_project(marker, String(entry[3]))
 		plots.add_child(marker)
 		marker.owner = root
 
-	var npcs := Node2D.new()
-	npcs.name = "NpcMarkers"
-	root.add_child(npcs)
-	npcs.owner = root
-	for entry in NPCS:
-		var marker := Marker2D.new()
-		marker.name = "Npc_" + String(entry[0])
-		marker.position = Vector2(entry[1]) * TILE + Vector2(TILE, TILE) * 0.5
-		marker.set_meta("npc_id", entry[0])
-		npcs.add_child(marker)
-		marker.owner = root
-
-	var pois := Node2D.new()
-	pois.name = "PointsOfInterest"
-	root.add_child(pois)
-	pois.owner = root
+	var pois := _group(root, "PointsOfInterest")
 	for entry in POIS:
 		var poi := Marker2D.new()
 		poi.name = "Poi_" + String(entry[0])
-		poi.position = Vector2(entry[1]) * TILE + Vector2(TILE, TILE) * 0.5
+		poi.position = _centre(entry[1])
 		poi.set_meta("poi_id", entry[0])
-		poi.set_meta("note", entry[3])
+		poi.set_meta("note", entry[2])
+		poi.set_meta("district", entry[3])
+		_stamp_project(poi, String(entry[0]))
 		pois.add_child(poi)
 		poi.owner = root
+
+	_add_npc_markers(root, "ambry")
+
+	# Doorways, and the spot outside each one you come back out to. Emitted as
+	# metadata rather than as Area2Ds: the map is data, and `Level` turns these
+	# into `world/doorway.tscn` instances when the scene runs.
+	var doors := _group(root, "Doorways")
+	for entry in BUILDINGS:
+		var target: String = entry[6]
+		if target == "":
+			continue
+		var cell := _door_cell(entry)
+		var door := Marker2D.new()
+		door.name = "Doorway_" + String(entry[3])
+		door.position = _centre(cell)
+		door.set_meta("target_scene", target)
+		door.set_meta("target_spawn", "PlayerSpawn")
+		doors.add_child(door)
+		door.owner = root
+
+		# Where the interior sends you back to: one tile out, so you are not
+		# standing in the doorway you just used.
+		var outside := Marker2D.new()
+		outside.name = "Door_" + String(entry[3])
+		outside.position = _centre(cell + Vector2i(0, 1))
+		root.add_child(outside)
+		outside.owner = root
 
 	var spawn := Marker2D.new()
 	spawn.name = "PlayerSpawn"
 	# Just inside the south gate: the player always enters Ambry the same way.
-	spawn.position = Vector2(19.5, MAP_H - 3) * TILE
+	spawn.position = _centre(Vector2i(ROAD_X[0], MAP_H - 3))
 	root.add_child(spawn)
 	spawn.owner = root
 
 
+func _stamp_project(marker: Marker2D, id: String) -> void:
+	if not _project.has(id):
+		return
+	marker.set_meta("project", true)
+	marker.set_meta("cost", _project[id]["cost"])
+	marker.set_meta("requires", _project[id]["requires"])
+
+
+func _add_npc_markers(root: Node2D, where: String) -> void:
+	var npcs := _group(root, "NpcMarkers")
+	for entry in _npcs_in(where):
+		var marker := Marker2D.new()
+		marker.name = "Npc_" + String(entry[0])
+		marker.position = _centre(entry[2])
+		marker.set_meta("npc_id", entry[0])
+		npcs.add_child(marker)
+		marker.owner = root
+
+
+func _npcs_in(where: String) -> Array:
+	return NPCS.filter(func(entry): return String(entry[1]) == where)
+
+
+# ----------------------------------------------------------------- interiors
+
+## One room, walls, a door in the south face, and whatever the room is for.
+##
+## Each interior is a `Level` in its own right (`levels/level.gd`), so
+## `world_bounds()` derives the camera from the tiles and a one-room scene needs
+## no special handling.
+func _build_interior(tileset: TileSet, entry: Array) -> void:
+	var id: String = entry[0]
+	var size: Vector2i = entry[1]
+	var door_offset: int = entry[2]
+	var features: Array = entry[3]
+	var pois: Array = entry[4]
+
+	var ground := _new_layer("Ground", tileset, 0)
+	var objects := _new_layer("Objects", tileset, 1)
+	objects.y_sort_enabled = true
+
+	_fill(ground, Rect2i(0, 0, size.x, size.y), "floorboards")
+	for x in range(size.x):
+		_put(objects, Vector2i(x, 0), "wall")
+		_put(objects, Vector2i(x, size.y - 1), "wall")
+	for y in range(size.y):
+		_put(objects, Vector2i(0, y), "wall")
+		_put(objects, Vector2i(size.x - 1, y), "wall")
+	for x in [2, size.x - 3]:
+		_put(objects, Vector2i(x, 0), "window")
+
+	var door := Vector2i(door_offset, size.y - 1)
+	_put(objects, door, "door")
+
+	for feature in features:
+		_put(objects, feature[1], String(feature[0]))
+
+	var root := Node2D.new()
+	root.name = id.to_pascal_case()
+	root.y_sort_enabled = true
+	for layer in [ground, objects]:
+		root.add_child(layer)
+		layer.owner = root
+
+	var pois_node := _group(root, "PointsOfInterest")
+	for poi_entry in pois:
+		var poi := Marker2D.new()
+		poi.name = "Poi_" + String(poi_entry[0])
+		poi.position = _centre(poi_entry[1])
+		poi.set_meta("poi_id", poi_entry[0])
+		poi.set_meta("note", poi_entry[2])
+		poi.set_meta("district", "interior")
+		pois_node.add_child(poi)
+		poi.owner = root
+
+	_add_npc_markers(root, id)
+
+	var doors := _group(root, "Doorways")
+	var out := Marker2D.new()
+	out.name = "Doorway_out"
+	out.position = _centre(door)
+	out.set_meta("target_scene", VILLAGE_PATH.replace("ambry.tscn", "ambry_level.tscn"))
+	out.set_meta("target_spawn", "Door_" + _plot_for_interior(id))
+	doors.add_child(out)
+	out.owner = root
+
+	# Two tiles in from the door, so arriving never overlaps the doorway you
+	# would immediately walk back through.
+	var spawn := Marker2D.new()
+	spawn.name = "PlayerSpawn"
+	spawn.position = _centre(Vector2i(door_offset, size.y - 3))
+	root.add_child(spawn)
+	spawn.owner = root
+
+	var layers: Array[TileMapLayer] = [ground, objects]
+	var reached := _flood(layers, Vector2i(door_offset, size.y - 3))
+	if not reached.has(door):
+		_fail("%s: the door is not reachable from the spawn" % id)
+
+	var packed := PackedScene.new()
+	packed.pack(root)
+	_save(packed, "%s/%s.tscn" % [INTERIOR_DIR, id])
+	root.free()
+	print("interior %s: %dx%d tiles, %d POIs, %d npc markers"
+		% [id, size.x, size.y, pois.size(), _npcs_in(id).size()])
+
+
+static func _plot_for_interior(id: String) -> String:
+	for entry in BUILDINGS:
+		if String(entry[6]).ends_with("/%s_level.tscn" % id):
+			return String(entry[3])
+	return id
+
+
 # ------------------------------------------------------------------ helpers
+
+func _group(root: Node2D, group_name: String) -> Node2D:
+	var existing := root.get_node_or_null(NodePath(group_name)) as Node2D
+	if existing != null:
+		return existing
+	var node := Node2D.new()
+	node.name = group_name
+	root.add_child(node)
+	node.owner = root
+	return node
+
+
+static func _centre(cell: Vector2i) -> Vector2:
+	return Vector2(cell) * TILE + Vector2(TILE, TILE) * 0.5
+
 
 func _new_layer(layer_name: String, tileset: TileSet, z: int) -> TileMapLayer:
 	var layer := TileMapLayer.new()
@@ -370,6 +807,11 @@ func _fill(layer: TileMapLayer, rect: Rect2i, tile_name: String) -> void:
 	for y in range(rect.position.y, rect.end.y):
 		for x in range(rect.position.x, rect.end.x):
 			_put(layer, Vector2i(x, y), tile_name)
+
+
+func _fail(message: String) -> void:
+	_failures += 1
+	push_error(message)
 
 
 func _save(resource: Resource, path: String) -> void:

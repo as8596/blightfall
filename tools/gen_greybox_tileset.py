@@ -3,7 +3,7 @@
 
     python3 tools/gen_greybox_tileset.py
 
-A 4x5 atlas of 64x64 tiles for blocking out the village before any art exists.
+A 4x7 atlas of 64x64 tiles for blocking out the village before any art exists.
 
 **Tiles are distinguished by pattern, not only by colour.** A greybox you can
 only read in colour is one you can't read in a screenshot, can't read
@@ -60,6 +60,14 @@ TILES = [
     ("npc_marker",    (0x6b, 0x74, 0x5e), "ring",  False),
     ("blight_creep",  (0x9d, 0xba, 0x33), "bloom", True),    # the only saturated tile
     ("void",          (0x17, 0x18, 0x1b), "hatch", True),
+
+    # the two-district village (docs/AMBRY.md)
+    ("bell",          (0x9a, 0x7c, 0x45), "ring",  True),
+    ("garden",        (0x54, 0x5c, 0x3a), "dots",  False),   # the allotment
+    ("tent",          (0x7a, 0x72, 0x60), "post",  True),    # refugee lean-tos
+    ("rubble_wall",   (0x63, 0x5a, 0x4e), "hatch", True),    # the packed breach
+    ("chest",         (0x7e, 0x63, 0x3c), "brick", True),    # storage, in your home
+    ("shrine",        (0x77, 0x78, 0x7c), "ring",  True),    # older than the town
 ]
 
 SOLID = {name for name, _c, _p, solid in TILES if solid}

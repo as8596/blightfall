@@ -51,6 +51,7 @@ func _run() -> void:
 	await _test_animation()
 	await _test_save_load()
 	await _test_haul()
+	await _test_village()
 	_test_design_rules()
 
 	print("\n%d checks, %d failed\n" % [_checks, _failures])
@@ -707,6 +708,116 @@ func _test_haul() -> void:
 	for node in get_tree().get_nodes_in_group(HaulCache.GROUP):
 		node.queue_free()
 	bag.clear()
+	await _reset_player()
+
+
+## Ambry, as built by `tools/build_greybox.gd`. See docs/AMBRY.md.
+##
+## The build script already asserts the layout is walkable and the north
+## district is sealed; it does that against its own tile arrays. This checks the
+## other half — that the scene it wrote still says the same things once the
+## engine has loaded it, that the doors lead somewhere real, and that the walls
+## physically stop a body. The last one is not paranoia: a tileset with no
+## collision polygons at all rendered a screenshot of Ambry that looked
+## completely correct, and every wall in it was walk-through.
+func _test_village() -> void:
+	print("\nAmbry (docs/AMBRY.md)")
+
+	var level: Level = load("res://levels/ambry/ambry_level.tscn").instantiate()
+	add_child(level)
+	await _ticks(4)
+
+	var plots := level.building_plots()
+	var pois := level.points_of_interest()
+	_check("twenty locations and POIs", plots.size() + pois.size() == 20,
+		"%d plots + %d pois" % [plots.size(), pois.size()])
+
+	var districts := {}
+	for entry in plots + pois:
+		var district := String(entry.get("district", ""))
+		districts[district] = int(districts.get(district, 0)) + 1
+	# Four are behind the wall and the fifth *is* the wall — you stand on the
+	# south side to work on the breach, but it belongs to the group it opens.
+	_check("five of them behind the wall",
+		int(districts.get("north", 0)) + int(districts.get("wall", 0)) == 5,
+		"%s" % [districts])
+
+	# GDD §15 A4 caps the rebuild system at eight projects, and A6 makes the
+	# archive the one that sits behind another project.
+	var projects := level.rebuild_projects()
+	var requires := {}
+	for entry in projects:
+		requires[String(entry["id"])] = String(entry.get("requires", ""))
+	_check("eight rebuild projects", projects.size() == 8, "%d" % projects.size())
+	_check("your home is the first build",
+		level.district_of("home") == "south" and requires.get("home", "") == "")
+	_check("the archive waits on the breach", requires.get("archive", "") == "breach",
+		"requires '%s'" % requires.get("archive", ""))
+	_check("the breach is worked on from the south side",
+		level.district_of("breach") == "wall")
+
+	# Ten NPCs (§2's nine plus the carpenter), spread across the village and the
+	# four interiors. Four of the cast being indoors is the point — rebuilding
+	# moves a person rather than unlocking a menu.
+	var cast := {}
+	for entry in level.npc_markers():
+		cast[String(entry["id"])] = "ambry"
+	var interiors := ["home", "inn", "forge", "magistrate_hall"]
+	for id in interiors:
+		var path := "res://levels/ambry/interiors/%s_level.tscn" % id
+		_check("interior exists: %s" % id, ResourceLoader.exists(path))
+		var interior: Level = load(path).instantiate()
+		add_child(interior)
+		await _ticks(2)
+		for entry in interior.npc_markers():
+			cast[String(entry["id"])] = id
+		# The way back out has to land on a marker Ambry actually has, or the
+		# player leaves a building and arrives in the middle of nowhere.
+		var out := interior.map.find_child("Doorway_out", true, false) as Marker2D
+		_check("%s: the way out points at Ambry" % id, out != null
+			and level.find_marker(String(out.get_meta("target_spawn", ""))) != Vector2.INF,
+			String(out.get_meta("target_spawn", "")) if out != null else "missing")
+		interior.queue_free()
+		await _ticks(2)
+	_check("ten NPCs placed", cast.size() == 10, "%s" % [cast.size()])
+	_check("the carpenter is in the village", cast.get("carpenter", "") == "ambry")
+	_check("the magistrate is indoors", cast.get("magistrate", "") == "magistrate_hall")
+
+	# Doorways are markers in the map; Level is what turns them into Area2Ds.
+	var doors: Array[Doorway] = []
+	for child in level.get_children():
+		var door := child as Doorway
+		if door != null:
+			doors.append(door)
+	_check("four doorways placed", doors.size() == 4, "%d" % doors.size())
+	var targets_exist := true
+	for door in doors:
+		if not ResourceLoader.exists(door.target_scene):
+			targets_exist = false
+	_check("every doorway leads to a scene that exists", targets_exist)
+
+	# ---- the walls are real.
+	var wall_player := level.player
+	_check("the level placed a player", wall_player != null)
+	if wall_player != null:
+		# Two tiles south of the wall, on the spine, facing it.
+		wall_player.global_position = Vector2(23.5 * 64.0, 18.0 * 64.0)
+		await _ticks(2)
+		var start_y := wall_player.global_position.y
+		Input.action_press(&"move_up")
+		await _ticks(90)
+		Input.action_release(&"move_up")
+		await _ticks(2)
+		var stopped_at := wall_player.global_position.y
+		# The wall occupies row 15, so its south face is at y = 16 * 64 = 1024,
+		# and the player's body sits 32px above their origin.
+		_check("the north wall stops a body", stopped_at > 1024.0,
+			"walked from y=%.0f to y=%.0f, wall face at y=1056" % [start_y, stopped_at])
+		_check("and it was actually walking", stopped_at < start_y - 32.0,
+			"moved %.0fpx" % (start_y - stopped_at))
+
+	level.queue_free()
+	await _ticks(2)
 	await _reset_player()
 
 

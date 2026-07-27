@@ -30,6 +30,10 @@ signal haul_dropped(items: Dictionary, where: Vector2)
 ## A dropped haul was picked back up in full.
 signal haul_recovered
 
+## The player crossed a threshold — a door, or the way back out of one. Emitted
+## after the new scene is up and the player has been placed in it.
+signal doorway_used(scene_path: String, spawn: String)
+
 ## Requested by hitboxes, consumed by the camera rig. Keeps camera logic out of
 ## the player (GDD §12, rule 4).
 signal screen_shake_requested(amount: float, duration: float)
