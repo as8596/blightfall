@@ -108,20 +108,33 @@ func building_plots() -> Array[Dictionary]:
 	return plots
 
 
+## Every permanent point of interest, as {id, note, position} — hearth,
+## stockpile, well, gallows, gate. See docs/AMBRY.md.
+func points_of_interest() -> Array[Dictionary]:
+	return _markers_under("PointsOfInterest", "poi_id", "note")
+
+
 ## Every placed NPC marker, as {id, position}.
 func npc_markers() -> Array[Dictionary]:
+	return _markers_under("NpcMarkers", "npc_id", "")
+
+
+func _markers_under(group_name: String, id_key: String, extra_key: String) -> Array[Dictionary]:
 	var markers: Array[Dictionary] = []
 	if map == null:
 		return markers
-	var root := map.find_child("NpcMarkers", true, false)
+	var root := map.find_child(group_name, true, false)
 	if root == null:
 		return markers
 	for child in root.get_children():
 		var marker := child as Marker2D
 		if marker == null:
 			continue
-		markers.append({
-			"id": marker.get_meta("npc_id", marker.name),
+		var entry := {
+			"id": marker.get_meta(id_key, marker.name),
 			"position": marker.global_position,
-		})
+		}
+		if extra_key != "":
+			entry[extra_key] = marker.get_meta(extra_key, "")
+		markers.append(entry)
 	return markers

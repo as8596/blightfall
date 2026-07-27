@@ -51,26 +51,49 @@ const MAP_H := 30
 ## name, rect (x, y, w, h), door offset along the south wall, plot id, state
 ## state: "built" | "ruined" | "empty"
 const BUILDINGS: Array = [
-	["inn",        Rect2i(4, 17, 8, 6),  3, "inn",        "built"],
-	["smith",      Rect2i(28, 17, 7, 6), 3, "smith",      "built"],
-	["magistrate", Rect2i(15, 4, 10, 6), 4, "magistrate", "built"],
-	["apothecary", Rect2i(4, 5, 7, 5),   3, "apothecary", "ruined"],
-	["chapel",     Rect2i(29, 5, 7, 5),  3, "chapel",     "ruined"],
-	["market",     Rect2i(14, 22, 6, 4), 2, "market",     "empty"],
-	["watchpost",  Rect2i(23, 22, 5, 4), 2, "watchpost",  "empty"],
+	["inn",         Rect2i(4, 17, 8, 6),  3, "inn",         "built"],
+	["forge",       Rect2i(28, 17, 7, 6), 3, "forge",       "built"],
+	["magistrate",  Rect2i(15, 4, 10, 6), 4, "magistrate",  "built"],
+	["apothecary",  Rect2i(3, 5, 7, 5),   3, "apothecary",  "ruined"],
+	["archive",     Rect2i(30, 5, 6, 5),  2, "archive",     "ruined"],
+	["market",      Rect2i(5, 24, 6, 4),  2, "market",      "empty"],
+	["watchpost",   Rect2i(29, 24, 5, 4), 2, "watchpost",   "empty"],
+	# Shut door, drawn curtain. Nothing to interact with for most of the game,
+	# and that is the interaction.
+	["hidden_case", Rect2i(12, 23, 5, 4), 2, "hidden_case", "built"],
+]
+
+## Permanent points of interest. id, tile, tile to paint, note.
+const POIS: Array = [
+	["hearth",    Vector2i(22, 15), "hearth",     "save + rest"],
+	["stockpile", Vector2i(24, 15), "stockpile",  "bank the haul"],
+	["well",      Vector2i(18, 13), "well",       "the child, the fox"],
+	# Between the gate and the town, so it is passed going out and coming back,
+	# every run. Nobody makes the player look at it; it is where the road goes.
+	["gallows",   Vector2i(21, 27), "plot_ruined", "sentenced here"],
+	["gate",      Vector2i(19, 29), "gate",       "to the valley"],
+]
+
+## The graves. North edge, nearest the blight — the list grows if the player is
+## slow, which is the cheapest pressure mechanic available: no timer, no fail
+## state, just a row that gets longer.
+const GRAVES: Array = [
+	Vector2i(6, 3), Vector2i(8, 3), Vector2i(10, 3),
 ]
 
 ## Where each named NPC stands. Ids match the §7 cast.
 const NPCS: Array = [
-	["magistrate", Vector2i(20, 11)],
-	["smith", Vector2i(31, 23)],
-	["innkeeper", Vector2i(8, 23)],
-	["child", Vector2i(17, 15)],
-	["apothecary", Vector2i(7, 11)],
-	["reluctant_guard", Vector2i(20, 27)],
-	["unrepentant", Vector2i(25, 16)],
-	["hidden_case", Vector2i(12, 13)],
-	["fox", Vector2i(24, 13)],
+	["magistrate", Vector2i(20, 11)],          # his hall
+	["smith", Vector2i(31, 24)],               # the forge
+	["innkeeper", Vector2i(8, 24)],            # the inn
+	["child", Vector2i(17, 15)],               # the well
+	# Works out of the inn until her own building is rebuilt. Rebuilding
+	# visibly moves a person rather than unlocking a menu.
+	["apothecary", Vector2i(10, 24)],
+	["reluctant_guard", Vector2i(18, 28)],     # the gate
+	["unrepentant", Vector2i(23, 27)],         # the gallows, of course
+	["hidden_case", Vector2i(14, 27)],         # own doorway
+	["fox", Vector2i(20, 13)],                 # the well's edge
 ]
 
 var _index := {}
@@ -106,11 +129,19 @@ func _build_tileset() -> TileSet:
 	source.texture = texture
 	source.texture_region_size = Vector2i(TILE, TILE)
 
+	# Attach the source *before* touching per-tile collision. A TileData reaches
+	# its physics layers through the TileSet that owns it, so on a detached
+	# source add_collision_polygon(0) has no layer 0 to add to — it pushes an
+	# error and does nothing, and the result is a tileset that looks complete
+	# and has no collision at all.
+	tileset.add_source(source, 0)
+
 	var half := TILE / 2.0
 	var square := PackedVector2Array([
 		Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half),
 	])
 
+	var solid := 0
 	for i in TILES.size():
 		var coords: Vector2i = Vector2i(i % ATLAS_COLS, i / ATLAS_COLS)
 		source.create_tile(coords)
@@ -118,8 +149,16 @@ func _build_tileset() -> TileSet:
 			var data := source.get_tile_data(coords, 0)
 			data.add_collision_polygon(0)
 			data.set_collision_polygon_points(0, 0, square)
+			if data.get_collision_polygons_count(0) > 0:
+				solid += 1
 
-	tileset.add_source(source, 0)
+	# Verified rather than assumed, because the failure above was silent in
+	# every way that mattered.
+	var expected_solid: int = TILES.filter(func(t): return t[1]).size()
+	if solid != expected_solid:
+		push_error("collision missing: %d of %d solid tiles have polygons" % [solid, expected_solid])
+	else:
+		print("collision: %d/%d solid tiles have polygons" % [solid, expected_solid])
 	print("tileset: %d tiles, %d solid" % [TILES.size(), TILES.filter(func(t): return t[1]).size()])
 	return tileset
 
@@ -158,9 +197,20 @@ func _build_village(tileset: TileSet) -> void:
 		_put(objects, Vector2i(x, MAP_H - 1), "gate")
 		_put(ground, Vector2i(x, MAP_H - 1), "dirt_path")
 
-	# The square: a well, and a hearth. Light is hearths, not glare.
+	# The square. Hearth and stockpile sit together so banking a haul and saving
+	# are one trip — a run should end in a single gesture, not a lap of errands.
 	_fill(objects, Rect2i(18, 13, 2, 2), "well")
-	_fill(objects, Rect2i(22, 15, 2, 2), "hearth")
+	_fill(objects, Rect2i(21, 15, 2, 2), "hearth")
+	_fill(objects, Rect2i(24, 15, 2, 2), "stockpile")
+
+	# The gallows, on the road between the gate and the town.
+	_fill(ground, Rect2i(21, 26, 3, 2), "plot_ruined")
+	_put(objects, Vector2i(22, 26), "fence")
+
+	# The graves, north edge, nearest the thing that made them.
+	for cell in GRAVES:
+		_put(ground, cell, "plot_ruined")
+		_put(objects, cell, "fence")
 
 	for entry in BUILDINGS:
 		_place_building(ground, objects, overhead, entry)
@@ -174,14 +224,35 @@ func _build_village(tileset: TileSet) -> void:
 
 	_add_markers(root)
 
+	_assert_road_clear(objects)
+
 	var packed := PackedScene.new()
 	packed.pack(root)
 	_save(packed, VILLAGE_PATH)
 	# The tool builds these nodes outside any tree, so nothing else will free
 	# them and the engine reports leaked RIDs on exit.
 	root.free()
-	print("village: %dx%d tiles (%dx%d px), %d buildings, %d npc markers"
-		% [MAP_W, MAP_H, MAP_W * TILE, MAP_H * TILE, BUILDINGS.size(), NPCS.size()])
+	print("village: %dx%d tiles (%dx%d px), %d buildings, %d POIs, %d npc markers"
+		% [MAP_W, MAP_H, MAP_W * TILE, MAP_H * TILE, BUILDINGS.size(), POIS.size(), NPCS.size()])
+
+
+## The spine from the south gate to the square carries every entrance and exit
+## in the game. Nothing may stand on it.
+func _assert_road_clear(objects: TileMapLayer) -> void:
+	var blocked: Array[Vector2i] = []
+	for y in range(20, MAP_H - 1):
+		for x in [19, 20]:
+			var cell := Vector2i(x, y)
+			var atlas := objects.get_cell_atlas_coords(cell)
+			if atlas == Vector2i(-1, -1):
+				continue
+			var index := atlas.y * ATLAS_COLS + atlas.x
+			if index < TILES.size() and TILES[index][1]:
+				blocked.append(cell)
+	if blocked.is_empty():
+		print("road from the gate: clear")
+	else:
+		push_error("road from the gate is blocked at %s" % [blocked])
 
 
 func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: TileMapLayer,
@@ -256,6 +327,19 @@ func _add_markers(root: Node2D) -> void:
 		marker.set_meta("npc_id", entry[0])
 		npcs.add_child(marker)
 		marker.owner = root
+
+	var pois := Node2D.new()
+	pois.name = "PointsOfInterest"
+	root.add_child(pois)
+	pois.owner = root
+	for entry in POIS:
+		var poi := Marker2D.new()
+		poi.name = "Poi_" + String(entry[0])
+		poi.position = Vector2(entry[1]) * TILE + Vector2(TILE, TILE) * 0.5
+		poi.set_meta("poi_id", entry[0])
+		poi.set_meta("note", entry[3])
+		pois.add_child(poi)
+		poi.owner = root
 
 	var spawn := Marker2D.new()
 	spawn.name = "PlayerSpawn"
