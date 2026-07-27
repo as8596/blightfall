@@ -20,49 +20,52 @@ sprite instead of ten.
 
 ---
 
-## Step zero: lock the palette
+## Step zero: pick the range for what you're drawing
 
-Before drawing anything. GDD §8: *"fixed, pre-made, from lospec.com. Do not
-design your own — it's a week you don't have."*
-
-**64 colours** (GDD §15, A2). The extra 32 over the original budget are for
-more *tones per material* — a four-step ramp where 16×24 had one flat colour —
-not for more hues.
-
-1. Download [Endesga 64](https://lospec.com/palette-list/endesga-64) as `.gpl`
-   (GIMP palette — Pixelorama imports it directly).
-2. Commit it to `art/palettes/` so every machine and every future you uses the
-   identical 64 values. See `art/palettes/README.md`.
-3. Import it into Pixelorama and work from it exclusively.
-4. `python3 tools/check_palette.py` before committing art.
-
-`tests/palette_sheet.tscn` renders the committed palette as a labelled swatch
-sheet and marks every colour above 65% saturation as **HOT** — the ones that
-will compete with the blight accent for the player's eye. Open it with F6 before
-picking colours for a new asset.
-
-**If anything generates pixels rather than you drawing them** — Pixelorama's 3D
-layers, a filter, an imported reference, a gradient — quantise it back to the
-palette before it lands in the repo. Off-palette colours don't announce
-themselves; they just quietly break the readability rule that the whole art
-direction rests on:
+There is no global palette (GDD §15 A5). You have the full colour space, and
+one hard rule:
 
 > **Corruption is the one saturated colour.** Everything else muted — greys,
 > browns, sick greens. The blight is the only thing that glows. (GDD §8)
 
-That rule only holds if nothing else in frame is saturated, and 64 colours is
-twice the rope 32 was. Endesga 64 contains plenty of saturated hues; most of
-them must stay unused. One stray generated highlight competing with the blight
-accent costs you the visual language, and it is very hard to spot one asset at a
-time — which is what `tools/check_palette.py` exists for. It reports the nearest
-palette entry and a delta, so a filter that shifted one tone by 1 shows up as
-plainly as a stray magenta.
+That rule is the antagonist's entire screen presence. It never speaks, never
+appears as a figure, and has no motive — what it has is a colour, and the moment
+something else in frame glows the same way, it stops reading as the thing that
+is wrong with the valley.
 
-Zone identity comes from **slices** of the same palette — Ambry warm,
-Orchardfall that warmth sickened, Stillwater cold, Hollowdeep near-monochrome —
-with the luminous yellow-green blight accent constant across all four. Consider
-saving each slice as its own Pixelorama palette so a zone's tileset can't
-accidentally borrow a colour from another zone's.
+So: **hue 60–100° above 55% saturation is reserved.** Muted olive is fine. A
+luminous yellow-green is the Blight, and nothing else may be one.
+
+Everything else is open. Give each location its own working palette in
+Pixelorama — they no longer have to be subsets of anything, only recognisably
+unlike each other:
+
+| Zone | Range |
+|---|---|
+| Ambry | warm — amber, ochre, cream, ember. The only warm location |
+| Orchardfall | that warmth sickened — yellow-green tending grey-brown |
+| Stillwater | cold — blue-grey, teal, black water |
+| Hollowdeep | near-monochrome, tightly narrowed |
+
+Save each as a palette file in `art/palettes/` and work from it. Not because a
+checker enforces it, but because the alternative is four zones that drift into
+the same brown over eighteen months.
+
+**Icons are exempt from the saturation guidance.** They live in a UI panel, not
+in the world, and a bright gemstone in an inventory slot competes with nothing.
+The blight reservation still applies to them.
+
+### Checking
+
+```
+python3 tools/check_colour.py              # profile + enforce the reservation
+python3 tools/check_colour.py --map /tmp/colour.png
+```
+
+Prints each directory's dominant hues, neutral share, mean saturation and
+high-saturation percentage, and fails on any world asset claiming the accent.
+`--map` plots hue against saturation with the reserved band shaded, so two zones
+converging is something you see rather than something you find out about late.
 
 ---
 

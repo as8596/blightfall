@@ -25,7 +25,8 @@ is a panel rather than a postage stamp.
 - **Leave 2–4px of margin.** Nothing should touch the canvas edge, or icons look
   cramped when a selection border is drawn around them.
 - **Draw at 1:1.** 64×64 canvas, zoom in to work. Never draw large and downscale.
-- **Stay on palette.** Same 64 colours as everything else.
+- **Avoid the reserved accent.** Hue 60–100° above 55% saturation belongs to
+  the blight. Otherwise the colour space is yours (GDD §15 A5).
 - **One subject, centred.** An icon is read in under a second; it has a
   silhouette and one accent, same as an enemy.
 
@@ -34,29 +35,31 @@ is a panel rather than a postage stamp.
 Flat files, category prefix, snake case — the prefix is what makes the folder
 sort into something readable once there are forty of them.
 
-```
-art/icons/items/material_timber.png
-art/icons/items/material_stone.png
-art/icons/items/tool_wardens_hook.png
-art/icons/items/upgrade_heart_shard.png
-art/icons/items/key_magistrates_seal.png
+`items/` is sorted into role subfolders, so the working set stays obvious as it
+grows:
 
-art/icons/ui/heart_full.png
-art/icons/ui/heart_empty.png
-art/icons/ui/stamina_pip.png
+```
+art/icons/items/materials/     rebuild currency — ore, stone, gems
+art/icons/items/consumables/   food and supplies
+art/icons/items/keys/          key items
+art/icons/items/parked/        drawn, but for systems the game doesn't have
+
+art/icons/ui/                  hearts, pips, prompts
 ```
 
-Prefixes in use: `material_`, `tool_`, `upgrade_`, `key_`, `consumable_`.
+`parked/` is not a bin. It is art that is good and currently unused — equipment
+and archery icons against a design with one weapon and no bow. If those systems
+ever exist, the icons are already there.
 
 ## Checking your work
 
 ```
-python3 tools/check_palette.py
+python3 tools/check_colour.py
 ```
 
-Scans `art/icons/` along with sprites and tilesets, and fails on any colour
-outside the committed palette — reporting the nearest entry and a delta, so a
-filter that shifted one tone by 1 shows up as plainly as a stray magenta.
+Profiles `art/icons/` along with sprites and tilesets. Icons are exempt from the
+saturation guidance — they sit in a UI panel, not in the world — but the blight
+accent is reserved everywhere, so an icon that glows yellow-green fails.
 
 ```
 godot --path . tests/screenshot.tscn -- --scene=res://tests/icon_sheet.tscn --shot=/tmp/icons.png

@@ -23,8 +23,8 @@ is the main scene.
 # headless self-check — 103 assertions over the M1 systems
 godot --headless --path . tests/m1_smoke_test.tscn
 
-# verify every sprite is on the project palette
-python3 tools/check_palette.py
+# colour discipline: profile every group, enforce the reserved blight accent
+python3 tools/check_colour.py
 
 # regenerate the greybox tileset and rebuild the village
 python3 tools/gen_greybox_tileset.py
@@ -88,7 +88,7 @@ camera/            the camera rig, which is not a child of the player
 art/               shaders, and sprites/tilesets/palettes once M2 starts
 ui/                debug overlay
 tests/             headless smoke test + screenshot tool
-tools/             placeholder SFX generator, palette checker, size study
+tools/             SFX + tileset generators, colour checker, greybox builder
 ```
 
 ## Standing rules

@@ -65,18 +65,25 @@ func _draw() -> void:
 
 func _load_folder(path: String) -> Array:
 	var found: Array = []
+	_collect(path, "", found)
+	found.sort_custom(func(a, b): return a[0] < b[0])
+	return found
+
+
+## Recurses, because items/ is sorted into role subfolders. Labels carry the
+## subfolder so the sheet says which bucket a thing is in.
+func _collect(path: String, prefix: String, into: Array) -> void:
 	var dir := DirAccess.open(path)
 	if dir == null:
-		return found
+		return
 	for file in dir.get_files():
-		# Godot exports .png as .png.import at runtime; either spelling resolves.
 		if not file.to_lower().ends_with(".png"):
 			continue
 		var texture: Texture2D = load(path.path_join(file))
 		if texture != null:
-			found.append([file.get_basename(), texture])
-	found.sort_custom(func(a, b): return a[0] < b[0])
-	return found
+			into.append([prefix + file.get_basename(), texture])
+	for sub in dir.get_directories():
+		_collect(path.path_join(sub), prefix + sub + "/", into)
 
 
 func _draw_folder(font: Font, view: Vector2, y: float, path: String,

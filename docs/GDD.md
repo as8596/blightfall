@@ -634,11 +634,9 @@ only screen presence §3 gives it.
 
 Zone slices (§8) go from ~10 colours to ~20 each.
 
-**Enforcement:** `tools/check_palette.py` scans every sprite and tileset against
-the committed palette and fails on anything off it, reporting the nearest entry
-and a delta — so a filter that nudged one tone by 1 is as visible as a stray
-magenta. Off-palette colours never announce themselves otherwise, and by the
-time forty sprites exist they are no longer cheap to fix.
+**Superseded by A5** — the fixed palette was dropped entirely. The reasoning
+above still explains why the count had to rise; A5 explains why a count was the
+wrong instrument.
 
 ### A3 — The fox is bipedal (affects §7, §8)
 
@@ -769,6 +767,54 @@ does not currently contain it. New systems required:
 Two or three resource types, not ten. Six to eight rebuild projects, not twenty.
 §2 was written to stop exactly this kind of idea from quietly tripling the
 project, and it is still right even though it is being amended.
+
+### A5 — No fixed palette (supersedes §8 and §15 A2)
+
+**Was:** one fixed palette — 32 colours, then 64 — with each zone taking a slice.
+**Now:** no global palette. Full colour space, with per-zone discipline.
+
+A2 raised the count to 64 because a 64×96 character needs four tones per
+material. That was the right diagnosis and the wrong fix: the real constraint
+was never the number, it was that four zones and a hub were being asked to share
+one set. Dropping the ceiling gives each location its own range instead of a
+slice of somebody else's.
+
+It also settles the icon question. The uploaded item set uses 532 colours across
+39 icons; re-indexing to any fixed palette would have flattened the gemstones for
+no benefit, since icons sit in a UI panel and are not competing with anything in
+the world.
+
+**What the palette was silently doing, that now needs doing on purpose:**
+
+1. **Guaranteeing the blight owns its colour.** This is the one that matters.
+   §3 gives the antagonist no voice, no face and no motive — its only screen
+   presence is environmental, and it is carried almost entirely by one luminous
+   yellow-green. With a fixed palette, nothing else could be that colour because
+   the colour did not exist twice. Now anything can be, so it is checked:
+   `tools/check_colour.py` reserves hue 60–100° above 55% saturation and fails
+   on any world asset that claims it. Small highlights are tolerated; a glow is
+   not.
+
+2. **Guaranteeing zones read as different places.** Previously free, because
+   each zone got a different slice. Now it has to be looked at. The same tool
+   prints per-directory hue and saturation profiles, and `--map` plots hue
+   against saturation so two zones converging is visible rather than
+   discovered late.
+
+**Zone identity is now stated as intent, not as a slice:**
+
+| Zone | Range |
+|---|---|
+| Ambry | warm — amber, ochre, cream, ember. The only warm location |
+| Orchardfall | that warmth sickened — yellow-green tending grey-brown |
+| Stillwater | cold — blue-grey, teal, black water |
+| Hollowdeep | near-monochrome, tightly narrowed |
+
+Give each zone its own working palette in the art tool. They are no longer
+required to be subsets of anything, only to be recognisably unlike each other.
+
+**Still true, and now the only hard rule:** corruption is the one saturated
+colour. Everything else muted. The blight is the only thing that glows.
 
 ---
 
