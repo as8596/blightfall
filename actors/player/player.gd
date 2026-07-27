@@ -24,6 +24,10 @@ extends CharacterBody2D
 @export var hurt_knockback_distance: float = 88.0
 @export var combo: PlayerComboData
 
+@export_group("Haul")
+## Dropped where the player falls, carrying whatever they were holding.
+@export var haul_cache_scene: PackedScene
+
 @export_group("References")
 @export var combo_hitbox_shape_path: NodePath = ^"Hitbox/CollisionShape2D"
 
@@ -37,6 +41,7 @@ extends CharacterBody2D
 @onready var state_machine: StateMachine = $StateMachine
 @onready var visual: Sprite2D = $Visual
 @onready var animation: AnimationComponent = $AnimationComponent
+@onready var inventory: InventoryComponent = $InventoryComponent
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -163,8 +168,20 @@ func _on_hit_taken(hitbox_hit: Hitbox) -> void:
 
 
 func _on_died() -> void:
+	_drop_haul()
 	Events.player_died.emit(self)
 	state_machine.transition_to(&"Dead")
+
+
+## Leave the haul where the player fell (GDD §15 A4). Nothing is destroyed —
+## it waits, and it is the reason turning back early is ever the right call.
+func _drop_haul() -> void:
+	if inventory.total() <= 0 or haul_cache_scene == null:
+		return
+	var parent := get_parent()
+	if parent == null:
+		return
+	HaulCache.drop(get_tree(), haul_cache_scene, parent, global_position, inventory.take_all())
 
 
 # ------------------------------------------------------------------ saving
@@ -184,6 +201,7 @@ func save_data() -> Dictionary:
 		"health": health.current,
 		"max_health": health.max_health,
 		"max_stamina": stamina.max_stamina,
+		"inventory": inventory.save_data(),
 	}
 
 
@@ -199,6 +217,10 @@ func load_data(data: Dictionary) -> void:
 
 	stamina.max_stamina = SaveGame.read_float(data, "max_stamina", stamina.max_stamina)
 	stamina.refill()
+
+	var carried: Variant = data.get("inventory")
+	if carried is Dictionary:
+		inventory.load_data(carried)
 
 	# Whatever the player was doing when they saved, they are standing still now.
 	motion_velocity = Vector2.ZERO

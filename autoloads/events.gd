@@ -21,6 +21,15 @@ signal enemy_died(enemy: Node)
 ## Emitted by a Hitbox the moment it connects, before hitstop is applied.
 signal hit_landed(attacker: Node, target: Node, damage: int)
 
+## A material was picked up.
+signal material_collected(id: StringName, amount: int)
+
+## The player died carrying a haul; it is now on the ground at `where`.
+signal haul_dropped(items: Dictionary, where: Vector2)
+
+## A dropped haul was picked back up in full.
+signal haul_recovered
+
 ## Requested by hitboxes, consumed by the camera rig. Keeps camera logic out of
 ## the player (GDD §12, rule 4).
 signal screen_shake_requested(amount: float, duration: float)

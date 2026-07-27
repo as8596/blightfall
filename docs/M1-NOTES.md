@@ -146,6 +146,37 @@ default silently clamps down to the default on load.
 
 ---
 
+## The haul (GDD §15 A4)
+
+The riskiest claim in A4 is that gathering-and-returning feels like an
+expedition rather than a commute, and the mechanic that decides it is built:
+
+- **Carry capacity** (12 units, all materials weighing the same). The
+  interesting decision in the loop is *when to turn back*, and that only exists
+  if you can be full. A second weight axis would turn it into arithmetic.
+- **Death drops the haul where you fell**, in a cache that waits indefinitely.
+  Nothing is destroyed, only displaced — it is a stake, not a punishment.
+- **One cache at a time.** A second death moves the pile rather than scattering
+  the valley with them, so there is always exactly one thing to go back for and
+  the player always knows where it is.
+- **Caches survive quitting.** Losing a haul to a crash instead of to a mistake
+  would make the stake feel arbitrary, which is the one thing it must not be.
+
+Pickups are walked over, not interacted with — materials are routine, and a
+button press forty times a run is a tax rather than a decision. The interact
+verb, when it exists, is for things worth stopping for.
+
+**Not yet built:** anywhere to spend a haul. The building plots in Ambry are
+markers with metadata and nothing reads them. That is the other half of the
+loop and the obvious next piece.
+
+**What still needs your hands:** whether losing a haul stings the right amount.
+Capacity, and whether the cache should decay, are both single numbers. My guess
+is 12 is generous and the tension only appears around 6–8, but that is a guess
+and the whole point of building it early is that you can go and find out.
+
+---
+
 ## Tuning notes — for the human
 
 ### 1. Stamina currently does nothing

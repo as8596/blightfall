@@ -50,6 +50,7 @@ func _run() -> void:
 	await _test_enemy_behaviour()
 	await _test_animation()
 	await _test_save_load()
+	await _test_haul()
 	_test_design_rules()
 
 	print("\n%d checks, %d failed\n" % [_checks, _failures])
@@ -608,6 +609,104 @@ func _test_save_load() -> void:
 
 	SaveGame.delete_save(SLOT)
 	_check("delete removes the slot", not SaveGame.has_save(SLOT))
+	await _reset_player()
+
+
+func _test_haul() -> void:
+	print("\nHaul (carry capacity, loss on death, recovery)")
+	await _reset_player()
+	var bag := _player.inventory
+	bag.clear()
+
+	_check("starts empty", bag.total() == 0)
+	_check("capacity is finite", bag.capacity > 0, str(bag.capacity))
+
+	bag.add(&"stone", 5)
+	bag.add(&"timber", 3)
+	_check("carries what it was given", bag.total() == 8 and bag.count_of(&"stone") == 5)
+
+	# Partial pickup: walking over a pile with two slots free takes two, not
+	# nothing. Refusing the whole pile would read as a bug to a player.
+	var room := bag.space_left()
+	var taken := bag.add(&"ore", room + 10)
+	_check("fills to capacity and no further", taken == room and bag.is_full(),
+		"took %d of %d" % [taken, room + 10])
+	_check("a full bag takes nothing more", bag.add(&"ore", 1) == 0)
+
+	# Spending is atomic — a half-paid building is worse than a refused one.
+	bag.clear()
+	bag.add(&"stone", 2)
+	_check("cannot afford what it lacks", not bag.can_afford({&"stone": 2, &"timber": 1}))
+	_check("a short spend changes nothing",
+		not bag.spend({&"stone": 2, &"timber": 1}) and bag.count_of(&"stone") == 2)
+	bag.add(&"timber", 1)
+	_check("an affordable spend goes through",
+		bag.spend({&"stone": 2, &"timber": 1}) and bag.total() == 0)
+
+	# Death drops the haul where the player fell.
+	bag.clear()
+	bag.add(&"stone", 4)
+	bag.add(&"ore", 2)
+	var death_spot := _player.global_position
+	_player.health.take_damage(999)
+	await _ticks(4)
+
+	_check("death empties the satchel", bag.total() == 0, str(bag.total()))
+	var caches := get_tree().get_nodes_in_group(HaulCache.GROUP)
+	_check("a cache is left behind", caches.size() == 1, "%d cache(s)" % caches.size())
+	if caches.is_empty():
+		return
+	var cache: HaulCache = caches[0]
+	_check("the cache holds the whole haul", cache.total() == 6, str(cache.total()))
+	_check("dropped where the player fell",
+		cache.global_position.distance_to(death_spot) < 8.0)
+
+	# It must not be re-absorbed during the death animation.
+	_check("cache is not armed immediately", cache.arm_delay > 0.0)
+
+	# Recovery by walking back to it — the normal case.
+	_player.respawn()
+	_player.global_position = death_spot + Vector2(600, 0)
+	await _ticks(3)
+	cache.arm()
+	_check("arming does not reach across the room", bag.total() == 0)
+	_player.global_position = cache.global_position
+	await _ticks(6)
+	_check("walking back over it recovers the haul", bag.total() == 6, str(bag.total()))
+	_check("the cache clears itself once empty", not is_instance_valid(cache))
+
+	# Recovery while already standing on it. Dying and respawning on the spot
+	# produces no entry event, so arming has to sweep or the haul is stranded
+	# under the player's feet.
+	bag.clear()
+	bag.add(&"ore", 3)
+	_player.health.take_damage(999)
+	await _ticks(4)
+	var stranded: Array = get_tree().get_nodes_in_group(HaulCache.GROUP)
+	if not stranded.is_empty():
+		var on_top: HaulCache = stranded[0]
+		_player.respawn()
+		_player.global_position = on_top.global_position
+		await _ticks(3)
+		on_top.arm()
+		await _ticks(2)
+		_check("a cache under the player is not stranded", bag.total() == 3, str(bag.total()))
+
+	# A second death moves the pile rather than scattering the valley with them.
+	bag.clear()
+	bag.add(&"stone", 3)
+	_player.health.take_damage(999)
+	await _ticks(4)
+	bag.add(&"timber", 2)
+	_player.health.take_damage(999)
+	await _ticks(4)
+	_check("only ever one cache",
+		get_tree().get_nodes_in_group(HaulCache.GROUP).size() == 1,
+		"%d" % get_tree().get_nodes_in_group(HaulCache.GROUP).size())
+
+	for node in get_tree().get_nodes_in_group(HaulCache.GROUP):
+		node.queue_free()
+	bag.clear()
 	await _reset_player()
 
 

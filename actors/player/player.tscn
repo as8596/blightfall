@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://actors/components/knockback_component.gd" id="6_knockback"]
 [ext_resource type="Script" path="res://actors/components/flash_component.gd" id="7_flash"]
 [ext_resource type="Script" path="res://actors/components/animation_component.gd" id="17_anim"]
+[ext_resource type="Script" path="res://actors/components/inventory_component.gd" id="18_inv"]
+[ext_resource type="PackedScene" path="res://world/haul_cache.tscn" id="19_cache"]
 [ext_resource type="Script" path="res://actors/components/hitbox.gd" id="8_hitbox"]
 [ext_resource type="Script" path="res://actors/components/hurtbox.gd" id="9_hurtbox"]
 [ext_resource type="Script" path="res://systems/state_machine/state_machine.gd" id="10_machine"]
@@ -34,6 +36,7 @@ collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_player")
 combo = ExtResource("2_combo")
+haul_cache_scene = ExtResource("19_cache")
 
 [node name="Visual" type="Sprite2D" parent="."]
 
@@ -90,6 +93,10 @@ script = ExtResource("9_hurtbox")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
 position = Vector2(0, -48)
 shape = SubResource("Rect_hurtbox")
+
+[node name="InventoryComponent" type="Node" parent="."]
+script = ExtResource("18_inv")
+capacity = 12
 
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("10_machine")
