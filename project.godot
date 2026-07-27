@@ -1,6 +1,10 @@
 ; Engine configuration file.
-; Blightfall — M1 combat prototype.
-; See docs/BUILD-PLAN.md. Every setting below is required by Week 1 / Day 1.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
 
@@ -31,17 +35,6 @@ window/stretch/mode="canvas_items"
 
 [importer_defaults]
 
-; Pixel-art defaults for every texture, so sprites exported from Pixelorama
-; import correctly without touching the Import tab per file.
-;
-; fix_alpha_border bleeds colour outward into transparent pixels to stop seams
-; under linear filtering. This project filters Nearest, so there are no seams to
-; stop — and the bleed writes colours that aren't in the 32-colour palette into
-; the edge pixels of every sprite.
-;
-; detect_3d/compress_to silently switches a texture to VRAM compression the
-; first time it's used in a 3D context, which turns crisp pixels to mush. It is
-; the single most common way a pixel-art project mysteriously goes blurry.
 texture={
 "compress/mode": 0,
 "detect_3d/compress_to": 0,
@@ -110,14 +103,10 @@ tool={
 2d_physics/layer_7="EnemyHurtbox"
 2d_physics/layer_8="Interactable"
 
-[physics]
-
-common/physics_ticks_per_second=60
-
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/canvas_textures/default_texture_filter=0
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true

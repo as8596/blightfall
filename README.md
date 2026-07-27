@@ -39,6 +39,12 @@ rebuilds itself, and every `class_name` in the project fails to resolve. The
 symptom is a scene that loads with no player in it. The fix is to delete
 `.godot/` and reopen the editor.
 
+**Don't put comments in `project.godot`.** The editor rewrites that file on
+save, stripping comments and dropping any setting left at its default. It is
+kept here in exactly the form Godot writes, so opening the project produces no
+diff. What those settings do is explained in
+[`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
+
 ```
 # headless self-check — 143 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn

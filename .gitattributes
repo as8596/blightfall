@@ -1,0 +1,12 @@
+# Godot writes LF on every platform, including Windows. Without this, a Windows
+# checkout gets CRLF, the editor saves LF, and every file the editor touches
+# shows up as wholly rewritten — which buries real changes and blocks
+# fast-forward pulls for no reason.
+* text=auto eol=lf
+
+# Binary, so git never tries to translate line endings inside them.
+*.png binary
+*.wav binary
+*.ogg binary
+*.ttf binary
+*.otf binary

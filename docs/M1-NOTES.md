@@ -70,6 +70,42 @@ drawn and mid-swing, for checking layout without a human present.
 
 ---
 
+## Project settings
+
+**`project.godot` is owned by the editor, not by us.** Godot rewrites the whole
+file whenever it saves the project: it strips every comment, reorders sections,
+and drops any setting whose value equals the engine default. Anything explained
+in there is deleted the next time someone opens the project — and on a shared
+repo it also produces a phantom diff that blocks the next `git pull`. So the
+explanations live here instead, and the file is left in exactly the form Godot
+writes so that opening the editor is a no-op.
+
+**Pixel-art importer defaults** (`[importer_defaults] texture=`) apply to every
+texture, so sprites exported from Pixelorama import correctly without anyone
+touching the Import tab per file. Two of the five are load-bearing:
+
+- `process/fix_alpha_border: false`. It bleeds colour outward into transparent
+  pixels to stop seams under linear filtering. This project filters Nearest, so
+  there are no seams to stop — and the bleed writes colours into the edge pixels
+  of every sprite that the artist never chose.
+- `detect_3d/compress_to: 0`. Left on, it silently switches a texture to VRAM
+  compression the first time it is used in a 3D context, which turns crisp
+  pixels to mush. It is the single most common way a pixel-art project
+  mysteriously goes blurry.
+
+**Physics runs at 60 ticks/second.** You will not find that in `project.godot`,
+because 60 is Godot's default and the editor drops the line. It matters anyway:
+every number in GDD §5 is expressed in seconds and converted against this rate,
+so the smoke test's tick-counted assertions assume it. If it ever needs to
+change, change it in the editor and re-run the smoke test — several measured
+values will move.
+
+**Line endings** are pinned to LF by `.gitattributes`, for the same reason as
+the first paragraph: Godot writes LF on Windows too, so letting git check out
+CRLF means the editor "modifies" every file it opens.
+
+---
+
 ## Sprite resolution: 64×96 (GDD §15, A1)
 
 The project runs at **1280×720 internal, 64×64 tiles, 64×96 characters** — a
