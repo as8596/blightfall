@@ -214,6 +214,12 @@ All three are corrupted named NPCs. Drama comes free.
 
 ## 6. Progression
 
+> ⚠️ **Superseded by §15 A4.** Progression is now the rebuild state of Ambry:
+> materials are carried home from zones and spent on buildings, and each
+> rebuilt building grants a capability. XP is recommended for deletion. The
+> section below is kept for the reasoning behind the four XP rules, which
+> still applies to any numeric progression that replaces it.
+
 **Item gates for world progression, light XP for numbers.** Item gates do all gating; XP only adjusts values.
 
 ### XP rules (non-negotiable)
@@ -318,6 +324,10 @@ The horror is retroactive: the valley was always sitting on top of it.
 - Boss arena
 
 ### The hub
+
+> ⚠️ **Amended by §15 A4.** Ambry is now also the progression system — the
+> player rebuilds it, and its state is a live readout of whether they are
+> winning. Everything below still holds; it gains a mechanical spine.
 
 Narratively the most important location, and where the warmth lives. The zones are grim; the town is warm, safe, and worth saving. Concentrating emotional investment into one reusable scene is cheap and effective.
 
@@ -660,6 +670,105 @@ that has no walk cycle because §7 places it sitting.
 Everything else in §7 is untouched: player-initiated dialogue only, never
 repeats, observes rather than instructs, placed rather than following, and never
 harmed.
+
+### A4 — The village is the progression system (supersedes §6, reshapes §7)
+
+**The loop:** go out into a zone, take what you can carry, bring it home, rebuild
+part of Ambry, gain something that lets you go further. Repeat, deeper.
+
+This replaces item-gated progression and light XP with a single system, and it
+resolves the tools question in §6 by giving them somewhere to come from.
+
+#### The village is the character sheet
+
+Not a hub with shops. The *rebuild state of Ambry is* the player's progression.
+Every capability comes from a building brought back:
+
+| Rebuilt | Gives |
+|---|---|
+| The forge | Weapon damage; later, reach and the third-hit finisher |
+| The apothecary | Healing capacity carried into a zone |
+| The inn | Supplies per expedition; a bed that restores |
+| The wall / gate | Safe passage, opening a route toward the next zone |
+| The chapel or archive | Reveals what the blight is doing — map, tracking, the fox's range |
+
+One system instead of two. It also means the player's power is visibly made of
+other people's work, which is the story: they condemned you, and their help is
+what makes stopping this possible.
+
+**Recommendation: cut XP entirely.** §6's four XP rules existed to stop XP
+causing problems — capping levels, never scaling enemies, weighting away from
+trash. Deleting XP is the strongest version of all four, removes a tuning
+surface, and stops two progression systems competing for the same feeling.
+Levels gated nothing anyway.
+
+#### Tools come from the town, not from rooms
+
+The four keys in §6 stop being pickups in an acquisition room. The smith,
+rebuilt, makes you the Hook. This costs nothing mechanically and buys a lot:
+every traversal unlock becomes evidence of the town's investment in you rather
+than loot on a pedestal.
+
+Whether they stay as the four named tools, become survival gear (something that
+lets you *endure* a hazard rather than *unlock* a door), or reduce to two is
+still open. The delivery mechanism is the decided part.
+
+#### Materials are placed, not dropped
+
+**Hand-placed in the world. Never a drop from a killed enemy.** This is the same
+rule §6 already applies to Heart Shards and Whetstones, and it is the single
+line between "rebuilding is exploration" and "rebuilding is farming". The moment
+a Blighted Villager drops two timber, the optimal play is to kill villagers in a
+loop, and the game becomes about the loop instead of the valley.
+
+It also protects §3's asymmetry: nameless enemies are beyond help and killing
+them is mercy. Mercy that pays out in construction materials is not mercy.
+
+#### The tension, and the fix
+
+A rebuild loop pulls the player *back* to town. The stated goal is adventure —
+travelling through dangerous zones toward the heart. Those fight each other, and
+a game that makes you commute is the failure mode.
+
+Three things keep it an expedition:
+
+1. **Long trips, big hauls.** You do not pop home after every room. Carrying
+   capacity is limited, so a run ends when you are full or nearly dead, and
+   deciding *when to turn back* is the interesting choice.
+2. **You can lose the haul.** Die in a zone and what you were carrying stays
+   there, recoverable if you can reach it again. This is what makes the walk
+   home tense instead of administrative — the adventure extends to the return
+   journey, which is otherwise dead time.
+3. **Shortcuts, opened from the far side.** Already in the §7 zone template.
+   Returning becomes fast only once you have earned it, so the first trip out is
+   an expedition and the tenth is a commute *by choice*.
+
+Point 2 is the load-bearing one and the one to prototype first. Without it,
+gathering has no risk and the return trip is a chore.
+
+#### The town also un-degrades
+
+§7 has Ambry worsening as the blight advances — more refugees, fewer shops open,
+walls further reinforced. Keep that as the *default drift*, and let rebuilding
+push against it. The town's state becomes a live readout of whether the player
+is winning, in the one location the game has already decided is the emotional
+centre. Warmth stops being a backdrop and becomes the score.
+
+#### Scope — read this before starting
+
+This is the largest addition to the design so far, and §2 is a hard ceiling that
+does not currently contain it. New systems required:
+
+- A carried-resource type or three, with capacity and loss-on-death
+- Rebuild projects: state, costs, and a build interaction
+- Per-building unlock effects wired into player capability
+- UI for all of the above — the first real UI in the project
+- Save state for village progress (the save system already takes this: a
+  `village` node joins the `saveable` group and implements three methods)
+
+Two or three resource types, not ten. Six to eight rebuild projects, not twenty.
+§2 was written to stop exactly this kind of idea from quietly tripling the
+project, and it is still right even though it is being amended.
 
 ---
 
