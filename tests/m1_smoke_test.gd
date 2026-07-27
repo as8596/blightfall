@@ -796,6 +796,24 @@ func _test_village() -> void:
 			targets_exist = false
 	_check("every doorway leads to a scene that exists", targets_exist)
 
+	# ---- draw order. z_index is checked *before* y-sorting, so a props layer
+	# sitting one above the player draws over them from every position — walk up
+	# to a wall and you disappear behind it. Nothing about the scene looks wrong
+	# when this is broken; you just stop being able to see yourself.
+	var objects := level.map.get_node_or_null("Objects") as TileMapLayer
+	var overhead := level.map.get_node_or_null("Overhead") as TileMapLayer
+	_check("props share the player's z_index",
+		objects != null and objects.z_index == level.player.z_index,
+		"objects z=%d, player z=%d" % [objects.z_index if objects != null else -99,
+			level.player.z_index])
+	_check("and are y-sorted, so walls sort by where the player stands",
+		objects != null and objects.y_sort_enabled)
+	_check("ground is below both", level.map.get_node_or_null("Ground") != null
+		and (level.map.get_node("Ground") as TileMapLayer).z_index < level.player.z_index)
+	_check("overhead is above both, and empty until eaves can fade",
+		overhead != null and overhead.z_index > level.player.z_index
+			and overhead.get_used_rect().size == Vector2i.ZERO)
+
 	# ---- the walls are real.
 	var wall_player := level.player
 	_check("the level placed a player", wall_player != null)

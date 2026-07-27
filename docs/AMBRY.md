@@ -267,6 +267,36 @@ exist yet.
 
 ---
 
+## Draw order
+
+Three layers, and the rule that makes them work:
+
+| Layer | z_index | |
+|---|---|---|
+| Ground | −1 | grass, roads, floors. Never in front of anything |
+| Objects | **0** | walls, props, and **the same z_index as the player**. Y-sorted |
+| Overhead | 1 | above everything, no collision. Currently empty |
+
+**Objects has to share the player's z_index.** Godot checks `z_index` before it
+y-sorts, so a props layer one above the player draws over them from every
+position — walk up to a wall and you vanish behind it entirely. It looks like a
+sprite or camera bug and is neither. The smoke test pins all three values.
+
+Tile `y_sort_origin` is deliberately left at the default (the tile's centre).
+Moving it to the tile's base is tempting and wrong: a tile at row N would then
+sort at exactly the feet of a player standing on row N+1 — the one position
+players actually occupy when walking along a wall — and ties resolve by tree
+order, so it would work by accident rather than by rule.
+
+**Overhead is empty on purpose.** It used to carry a roof eave, one row above
+each building's north wall, and for most buildings that row is walkable ground:
+the inn's landed on the ring road, and walking past it erased the player from
+the waist down. An eave you can walk under is a good effect, but it has to fade
+when something is beneath it — a shader and a proximity test, not a tile. The
+build script now refuses to place anything opaque over a walkable cell.
+
+---
+
 ## Build status
 
 | | State |
@@ -297,6 +327,7 @@ write a village that fails any of these:
 - every south door and POI is reachable on foot from the spawn
 - the north district is **not** reachable — and **is**, once the breach is
   opened
+- nothing on the Overhead layer sits over ground the player can stand on
 
 The last two matter because a village that fails them looks completely correct
 in a screenshot. So did the one whose walls had no collision at all.

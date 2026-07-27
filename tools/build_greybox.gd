@@ -17,6 +17,19 @@ extends SceneTree
 const TILE := 64
 const ATLAS_COLS := 4
 
+## Draw order.
+##
+## **Objects must share the player's z_index, which is 0.** `z_index` is checked
+## before y-sorting, so a props layer at z_index 1 draws over the player from
+## every position — walk up to a wall and you vanish behind it. The layer is
+## y-sorted instead, and the actors are ordinary participants in that sort.
+##
+## Ground goes below because it is never something you stand in front of.
+## Overhead is roofs, which are always above and have no collision.
+const Z_GROUND := -1
+const Z_OBJECTS := 0
+const Z_OVERHEAD := 1
+
 const TILESET_PATH := "res://resources/tilesets/greybox.tres"
 const TEXTURE_PATH := "res://art/tilesets/greybox_64.png"
 const VILLAGE_PATH := "res://levels/ambry/ambry.tscn"
@@ -296,6 +309,17 @@ func _build_tileset() -> TileSet:
 	for i in TILES.size():
 		var coords: Vector2i = Vector2i(i % ATLAS_COLS, i / ATLAS_COLS)
 		source.create_tile(coords)
+		# `y_sort_origin` is deliberately left at its default of 0 — the tile's
+		# centre. It is tempting to move it to the tile's base, and that is
+		# wrong here: a tile at row N would then sort at exactly the feet of a
+		# player standing on row N+1, which is the one position players actually
+		# occupy when walking along a wall. Ties resolve by tree order, so it
+		# would work by accident rather than by rule.
+		#
+		# At the centre there is no reachable tie: a player below a wall sorts a
+		# half-tile after it (in front), a player above it a half-tile before
+		# (behind), and the row the wall occupies is solid so nobody stands
+		# there. Revisit if wall art ever gets taller than one tile.
 		if TILES[i][1]:
 			var data := source.get_tile_data(coords, 0)
 			data.add_collision_polygon(0)
@@ -317,9 +341,9 @@ func _build_tileset() -> TileSet:
 # ------------------------------------------------------------------ village
 
 func _build_village(tileset: TileSet) -> void:
-	var ground := _new_layer("Ground", tileset, 0)
-	var objects := _new_layer("Objects", tileset, 1)
-	var overhead := _new_layer("Overhead", tileset, 2)
+	var ground := _new_layer("Ground", tileset, Z_GROUND)
+	var objects := _new_layer("Objects", tileset, Z_OBJECTS)
+	var overhead := _new_layer("Overhead", tileset, Z_OVERHEAD)
 	objects.y_sort_enabled = true
 
 	# Ground. Grass first, then roads, then the square on top of them — the
@@ -403,7 +427,7 @@ func _build_village(tileset: TileSet) -> void:
 
 	var layers: Array[TileMapLayer] = [ground, objects, overhead]
 	_assert_road_clear(layers)
-	_assert_layout(layers)
+	_assert_layout(layers, overhead)
 
 	var packed := PackedScene.new()
 	packed.pack(root)
@@ -438,7 +462,7 @@ func _assert_road_clear(layers: Array[TileMapLayer]) -> void:
 ## 2. The north district is **not** — it is behind an unrepaired breach, and if
 ##    it were accidentally open the whole point of the wall would be gone with
 ##    no visible symptom.
-func _assert_layout(layers: Array[TileMapLayer]) -> void:
+func _assert_layout(layers: Array[TileMapLayer], overhead: TileMapLayer) -> void:
 	var spawn := Vector2i(ROAD_X[0], MAP_H - 3)
 	var reached := _flood(layers, spawn)
 	if reached.is_empty():
@@ -476,6 +500,23 @@ func _assert_layout(layers: Array[TileMapLayer]) -> void:
 	# northern POI has to actually be standable. The most expensive project in
 	# the game opening onto a district you cannot cross would be a very quiet
 	# way to waste the player's whole mid-game.
+	# Nothing on the Overhead layer may sit over ground the player can stand on.
+	# Overhead draws above the actors unconditionally, so a single tile in the
+	# wrong place deletes the player's legs while they walk under it — which
+	# looks like a sprite bug or a broken camera, and is neither. This is how
+	# the inn's eave was found, after it had been sitting on the ring road
+	# through a whole build.
+	var covered: Array[String] = []
+	for cell in reached:
+		var atlas := overhead.get_cell_atlas_coords(cell)
+		if atlas != Vector2i(-1, -1):
+			covered.append("%s (%s)" % [cell, TILES[atlas.y * ATLAS_COLS + atlas.x][0]])
+	if covered.is_empty():
+		print("overhead layer: nothing drawn over walkable ground")
+	else:
+		_fail("overhead tiles cover %d walkable cells, e.g. %s"
+			% [covered.size(), covered.slice(0, 6)])
+
 	var opened := {}
 	for row in WALL_ROWS:
 		for x in BREACH_X:
@@ -588,9 +629,17 @@ func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: Tile
 	if door_offset + 2 < rect.size.x - 1:
 		_put(objects, door + Vector2i(2, 0), "window")
 
-	# Roof on the overhead layer: drawn above the player, no collision, so
-	# walking "inside" reads correctly once interiors matter.
-	_fill(overhead, Rect2i(rect.position.x, rect.position.y - 1, rect.size.x, 1), "roof")
+	# No roof eave. There *was* one — a strip on the Overhead layer, one row
+	# above the north wall — and it was a bug: that row is walkable ground for
+	# most of these buildings (the inn's landed squarely on the ring road), and
+	# an opaque overhead tile over walkable ground erases the player from the
+	# waist down as they walk past.
+	#
+	# An eave you can walk under is a good effect, but it needs to fade when
+	# something is beneath it. That is a shader and a proximity test, not a
+	# tile, and it belongs with the art pass. The Overhead layer stays for it.
+	# `_assert_overhead_clear` below now refuses to build a village that puts
+	# anything opaque over a tile the player can stand on.
 
 
 func _add_markers(root: Node2D) -> void:
@@ -694,8 +743,8 @@ func _build_interior(tileset: TileSet, entry: Array) -> void:
 	var features: Array = entry[3]
 	var pois: Array = entry[4]
 
-	var ground := _new_layer("Ground", tileset, 0)
-	var objects := _new_layer("Objects", tileset, 1)
+	var ground := _new_layer("Ground", tileset, Z_GROUND)
+	var objects := _new_layer("Objects", tileset, Z_OBJECTS)
 	objects.y_sort_enabled = true
 
 	_fill(ground, Rect2i(0, 0, size.x, size.y), "floorboards")

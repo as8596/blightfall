@@ -31,6 +31,11 @@ var _use_placeholder_animations: bool = false
 ## rather than playing it.
 var _fit_level: bool = false
 
+## `--at=tx,ty` stands the player on a tile, so a specific corner of a level can
+## be looked at without walking there. Draw-order bugs only show up next to the
+## thing being drawn over you.
+var _stand_at: Vector2 = Vector2.INF
+
 var _room: Node
 
 
@@ -54,6 +59,10 @@ func _capture() -> void:
 			settle_frames = arg.trim_prefix("--frames=").to_int()
 		elif arg.begins_with("--boxes"):
 			DebugSettings.show_boxes = true
+		elif arg.begins_with("--at="):
+			var parts := arg.trim_prefix("--at=").split(",")
+			if parts.size() == 2:
+				_stand_at = Vector2(float(parts[0]), float(parts[1]))
 		elif arg.begins_with("--fit"):
 			_fit_level = true
 		elif arg.begins_with("--anim"):
@@ -87,6 +96,13 @@ func _capture() -> void:
 		await _wait_ticks(4)
 
 	var player := _room.get_node_or_null("Player") as Player
+	if _stand_at != Vector2.INF and player != null:
+		# Tile coordinates, landing on the tile's centre.
+		player.global_position = (_stand_at + Vector2(0.5, 0.5)) * 64.0
+		if level != null and level.camera != null:
+			level.camera.set_target(player)
+		await _wait_ticks(4)
+
 	if _use_placeholder_animations and player != null:
 		player.animation.animations = load("res://resources/animation/player_placeholder.tres")
 		await _wait_ticks(2)
