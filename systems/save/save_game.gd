@@ -39,6 +39,11 @@ const SLOT_COUNT: int = 3
 
 var playtime: float = 0.0
 
+## The slot this run is using. Dying reloads it, so something has to remember
+## which one the player is actually in — "slot 1" hard-coded in three places is
+## how a game ends up loading somebody else's save.
+var current_slot: int = 1
+
 var _last_error: String = ""
 
 
@@ -149,6 +154,7 @@ func save_slot(slot: int) -> bool:
 	if error != OK:
 		return _fail(slot, "rename failed (%d)" % error)
 
+	current_slot = slot
 	saved.emit(slot)
 	return true
 
@@ -218,6 +224,7 @@ func load_slot(slot: int) -> bool:
 	if data.is_empty():
 		return false
 	apply(data)
+	current_slot = slot
 	loaded.emit(slot)
 	return true
 
@@ -242,6 +249,7 @@ func load_slot_into_scene(slot: int) -> bool:
 		await get_tree().process_frame
 
 	apply(data)
+	current_slot = slot
 	loaded.emit(slot)
 	return true
 

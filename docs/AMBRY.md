@@ -316,7 +316,8 @@ build script now refuses to place anything opaque over a walkable cell.
 | POIs and NPC markers | **Built** — `Level.points_of_interest()`, `npc_markers()`, all ten placed |
 | Four interiors, doors that work both ways | **Built** — `world/doorway.gd`, `tests/doorway_test.tscn` |
 | Interact verb | **Built** — `world/interactable.gd`, `actors/components/interactor_component.gd`, bound to E |
-| Fade transitions | **Built** — `autoloads/screen_fade.gd` |
+| Fade transitions | **Built** — `autoloads/screen_fade.gd`, `autoloads/transition.gd` |
+| Dying | **Built** — reloads the last save, or restarts the level if there isn't one |
 | Prompts on anything but doors | **Not built.** The base class is there; nothing else uses it yet |
 | Rebuild transaction (spend → change state) | **Not built** |
 | Dialogue | **Not built.** NPCs are markers |

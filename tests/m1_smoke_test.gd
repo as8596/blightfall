@@ -26,6 +26,9 @@ func _ready() -> void:
 	# Headless runs unthrottled otherwise, which makes the physics accumulator
 	# spike and the tick-counted assertions below meaningless.
 	Engine.max_fps = 250
+	# This test kills the player four times on purpose. Dying now reloads the
+	# last save, which would tear down the test scene mid-run.
+	Transition.auto_retry = false
 	_run.call_deferred()
 
 
@@ -817,6 +820,24 @@ func _test_village() -> void:
 	pickup.queue_free()
 	_check("doorways are interactable", doors.is_empty() or doors[0] is Interactable)
 	_check("the fade starts clear", not ScreenFade.is_covered() and ScreenFade.alpha() == 0.0)
+
+	# Death has to lead somewhere. It used to be terminal outside the prototype
+	# room, which was fine when the prototype room was the only level and is not
+	# fine now — see tests/death_test.tscn for the flow itself.
+	_check("dying is wired to something",
+		Events.player_died.get_connections().size() > 0,
+		"%d listener(s)" % Events.player_died.get_connections().size())
+	# `current_slot` is the slot death reloads, so it has to *follow* the slot
+	# actually being used rather than being a constant somebody remembers to set
+	# — otherwise a death in slot 3 quietly resumes somebody else's run.
+	const SCRATCH := 9
+	var previous_slot := SaveGame.current_slot
+	SaveGame.current_slot = 1
+	var wrote := SaveGame.save_slot(SCRATCH)
+	_check("saving moves the run to that slot",
+		wrote and SaveGame.current_slot == SCRATCH, "slot %d" % SaveGame.current_slot)
+	SaveGame.delete_save(SCRATCH)
+	SaveGame.current_slot = previous_slot
 
 	# ---- draw order. z_index is checked *before* y-sorting, so a props layer
 	# sitting one above the player draws over them from every position — walk up

@@ -47,7 +47,7 @@ Two things from the GDD that also aren't here, on purpose:
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 154 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 156 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -66,6 +66,16 @@ It also asserts the two halves of the fade: that the screen reaches **full**
 black mid-transition, and that walking into a door does *not* open it. The first
 would pass just as happily against a fade that never started; the second is the
 reason doors are pressed at all.
+
+`godot --headless --path . tests/death_test.tscn` — 14 assertions. Kills the
+player twice: once with no save on disk, once with one. Same reason for being
+separate — it changes scenes.
+
+There is no bed in the world yet, so **the no-save case is every death today**,
+and it has to restart the level rather than leave the player lying in an empty
+street. The second case checks that a retry is not a rewind: the haul dropped
+where you fell is still there afterwards, still holding everything, still in the
+same spot.
 
 It cannot answer the M1 gate. "Is this fun" needs hands on a keyboard, and then
 two or three other people's hands. What it does is stop the numbers in the code
@@ -186,7 +196,9 @@ Four things it already handles, all of which are miserable to add later:
   values should come out of a save entry.
 
 There is no save *point* yet — that is level content. `SaveGame.save_slot(1)` is
-on F6 and load on F7 in the prototype room.
+on F6 and load on F7 in the prototype room. `SaveGame.current_slot` tracks which
+slot the run is in, because dying now reloads it and "slot 1" hard-coded in
+three places is how a game ends up loading somebody else's save.
 
 One ordering trap worth knowing, because there is a test pinning it: restore
 `max_health` **before** `current`, or a save with more heart containers than the

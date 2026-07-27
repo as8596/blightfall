@@ -40,11 +40,14 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 154 assertions over the M1 systems and Ambry
+# headless self-check — 156 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
 godot --headless --path . tests/doorway_test.tscn
+
+# dies, with and without a save on disk, and checks the haul is still on the floor
+godot --headless --path . tests/death_test.tscn
 
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
@@ -107,7 +110,8 @@ systems/
 resources/
   combat/          the player's combo, as a tunable .tres
   enemy_data/      one .tres per enemy
-autoloads/         Events, Rng, HitStop, Sfx, DebugSettings, SaveGame, ScreenFade
+autoloads/         Events, Rng, HitStop, Sfx, DebugSettings, SaveGame,
+                   ScreenFade, Transition
 levels/
   level.gd         composes a map with a player and a camera
   ambry/           the village, greyboxed — map + level scene

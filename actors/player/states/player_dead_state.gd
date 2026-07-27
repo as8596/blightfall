@@ -1,9 +1,12 @@
 class_name PlayerDeadState
 extends PlayerState
-## Dead. Terminal until something calls `Player.respawn()`.
+## Dead. Terminal *within this scene*, which is the whole of it: `Transition`
+## hears `Events.player_died` and reloads the last save, so the body that entered
+## this state is freed rather than resurrected.
 ##
-## No death screen, no retry flow, no save — M1 has none of that (BUILD-PLAN).
-## F5 in the prototype room puts you back on your feet.
+## `Player.respawn()` still exists for F5 in the prototype room, and for tests,
+## which turn `Transition.auto_retry` off precisely so they can kill the player
+## without the scene reloading underneath them.
 
 
 func enter(_msg: Dictionary = {}) -> void:
