@@ -30,6 +30,8 @@ func enter(msg: Dictionary = {}) -> void:
 
 func exit() -> void:
 	_stop_hitbox()
+	if player.weapon_arc != null:
+		player.weapon_arc.stop()
 
 
 func physics_update(delta: float) -> void:
@@ -43,8 +45,11 @@ func physics_update(delta: float) -> void:
 	var active_end := _step.recovery_start()
 	var step_end := _step.duration()
 
+	# Re-aims at the cursor during windup only. Turning during the wind-up is
+	# responsiveness; turning after it is a get-out from a commitment the game
+	# just asked you to make.
 	if allow_turn_during_windup and _t < active_start:
-		player.face(player.input.intent.move)
+		player.face_aim()
 		player.hitbox.rotation = player.facing.angle()
 
 	if _t >= active_start and _t < active_end and not _hitbox_on:
@@ -101,9 +106,22 @@ func _start_step() -> void:
 	_t = 0.0
 	_chain_queued = false
 	_stop_hitbox()
-	player.face(player.input.intent.move)
+	# The swing goes where you pointed, not where you were walking.
+	player.face_aim()
 	player.configure_hitbox(_step)
 	player.animation.play_attack(_index)
+
+	# Alternate the sweep per hit, so a three-hit string reads as three motions
+	# rather than the same one three times. The blade covers windup and active
+	# together: by the time the hitbox is live the eye needs the streak already
+	# moving, or a 0.10s window has nothing to read.
+	if player.weapon_arc != null:
+		player.weapon_arc.swing(
+			player.facing.angle(),
+			_step.windup + _step.active,
+			_index % 2 == 0,
+			1.0 + float(player.stats.bonus(StatsComponent.REACH)) / 100.0
+		)
 	if _step.swing_sfx != &"":
 		Sfx.play(_step.swing_sfx)
 

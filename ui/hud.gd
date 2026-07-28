@@ -49,6 +49,8 @@ const SLOT_BACK := Color(0.13, 0.11, 0.10, 0.82)
 const SLOT_EDGE := Color(0.42, 0.35, 0.26)
 const SLOT_REFUSED := Color(0.86, 0.45, 0.30)
 const SLOT_SELECTED := Color(0.95, 0.88, 0.70)
+## Extra space between the numbered ten and the reserved potion pair.
+const POTION_GAP: float = 26.0
 
 var health: int = 0
 var max_health: int = 0
@@ -223,12 +225,15 @@ func _draw_hotbar(screen: Vector2) -> void:
 	var count: int = mini(slot_items.size(), ItemsComponent.HOTBAR_SLOTS)
 	if count <= 0:
 		return
-	var width := count * SLOT_SIZE + (count - 1) * SLOT_GAP
+	# A wider gap before the reserved pair, so the bar reads as "ten, and two"
+	# rather than as twelve of the same thing.
+	var width := count * SLOT_SIZE + (count - 1) * SLOT_GAP + POTION_GAP
 	var origin := Vector2((screen.x - width) * 0.5, screen.y - MARGIN.y - SLOT_SIZE)
 	var font := ThemeDB.fallback_font
 
 	for i in count:
-		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP), 0.0)
+		var shift: float = POTION_GAP if ItemsComponent.is_potion_slot(i) else 0.0
+		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP) + shift, 0.0)
 		var box := Rect2(at, Vector2(SLOT_SIZE, SLOT_SIZE))
 		_canvas.draw_rect(box, SLOT_BACK)
 		var chosen := i == selected
@@ -249,7 +254,7 @@ func _draw_hotbar(screen: Vector2) -> void:
 				Rect2(at + Vector2(pad, pad), Vector2(SLOT_SIZE - pad * 2.0, SLOT_SIZE - pad * 2.0)),
 				false)
 
-		_canvas.draw_string(font, at + Vector2(4.0, 14.0), "0" if i == 9 else str(i + 1),
+		_canvas.draw_string(font, at + Vector2(4.0, 14.0), _slot_key(i),
 			HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, Color(0.75, 0.70, 0.62, 0.85))
 
 		var held: int = int(slot_counts[i]) if i < slot_counts.size() else 0
@@ -262,3 +267,13 @@ func _draw_hotbar(screen: Vector2) -> void:
 				HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
 			_canvas.draw_string(font, text_at, label,
 				HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
+
+
+## What the slot's key is called on the bar. Ten numbers, then the two reserved
+## slots, which are bound to the keys next to them on the row.
+static func _slot_key(slot: int) -> String:
+	if slot < 9:
+		return str(slot + 1)
+	if slot == 9:
+		return "0"
+	return "-" if slot == 10 else "="

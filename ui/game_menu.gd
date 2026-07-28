@@ -14,8 +14,8 @@ extends CanvasLayer
 ## Escape over Tab should reach the pause menu, not the other way round.
 const LAYER: int = 108
 
-## Ten on the bar, thirty in the pack.
-const SLOT_COUNT: int = 40
+## Twelve on the bar, thirty in the pack.
+const SLOT_COUNT: int = 42
 
 signal opened
 signal closed
@@ -313,13 +313,13 @@ func _build_inventory_page() -> Control:
 	page.add_theme_constant_override("separation", 14)
 
 	var grid := GridContainer.new()
-	grid.columns = 10
+	grid.columns = ItemsComponent.HOTBAR_SLOTS
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	page.add_child(grid)
 
 	for i in SLOT_COUNT:
-		if i == 10:
+		if i == ItemsComponent.HOTBAR_SLOTS:
 			# A gap under the first row. That row is the hotbar — the same ten
 			# slots, in the same order, with the same numbers — and the three
 			# below are the pack. Running them together would make forty
@@ -357,7 +357,7 @@ func _build_inventory_page() -> Control:
 
 		var number := Label.new()
 		# Only the hotbar row is numbered; the pack has no keys to advertise.
-		number.text = str((i + 1) % 10) if i < 10 else ""
+		number.text = Hud._slot_key(i) if i < ItemsComponent.HOTBAR_SLOTS else ""
 		number.position = Vector2(5, 1)
 		number.add_theme_font_size_override("font_size", 13)
 		number.add_theme_color_override("font_color", Color(0.75, 0.70, 0.62, 0.85))

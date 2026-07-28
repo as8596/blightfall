@@ -57,6 +57,7 @@ extends CharacterBody2D
 @onready var interactor: InteractorComponent = $Interactor
 @onready var items: ItemsComponent = $ItemsComponent
 @onready var stats: StatsComponent = $StatsComponent
+@onready var weapon_arc: WeaponArc = $WeaponArc
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -237,6 +238,36 @@ func _move() -> void:
 ## Walk velocity for the current input, scaled (attacks move at 25% / 0%).
 func desired_walk_velocity(speed_scale: float = 1.0) -> Vector2:
 	return input.intent.move * move_speed * speed_scale
+
+
+## Where the cursor is, as a unit vector from the character.
+##
+## Attacks aim here through a full 360° while walking stays 8-directional. Those
+## are different jobs: movement wants to feel like a grid, and a swing wants to
+## go where you pointed. The body sprite still picks the nearest of its four
+## directions from this, which is what keeps a four-way sprite sheet honest
+## against a 360° swing.
+## Set to aim without a pointer or a pad — a cutscene, a scripted swing, a test
+## driving the character with no mouse in the window.
+var aim_override: Vector2 = Vector2.ZERO
+
+
+func aim_direction() -> Vector2:
+	if aim_override != Vector2.ZERO:
+		return aim_override.normalized()
+	# A pad aims with the right stick; a mouse aims with the cursor. Whichever
+	# was touched last wins, which is the only rule that survives someone
+	# picking up a controller mid-session.
+	if input.intent.aim_stick != Vector2.ZERO:
+		return input.intent.aim_stick.normalized()
+	var target := WorldView.mouse_world_position(self)
+	var offset := target - global_position
+	return offset.normalized() if offset.length_squared() > 1.0 else facing
+
+
+## Face the cursor, without snapping to eight.
+func face_aim() -> void:
+	facing = aim_direction()
 
 
 func face(direction: Vector2) -> void:

@@ -64,6 +64,26 @@ func _fit() -> void:
 	UiScale.set_content_rect(Rect2(position, Vector2(BASE) * factor))
 
 
+## Where the pointer is, in world coordinates.
+##
+## Three transforms deep and none of them optional: the window has black bars
+## down the sides, the picture inside them is scaled, and the world inside
+## *that* is moved around by a camera. Anything reading `get_mouse_position()`
+## straight off gets window pixels and aims at the wrong place by however wide
+## the letterbox is.
+static func mouse_world_position(node: CanvasItem) -> Vector2:
+	var viewport := node.get_viewport()
+	var window := node.get_window()
+	if viewport == null or window == null:
+		return node.global_position
+
+	var area := UiScale.content_rect()
+	var factor: float = area.size.x / float(BASE.x) if area.size.x > 0.0 else 1.0
+	var inside: Vector2 = (Vector2(window.get_mouse_position()) - area.position) / factor
+	# The canvas transform maps world to view, so its inverse maps back.
+	return viewport.get_canvas_transform().affine_inverse() * inside
+
+
 ## The scale the world is currently drawn at. The UI does not use it — that is
 ## the point — but the debug overlay reports it.
 func world_scale() -> float:

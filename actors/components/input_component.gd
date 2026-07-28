@@ -2,7 +2,7 @@ class_name InputComponent
 extends Node
 
 ## Hotbar keys, 1-9 then 0. Must match `ItemsComponent.slots`.
-const HOTBAR_SLOTS: int = 10
+const HOTBAR_SLOTS: int = 12
 ## The only place in the player's code that touches `Input` (GDD §12, rule 3).
 ##
 ## Produces an InputIntent the state machine consumes. Also owns input
@@ -50,6 +50,7 @@ func _process(delta: float) -> void:
 		intent.raw_move = Vector2.ZERO
 		intent.attack_held = false
 		intent.dodge_held = false
+		intent.aim_stick = Vector2.ZERO
 		_refresh_flags()
 		return
 
@@ -72,6 +73,14 @@ func _process(delta: float) -> void:
 			break
 	intent.attack_held = Input.is_action_pressed(&"attack")
 	intent.dodge_held = Input.is_action_pressed(&"dodge")
+	# The right stick, read raw. A pad has no cursor, so aiming has to come from
+	# somewhere — and this is the only place in the player's code allowed to ask
+	# the hardware anything (GDD §12 rule 3).
+	var stick := Vector2(
+		Input.get_joy_axis(0, JOY_AXIS_RIGHT_X),
+		Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
+	)
+	intent.aim_stick = stick if stick.length() > deadzone else Vector2.ZERO
 	_refresh_flags()
 
 

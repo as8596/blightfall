@@ -95,7 +95,12 @@ func _capture() -> void:
 			camera.global_position = bounds.get_center()
 		await _wait_ticks(4)
 
-	var player := _room.get_node_or_null("Player") as Player
+	# Searched for rather than pathed to. The player lives inside the world
+	# SubViewport now (`ui/world_view.gd`), the prototype room and `Level` reach
+	# it by different routes, and a hard-coded path finds nothing *silently* —
+	# which cost an afternoon hunting a drawing bug in a swing that was never
+	# actually swung.
+	var player := _find_player(_room)
 	if _stand_at != Vector2.INF and player != null:
 		# Tile coordinates, landing on the tile's centre.
 		player.global_position = (_stand_at + Vector2(0.5, 0.5)) * 64.0
@@ -118,7 +123,13 @@ func _capture() -> void:
 			enemy.global_position = player.global_position + Vector2(reach * 0.9, 0)
 		await _wait_ticks(20)
 
+	if player == null and (_attack or _use_placeholder_animations or _stand_at != Vector2.INF):
+		push_warning("screenshot: no player in this scene — some flags did nothing.")
+
 	if _attack and player != null:
+		# The swing follows the cursor, and a headless cursor sits at (0, 0) —
+		# which would aim this up and to the left. Pin it.
+		player.aim_override = Vector2.RIGHT
 		player.facing = Vector2.RIGHT
 		Input.action_press(&"attack")
 		await get_tree().process_frame
@@ -132,6 +143,16 @@ func _capture() -> void:
 		push_error("screenshot: save failed (%d)" % error)
 	print("screenshot: %s (%dx%d)" % [output_path, image.get_width(), image.get_height()])
 	get_tree().quit(0 if error == OK else 1)
+
+
+static func _find_player(root: Node) -> Player:
+	if root is Player:
+		return root as Player
+	for child in root.get_children():
+		var found := _find_player(child)
+		if found != null:
+			return found
+	return null
 
 
 func _wait_ticks(count: int) -> void:

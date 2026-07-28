@@ -55,6 +55,7 @@ func _run() -> void:
 	await _test_project_configuration()
 	await _test_movement()
 	await _test_attack_frame_data()
+	await _test_weapon_arc()
 	await _test_combo_chain()
 	await _test_dodge()
 	await _test_stamina()
@@ -125,6 +126,10 @@ func _await_state(state: StringName, limit: int = 30) -> bool:
 
 func _reset_player() -> void:
 	_release_all()
+	# Attacks aim at the cursor now, and a headless run has one at (0, 0). Every
+	# combat assertion below is about frame data rather than about aiming, so
+	# the aim is pinned rather than left to the pointer.
+	_player.aim_override = Vector2.RIGHT
 	_player.respawn()
 	_player.global_position = Vector2(800, 800)
 	await _ticks(3)
@@ -279,6 +284,44 @@ func _test_attack_frame_data() -> void:
 
 	await _ticks(30)
 	_check("combo window expires", _player.combo_window_remaining == 0.0 and _player.next_combo_index == 0)
+
+
+## The swing you can see, and the swing that can hurt you, running off one clock.
+##
+## Worth pinning because the failure is quiet: a blade that renders nothing at
+## all still passes every frame-data check above, and the hitbox keeps working
+## while the game stops telling anyone a hundredth of a second before it lands.
+func _test_weapon_arc() -> void:
+	print("\nWeapon arc (GDD §5: the streak is what makes 0.10s legible)")
+	await _reset_player()
+
+	var arc := _player.weapon_arc
+	_check("player carries a weapon arc", arc != null)
+	if arc == null:
+		return
+	_check("arc is hidden at rest", not arc.visible)
+
+	await _press(&"attack")
+	if not await _await_state(&"Attack"):
+		_check("arc test could not start", false)
+		return
+
+	_check("arc appears on the swing", arc.visible)
+	_check("arc aims where the player faces",
+		absf(angle_difference(arc.centre_angle(), _player.facing.angle())) < 0.01,
+		"arc %.2f vs facing %.2f" % [arc.centre_angle(), _player.facing.angle()])
+
+	# Still up while the hitbox is live: a streak that finishes before the
+	# dangerous frames do is a streak that lies about when you are safe.
+	var seen_with_hitbox := false
+	for i in 60:
+		await get_tree().physics_frame
+		if _player.hitbox.is_active() and arc.visible:
+			seen_with_hitbox = true
+		if not _player.state_machine.is_in(&"Attack"):
+			break
+	_check("arc is still drawn during the active frames", seen_with_hitbox)
+	_check("arc clears when the swing ends", not arc.visible)
 
 
 func _test_combo_chain() -> void:

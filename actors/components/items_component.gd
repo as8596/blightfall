@@ -20,13 +20,27 @@ signal refused(slot: int)
 ## Which slot the tool verb will act on.
 signal selection_changed(slot: int)
 
-## Forty: ten on the hotbar, bound to 1-9 and 0, and thirty behind Tab. The
+## Forty-two: twelve on the hotbar — ten numbered plus two reserved for potions
+## — and thirty behind Tab. The
 ## hotbar is the first ten by definition rather than by a flag, so "what is on
 ## my bar" needs no second list to stay in step with.
-@export_range(1, 60) var slots: int = 40
+@export_range(1, 60) var slots: int = 42
 
-## How many of those slots the hotbar shows.
-const HOTBAR_SLOTS: int = 10
+## How many of those slots the hotbar shows: ten numbered, then two reserved.
+const HOTBAR_SLOTS: int = 12
+
+## The last two are for potions and nothing else. Kept apart on the bar and
+## bound to `-` and `=`, so the thing you reach for in a fight is never one slot
+## away from the thing you reach for out of one.
+const POTION_SLOTS: int = 2
+
+## Index of the first reserved slot.
+const FIRST_POTION_SLOT: int = HOTBAR_SLOTS - POTION_SLOTS
+
+
+## Whether `slot` is one of the reserved potion slots.
+static func is_potion_slot(slot: int) -> bool:
+	return slot >= FIRST_POTION_SLOT and slot < HOTBAR_SLOTS
 
 ## Filled from the inspector for a starting kit.
 @export var starting_items: Array[ItemData] = []

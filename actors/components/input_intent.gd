@@ -24,6 +24,10 @@ var interact_buffered: bool = false
 ## Held state, for future charge attacks.
 var attack_held: bool = false
 
+## Right stick deflection, for aiming without a pointer. Zero when the player is
+## on mouse and keyboard.
+var aim_stick: Vector2 = Vector2.ZERO
+
 ## The dash key is still down. Tapping it dashes; keeping it down afterwards
 ## sprints — see `PlayerMoveState`.
 var dodge_held: bool = false
