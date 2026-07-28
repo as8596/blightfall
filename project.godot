@@ -29,6 +29,7 @@ Transition="*res://autoloads/transition.gd"
 Items="*res://autoloads/items.gd"
 Music="*res://autoloads/music.gd"
 Hud="*res://ui/hud.gd"
+PauseMenu="*res://ui/pause_menu.gd"
 
 [display]
 

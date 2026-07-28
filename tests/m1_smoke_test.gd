@@ -861,6 +861,24 @@ func _test_village() -> void:
 	_check("the tool verb is what uses the selected slot",
 		Items.has(&"bread") and kit.item_at(0) != null)
 
+	# Escape pauses, and the three things that must survive a pause do.
+	_check("escape is bound", InputMap.has_action(&"ui_cancel"))
+	PauseMenu.open()
+	await _ticks(1)
+	_check("the menu pauses the tree", PauseMenu.is_open() and get_tree().paused)
+	_check("and hides the HUD", not Hud.enabled)
+	_check("music keeps running while paused",
+		Music.process_mode == Node.PROCESS_MODE_ALWAYS)
+	_check("so does the fade, so a transition can finish",
+		ScreenFade.process_mode == Node.PROCESS_MODE_ALWAYS)
+	PauseMenu.close()
+	await _ticks(1)
+	_check("closing gives the game back",
+		not PauseMenu.is_open() and not get_tree().paused and Hud.enabled)
+	# A menu opening over a scene change would sit on top of a level the player
+	# has not seen yet.
+	Transition.auto_retry = false
+
 	var wheel := level.player.get_node_or_null("StaminaWheel")
 	_check("stamina is a ring on the character, not a bar in a corner", wheel != null)
 

@@ -57,7 +57,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 172 assertions over the M1 systems and Ambry
+# headless self-check — 178 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -89,6 +89,7 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Dash / dodge | Shift or Space | A |
 | Interact | E | B |
 | Use selected item | K | Y |
+| Pause menu | Escape | Start |
 | Hotbar select | 1–9, 0 or mouse wheel | — |
 
 `interact` opens doors. It is the general verb — `world/interactable.gd` is the
@@ -144,7 +145,7 @@ levels/
 camera/            the camera rig, which is not a child of the player
 art/               shaders, fonts, sprites, tilesets, icons
 world/             pickups, the haul cache, interactables and doorways
-ui/                HUD, stamina wheel, debug overlay
+ui/                HUD, stamina wheel, pause menu, debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, greybox builder
 ```
