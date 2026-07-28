@@ -2,7 +2,8 @@
 
 Top-down action RPG in Godot 4.6. See [`docs/GDD.md`](docs/GDD.md) for the design
 and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule. Art conventions
-live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md).
+live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md), and everything not yet
+built is inventoried in [`docs/WISHLIST.md`](docs/WISHLIST.md).
 
 **Sprite standard: 64×96 characters, 64×64 tiles, 1280×720 internal**
 (GDD §15, A1).
