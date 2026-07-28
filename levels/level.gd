@@ -37,6 +37,9 @@ extends Node2D
 ## markers with metadata — and the level is what turns that data into nodes.
 const DOORWAY_SCENE: PackedScene = preload("res://world/doorway.tscn")
 
+## The same, for the walk-into edges of outdoor areas (`world/gateway.gd`).
+const GATEWAY_SCENE: PackedScene = preload("res://world/gateway.tscn")
+
 @onready var world: Node2D = get_node_or_null(world_path) as Node2D
 @onready var map: Node2D = _in_world(map_path) as Node2D
 @onready var player: Player = _in_world(player_path) as Player
@@ -59,6 +62,7 @@ func _ready() -> void:
 	place_player_at(spawn_marker)
 	ensure_player_inside()
 	_spawn_doorways()
+	_spawn_gateways()
 
 
 ## Put the player on a named marker and point the camera at them.
@@ -130,6 +134,42 @@ func _spawn_doorways() -> void:
 		# be in window space and collide with nothing.
 		world.add_child(door)
 		door.global_position = marker.global_position
+
+
+## The walk-into edges. Same shape as `_spawn_doorways`, different verb — see
+## `world/gateway.gd` for why an edge is not a door.
+func _spawn_gateways() -> void:
+	var root := map.find_child("Gateways", true, false) if map != null else null
+	if root == null:
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var edge: Gateway = GATEWAY_SCENE.instantiate()
+		edge.name = marker.name
+		edge.target_scene = String(marker.get_meta("target_scene", ""))
+		edge.target_spawn = String(marker.get_meta("target_spawn", "PlayerSpawn"))
+		edge.facing = String(marker.get_meta("facing", "north"))
+		edge.span = int(marker.get_meta("span", 4))
+		world.add_child(edge)
+		edge.global_position = marker.global_position
+
+
+## Every gateway currently in the world, as {id, target, spawn, facing}. The
+## tests walk these rather than hard-coding a map that is generated.
+func gateways() -> Array:
+	var found: Array = []
+	if world == null:
+		return found
+	for child in world.get_children():
+		var edge := child as Gateway
+		if edge != null:
+			found.append({
+				"id": edge.name, "target": edge.target_scene,
+				"spawn": edge.target_spawn, "facing": edge.facing,
+			})
+	return found
 
 
 ## Union of every TileMapLayer's used rect, in world pixels.

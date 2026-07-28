@@ -46,6 +46,22 @@ texture_region_size = Vector2i(64, 64)
 0:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 1:6/0 = 0
 1:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:6/0 = 0
+2:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:6/0 = 0
+3:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:7/0 = 0
+1:7/0 = 0
+2:7/0 = 0
+2:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:7/0 = 0
+0:8/0 = 0
+1:8/0 = 0
+1:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:8/0 = 0
+2:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:8/0 = 0
+3:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 
 [sub_resource type="TileSet" id="TileSet_tk3om"]
 tile_size = Vector2i(64, 64)
@@ -53,40 +69,40 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_31u30")
 
-[node name="MagistrateHall" type="Node2D" unique_id=1227775607]
+[node name="MagistrateHall" type="Node2D" unique_id=721672155]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=820702531]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1707537966]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAADAAAAAAABAAAAAAADAAAAAAACAAAAAAADAAAAAAADAAAAAAADAAAAAAAEAAAAAAADAAAAAAAFAAAAAAADAAAAAAAGAAAAAAADAAAAAAAHAAAAAAADAAAAAAAIAAAAAAADAAAAAAAJAAAAAAADAAAAAAAKAAAAAAADAAAAAAAAAAEAAAADAAAAAAABAAEAAAADAAAAAAACAAEAAAADAAAAAAADAAEAAAADAAAAAAAEAAEAAAADAAAAAAAFAAEAAAADAAAAAAAGAAEAAAADAAAAAAAHAAEAAAADAAAAAAAIAAEAAAADAAAAAAAJAAEAAAADAAAAAAAKAAEAAAADAAAAAAAAAAIAAAADAAAAAAABAAIAAAADAAAAAAACAAIAAAADAAAAAAADAAIAAAADAAAAAAAEAAIAAAADAAAAAAAFAAIAAAADAAAAAAAGAAIAAAADAAAAAAAHAAIAAAADAAAAAAAIAAIAAAADAAAAAAAJAAIAAAADAAAAAAAKAAIAAAADAAAAAAAAAAMAAAADAAAAAAABAAMAAAADAAAAAAACAAMAAAADAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAJAAMAAAADAAAAAAAKAAMAAAADAAAAAAAAAAQAAAADAAAAAAABAAQAAAADAAAAAAACAAQAAAADAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAJAAQAAAADAAAAAAAKAAQAAAADAAAAAAAAAAUAAAADAAAAAAABAAUAAAADAAAAAAACAAUAAAADAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAJAAUAAAADAAAAAAAKAAUAAAADAAAAAAAAAAYAAAADAAAAAAABAAYAAAADAAAAAAACAAYAAAADAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAAJAAYAAAADAAAAAAAKAAYAAAADAAAAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=1071257003]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=1359222557]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAEAAAAAAAYAAAAAAAEAAAABAAAAAAAAAAEAAAABAAYAAAAAAAEAAAACAAAAAAABAAIAAAACAAYAAAAAAAEAAAADAAAAAAAAAAEAAAADAAYAAAAAAAEAAAAEAAAAAAAAAAEAAAAEAAYAAAAAAAEAAAAFAAAAAAAAAAEAAAAFAAYAAAAAAAIAAAAGAAAAAAAAAAEAAAAGAAYAAAAAAAEAAAAHAAAAAAAAAAEAAAAHAAYAAAAAAAEAAAAIAAAAAAABAAIAAAAIAAYAAAAAAAEAAAAJAAAAAAAAAAEAAAAJAAYAAAAAAAEAAAAKAAAAAAAAAAEAAAAKAAYAAAAAAAEAAAAAAAEAAAAAAAEAAAAKAAEAAAAAAAEAAAAAAAIAAAAAAAEAAAAKAAIAAAAAAAEAAAAAAAMAAAAAAAEAAAAKAAMAAAAAAAEAAAAAAAQAAAAAAAEAAAAKAAQAAAAAAAEAAAAAAAUAAAAAAAEAAAAKAAUAAAAAAAEAAAAFAAIAAAAAAAYAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1384808883]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=849583668]
 
-[node name="Poi_ledger" type="Marker2D" parent="PointsOfInterest" unique_id=1919504254]
+[node name="Poi_ledger" type="Marker2D" parent="PointsOfInterest" unique_id=2002954650]
 position = Vector2(352, 224)
 metadata/poi_id = "ledger"
 metadata/note = "your name, wrongly, still open on the desk"
 metadata/district = "interior"
 
-[node name="NpcMarkers" type="Node2D" parent="." unique_id=1358003080]
+[node name="NpcMarkers" type="Node2D" parent="." unique_id=976498735]
 
-[node name="Npc_magistrate" type="Marker2D" parent="NpcMarkers" unique_id=2123998441]
+[node name="Npc_magistrate" type="Marker2D" parent="NpcMarkers" unique_id=213957282]
 position = Vector2(352, 224)
 metadata/npc_id = "magistrate"
 
-[node name="Doorways" type="Node2D" parent="." unique_id=1393014366]
+[node name="Doorways" type="Node2D" parent="." unique_id=156846781]
 
-[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=303842096]
+[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=2026758831]
 position = Vector2(352, 416)
 metadata/target_scene = "res://levels/ambry/ambry_level.tscn"
 metadata/target_spawn = "Door_magistrate"
 metadata/prompt = "Leave"
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1286079982]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=14844632]
 position = Vector2(352, 288)

@@ -35,16 +35,9 @@ const TEXTURE_PATH := "res://art/tilesets/greybox_64.png"
 const VILLAGE_PATH := "res://levels/ambry/ambry.tscn"
 const INTERIOR_DIR := "res://levels/ambry/interiors"
 
-# Must match tools/gen_greybox_tileset.py, in order.
-const TILES: Array = [
-	["dirt_path", false], ["grass_yard", false], ["cobble", false], ["floorboards", false],
-	["wall", true], ["wall_inner", true], ["roof", false], ["fence", true],
-	["door", true], ["window", true], ["hearth", false], ["well", true],
-	["plot_empty", false], ["plot_ruined", false], ["stockpile", true], ["bed_save", false],
-	["gate", true], ["npc_marker", false], ["blight_creep", true], ["void", true],
-	["bell", true], ["garden", false], ["tent", true], ["rubble_wall", true],
-	["chest", true], ["shrine", true],
-]
+# The single source of truth, shared with `tools/build_orchardfall.gd`. It must
+# match `tools/gen_greybox_tileset.py`, in order.
+const TILES: Array = GreyboxMap.TILES
 
 # --------------------------------------------------------------------------
 # Ambry — two districts. See docs/AMBRY.md.
@@ -392,9 +385,23 @@ func _build_village(tileset: TileSet) -> void:
 	for x in range(1, MAP_W - 1):
 		_put(objects, Vector2i(x, MAP_H - 1), "fence")   # south edge
 		_put(objects, Vector2i(x, 3), "fence")           # north edge
+
+	# The south gate is **open**, and it is the only opening in Ambry's fence.
+	# It used to be two solid `gate` tiles, which was correct while there was
+	# nowhere to go: the town was the game. Now the valley is out there, so the
+	# gate is a gap with a post either side, and walking into it leaves
+	# (`world/gateway.gd`). No keypress — you are already walking south.
 	for x in ROAD_X:
-		_put(objects, Vector2i(x, MAP_H - 1), "gate")    # to the valley
-		_put(objects, Vector2i(x, 3), "gate")            # the north road
+		objects.erase_cell(Vector2i(x, MAP_H - 1))
+		_put(ground, Vector2i(x, MAP_H - 1), "dirt_path")
+	_put(objects, Vector2i(ROAD_X[0] - 1, MAP_H - 1), "gate")
+	_put(objects, Vector2i(ROAD_X[-1] + 1, MAP_H - 1), "gate")
+
+	# The north road stays shut. It is behind the wall, so nobody can reach it
+	# until the breach is rebuilt, and there is nothing on the far side yet —
+	# it is the short way to Orchardfall (docs/AMBRY.md) and it is mid-game.
+	for x in ROAD_X:
+		_put(objects, Vector2i(x, 3), "gate")
 
 	# ---- the square. Well and hearth flank the spine so the player walks
 	# between them on the way in from the gate.
@@ -702,12 +709,34 @@ func _add_markers(root: Node2D) -> void:
 		root.add_child(outside)
 		outside.owner = root
 
+	# The way out to the valley. An edge, not a door — walked into rather than
+	# pressed (`world/gateway.gd`).
+	var gateways := _group(root, "Gateways")
+	var out := Marker2D.new()
+	out.name = "Gateway_south"
+	out.position = Vector2((ROAD_X[0] + ROAD_X.size() * 0.5) * TILE, (MAP_H - 0.5) * TILE)
+	out.set_meta("target_scene", "res://levels/orchardfall/valley_road_level.tscn")
+	out.set_meta("target_spawn", "Edge_north")
+	out.set_meta("facing", "south")
+	out.set_meta("span", ROAD_X.size())
+	gateways.add_child(out)
+	out.owner = root
+
 	var spawn := Marker2D.new()
 	spawn.name = "PlayerSpawn"
 	# Just inside the south gate: the player always enters Ambry the same way.
 	spawn.position = _centre(Vector2i(ROAD_X[0], MAP_H - 3))
 	root.add_child(spawn)
 	spawn.owner = root
+
+	# ...and where the valley sends them back to. The same place, named for the
+	# edge it is on, so the zone's convention holds all the way to the gate:
+	# an exit heading north lands on the neighbour's `Edge_south`.
+	var arrive := Marker2D.new()
+	arrive.name = "Edge_south"
+	arrive.position = _centre(Vector2i(ROAD_X[0], MAP_H - 3))
+	root.add_child(arrive)
+	arrive.owner = root
 
 
 func _stamp_project(marker: Marker2D, id: String) -> void:

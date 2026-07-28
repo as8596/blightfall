@@ -68,6 +68,21 @@ TILES = [
     ("rubble_wall",   (0x63, 0x5a, 0x4e), "hatch", True),    # the packed breach
     ("chest",         (0x7e, 0x63, 0x3c), "brick", True),    # storage, in your home
     ("shrine",        (0x77, 0x78, 0x7c), "ring",  True),    # older than the town
+
+    # Orchardfall (docs/ORCHARDFALL.md). Ambry's warmth, sickened: the greens go
+    # yellow and the browns go grey. Two of these are the zone's whole read —
+    # `orchard_tree` is what the place was and `dead_tree` is what it is now,
+    # and they have to be told apart at a glance from across a screen.
+    ("orchard_tree",  (0x4c, 0x5c, 0x38), "bloom", True),
+    ("dead_tree",     (0x6a, 0x62, 0x4e), "post",  True),
+    ("tall_grass",    (0x5c, 0x62, 0x3a), "post",  False),
+    ("crop_row",      (0x5e, 0x54, 0x38), "plank", False),   # furrows, gone over
+    ("water",         (0x3a, 0x4c, 0x58), "hatch", True),
+    ("shallows",      (0x4e, 0x60, 0x62), "dots",  False),   # the walkable edge
+    ("bridge",        (0x74, 0x5e, 0x40), "plank", False),
+    ("rock",          (0x6d, 0x6b, 0x66), "brick", True),
+    ("ruin_wall",     (0x5f, 0x5c, 0x54), "solid", True),    # older than Ambry
+    ("signpost",      (0x86, 0x71, 0x4a), "cross", True),    # which way is which
 ]
 
 SOLID = {name for name, _c, _p, solid in TILES if solid}

@@ -43,10 +43,10 @@ size — later items are blocked by earlier ones.
 | 1 | ⭑ **Place pickups** | The satchel has no source. Nothing in any level fills it. |
 | 2 | ⭑ **The rebuild transaction** | The satchel has no sink. `building_plots()` is read by tests and nothing else. |
 | 3 | ⭑ **Village state in saves** | A town that forgets what you built is not a progression system. |
-| 4 | ⭑ **One zone outside the gate** | There is nowhere to gather. The prototype room is the only combat space and it is not a place. |
+| 4 | ~~One zone outside the gate~~ | **Built.** Orchardfall: six areas, walk-into edges, one interior (`docs/ORCHARDFALL.md`). It has no enemies and nothing to pick up. |
 | 5 | ⭑ **Three more enemies** | One enemy is a test fixture. A fight needs a reason to choose between verbs. |
 | 6 | ⭑ **Dialogue** | Ten NPCs are markers. Without lines there is no reason to leave and no one to notice you came back. |
-| 7 | ⭑ **Title screen** | The game currently boots into the middle of itself. |
+| 7 | ~~Title screen~~ | **Built.** `ui/main_menu.tscn` — continue, new game, UI scale, quit. |
 | 8 | ⭑ **The town visibly changes** | The payoff. Without it, building is a receipt. |
 
 That is the slice. Items 1–3 are days, not weeks — the systems around them
@@ -88,12 +88,12 @@ biggest gap in the project and it is not a large amount of code.
 
 ### World
 
-- ⭑ **One zone.** Orchardfall. Needs a tileset, a layout, encounter placement,
-  and a way in and out of Ambry that is not a door to an interior.
-- **Zone travel.** `Doorway` handles interiors. Leaving town is a different
-  shape — bigger, one-way-ish, and the point at which the satchel matters.
-- **Encounter placement.** Enemies currently spawn at random markers in a test
-  room. A zone needs hand-placed fights.
+- ~~One zone.~~ **Built** — Orchardfall, six areas with a loop in the graph
+  (`docs/ORCHARDFALL.md`). What it does not have is anything in it.
+- ~~Zone travel.~~ **Built** — `world/gateway.gd`. Edges are walked into, doors
+  are still pressed.
+- ⭑ **Encounter placement.** Enemies currently spawn at random markers in a test
+  room. Six areas exist and not one of them contains a fight.
 - **The blight as terrain.** It blocks paths and recedes when the town is
   rebuilt. Nothing implements it.
 - **The north wall unlock at runtime.** The map is built both ways and asserted
@@ -113,9 +113,11 @@ Zero of four. Each is a combat option *and* a traversal unlock.
 
 ### Front end and options
 
-- ⭑ **Title screen.** No main menu scene exists. `Music` registers a
-  `main_menu` track that nothing plays.
-- ⭑ **New game / continue.** `SaveGame` has slots; nothing offers them.
+- ~~Title screen.~~ **Built** — `ui/main_menu.tscn`, and it is the boot scene.
+- ~~New game / continue.~~ **Built.** Continue is disabled when the slot is
+  empty rather than doing nothing. New Game deliberately does *not* delete the
+  save — overwriting a run on a mis-click needs a confirmation, and that needs
+  more than one slot to be worth building.
 - **Audio buses and volume sliders.** Everything plays on Master. There is no
   way to turn the music down.
 - **Controller support.** `InputComponent` already reads an aim stick; nothing
@@ -266,8 +268,9 @@ Small, known, and each one is a thing that will be more annoying later.
 - **39 orphaned `.png.import` files** in `art/icons/items/` pointing at PNGs
   that were moved into subfolders. Harmless, untidy, and they will confuse
   someone eventually.
-- **The prototype room is the only combat space**, and it is reachable only by
-  opening the scene and pressing F6.
+- **The prototype room is still the only combat space**, and it is reachable
+  only by opening the scene and pressing F6. Orchardfall has six areas and no
+  enemies in any of them.
 - **Stamina regen is upgradeable and nothing upgrades it.** Same for damage,
   reach, carry and max health — the plumbing is in, the taps are not.
 - **`SpriteAnimation` has no per-frame timing**, so a clip's frames are evenly

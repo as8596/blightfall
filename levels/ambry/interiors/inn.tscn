@@ -46,6 +46,22 @@ texture_region_size = Vector2i(64, 64)
 0:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 1:6/0 = 0
 1:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:6/0 = 0
+2:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:6/0 = 0
+3:6/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+0:7/0 = 0
+1:7/0 = 0
+2:7/0 = 0
+2:7/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:7/0 = 0
+0:8/0 = 0
+1:8/0 = 0
+1:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+2:8/0 = 0
+2:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+3:8/0 = 0
+3:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 
 [sub_resource type="TileSet" id="TileSet_tk3om"]
 tile_size = Vector2i(64, 64)
@@ -53,44 +69,44 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_31u30")
 
-[node name="Inn" type="Node2D" unique_id=422244217]
+[node name="Inn" type="Node2D" unique_id=676636548]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=1724420878]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=783080411]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAADAAAAAAABAAAAAAADAAAAAAACAAAAAAADAAAAAAADAAAAAAADAAAAAAAEAAAAAAADAAAAAAAFAAAAAAADAAAAAAAGAAAAAAADAAAAAAAHAAAAAAADAAAAAAAIAAAAAAADAAAAAAAJAAAAAAADAAAAAAAKAAAAAAADAAAAAAALAAAAAAADAAAAAAAAAAEAAAADAAAAAAABAAEAAAADAAAAAAACAAEAAAADAAAAAAADAAEAAAADAAAAAAAEAAEAAAADAAAAAAAFAAEAAAADAAAAAAAGAAEAAAADAAAAAAAHAAEAAAADAAAAAAAIAAEAAAADAAAAAAAJAAEAAAADAAAAAAAKAAEAAAADAAAAAAALAAEAAAADAAAAAAAAAAIAAAADAAAAAAABAAIAAAADAAAAAAACAAIAAAADAAAAAAADAAIAAAADAAAAAAAEAAIAAAADAAAAAAAFAAIAAAADAAAAAAAGAAIAAAADAAAAAAAHAAIAAAADAAAAAAAIAAIAAAADAAAAAAAJAAIAAAADAAAAAAAKAAIAAAADAAAAAAALAAIAAAADAAAAAAAAAAMAAAADAAAAAAABAAMAAAADAAAAAAACAAMAAAADAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAJAAMAAAADAAAAAAAKAAMAAAADAAAAAAALAAMAAAADAAAAAAAAAAQAAAADAAAAAAABAAQAAAADAAAAAAACAAQAAAADAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAJAAQAAAADAAAAAAAKAAQAAAADAAAAAAALAAQAAAADAAAAAAAAAAUAAAADAAAAAAABAAUAAAADAAAAAAACAAUAAAADAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAJAAUAAAADAAAAAAAKAAUAAAADAAAAAAALAAUAAAADAAAAAAAAAAYAAAADAAAAAAABAAYAAAADAAAAAAACAAYAAAADAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAAJAAYAAAADAAAAAAAKAAYAAAADAAAAAAALAAYAAAADAAAAAAAAAAcAAAADAAAAAAABAAcAAAADAAAAAAACAAcAAAADAAAAAAADAAcAAAADAAAAAAAEAAcAAAADAAAAAAAFAAcAAAADAAAAAAAGAAcAAAADAAAAAAAHAAcAAAADAAAAAAAIAAcAAAADAAAAAAAJAAcAAAADAAAAAAAKAAcAAAADAAAAAAALAAcAAAADAAAAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=1117383002]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=1671971150]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAEAAAAAAAcAAAAAAAEAAAABAAAAAAAAAAEAAAABAAcAAAAAAAEAAAACAAAAAAABAAIAAAACAAcAAAAAAAEAAAADAAAAAAAAAAEAAAADAAcAAAAAAAEAAAAEAAAAAAAAAAEAAAAEAAcAAAAAAAEAAAAFAAAAAAAAAAEAAAAFAAcAAAAAAAIAAAAGAAAAAAAAAAEAAAAGAAcAAAAAAAEAAAAHAAAAAAAAAAEAAAAHAAcAAAAAAAEAAAAIAAAAAAAAAAEAAAAIAAcAAAAAAAEAAAAJAAAAAAABAAIAAAAJAAcAAAAAAAEAAAAKAAAAAAAAAAEAAAAKAAcAAAAAAAEAAAALAAAAAAAAAAEAAAALAAcAAAAAAAEAAAAAAAEAAAAAAAEAAAALAAEAAAAAAAEAAAAAAAIAAAAAAAEAAAALAAIAAAAAAAEAAAAAAAMAAAAAAAEAAAALAAMAAAAAAAEAAAAAAAQAAAAAAAEAAAALAAQAAAAAAAEAAAAAAAUAAAAAAAEAAAALAAUAAAAAAAEAAAAAAAYAAAAAAAEAAAALAAYAAAAAAAEAAAACAAIAAAACAAIAAAAFAAIAAAACAAMAAAAIAAIAAAADAAMAAAAKAAIAAAADAAMAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1047097308]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=970210888]
 
-[node name="Poi_inn_bed" type="Marker2D" parent="PointsOfInterest" unique_id=845317620]
+[node name="Poi_inn_bed" type="Marker2D" parent="PointsOfInterest" unique_id=77979699]
 position = Vector2(544, 224)
 metadata/poi_id = "inn_bed"
 metadata/note = "save + rest, until your home is yours"
 metadata/district = "interior"
 
-[node name="NpcMarkers" type="Node2D" parent="." unique_id=1867266643]
+[node name="NpcMarkers" type="Node2D" parent="." unique_id=910367681]
 
-[node name="Npc_innkeeper" type="Marker2D" parent="NpcMarkers" unique_id=1757255028]
+[node name="Npc_innkeeper" type="Marker2D" parent="NpcMarkers" unique_id=834004424]
 position = Vector2(288, 224)
 metadata/npc_id = "innkeeper"
 
-[node name="Npc_apothecary" type="Marker2D" parent="NpcMarkers" unique_id=669571601]
+[node name="Npc_apothecary" type="Marker2D" parent="NpcMarkers" unique_id=2099747752]
 position = Vector2(480, 288)
 metadata/npc_id = "apothecary"
 
-[node name="Doorways" type="Node2D" parent="." unique_id=1208863035]
+[node name="Doorways" type="Node2D" parent="." unique_id=2090373028]
 
-[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=1926949167]
+[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=1120528143]
 position = Vector2(352, 480)
 metadata/target_scene = "res://levels/ambry/ambry_level.tscn"
 metadata/target_spawn = "Door_inn"
 metadata/prompt = "Leave"
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=963391679]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1980357065]
 position = Vector2(352, 352)

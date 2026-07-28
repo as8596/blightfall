@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world/gateway.gd" id="1_gateway"]
+
+[sub_resource type="RectangleShape2D" id="Rect_gateway"]
+size = Vector2(256, 64)
+
+[node name="Gateway" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("1_gateway")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Rect_gateway")

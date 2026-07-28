@@ -2,8 +2,10 @@
 
 Top-down action RPG in Godot 4.6. See [`docs/GDD.md`](docs/GDD.md) for the design
 and [`docs/BUILD-PLAN.md`](docs/BUILD-PLAN.md) for the schedule. Art conventions
-live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md), and everything not yet
-built is inventoried in [`docs/WISHLIST.md`](docs/WISHLIST.md).
+live in [`docs/ART-PIPELINE.md`](docs/ART-PIPELINE.md). The village is described
+in [`docs/AMBRY.md`](docs/AMBRY.md) and the valley outside it in
+[`docs/ORCHARDFALL.md`](docs/ORCHARDFALL.md); everything not yet built is
+inventoried in [`docs/WISHLIST.md`](docs/WISHLIST.md).
 
 **Sprite standard: 64×96 characters, 64×64 tiles, 1280×720 internal**
 (GDD §15, A1).
@@ -17,9 +19,9 @@ built, what is deliberately missing, and what needs tuning by hand.
 
 ## Running it
 
-Open the project in Godot 4.6+ and press F5. `levels/ambry/ambry_level.tscn` is
-the main scene — the village, with the wall to the north and the gate south.
-It boots **fullscreen**; F11 toggles back to a window.
+Open the project in Godot 4.6+ and press F5. `ui/main_menu.tscn` is the main
+scene — title, continue, new game. New Game lands you in Ambry, just inside the
+south gate. It boots **fullscreen**; F11 toggles back to a window.
 
 **The world and the UI are rendered separately.** The world draws into a fixed
 1280×720 `SubViewport` with nearest filtering and is scaled up to fill the
@@ -27,8 +29,15 @@ window; the UI is laid out at the window's real resolution, so text rasterises
 natively instead of being 720p type stretched. UI size is a setting in the Escape
 menu, 1×–4× in half steps.
 
-**Ambry has no enemies**, by design: it is mechanically incapable of hurting you
-(GDD §7). For the combat prototype, open
+Walk **south out of the gate** and you are in Orchardfall — six connected areas
+with a loop in them (`docs/ORCHARDFALL.md`). Outdoor edges are **walked into**:
+follow a path off the screen and the same fade carries you to the next area. No
+keypress — that is for doors, which are a choice. Edges are just the end of the
+ground.
+
+**Nothing out there fights back yet.** Ambry has no enemies by design (GDD §7 —
+it is mechanically incapable of hurting you); Orchardfall has none because none
+have been placed. For the combat prototype, open
 `levels/prototype/prototype_room.tscn` and press **F6** to run just that scene.
 
 Controls and debug keys are below.
@@ -64,11 +73,14 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 199 assertions over the M1 systems and Ambry
+# headless self-check — 219 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
 godot --headless --path . tests/doorway_test.tscn
+
+# starts a new game from the title screen, walks out of town and back
+godot --headless --path . tests/gateway_test.tscn
 
 # dies, with and without a save on disk, and checks the haul is still on the floor
 godot --headless --path . tests/death_test.tscn
@@ -76,9 +88,10 @@ godot --headless --path . tests/death_test.tscn
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
 
-# regenerate the greybox tileset and rebuild the village
+# regenerate the greybox tileset, then rebuild the village and the valley
 python3 tools/gen_greybox_tileset.py
 godot --headless --path . --script res://tools/build_greybox.gd
+godot --headless --path . --script res://tools/build_orchardfall.gd
 
 # look at a level's whole layout rather than playing it
 godot --path . tests/screenshot.tscn -- --scene=res://levels/ambry/ambry_level.tscn --shot=/tmp/plan.png --fit
@@ -151,14 +164,15 @@ autoloads/         Events, Rng, HitStop, Sfx, DebugSettings, SaveGame,
 levels/
   level.gd         composes a map with a player and a camera
   ambry/           the village, greyboxed — map + level scene
+  orchardfall/     the valley: six areas, one interior
   prototype/       the hand-placed box room (combat test bed)
 camera/            the camera rig, which is not a child of the player
 art/               shaders, fonts, sprites, tilesets, icons
-world/             pickups, the haul cache, interactables and doorways
-ui/                world viewport, HUD, stamina wheel, menus, ui scale,
-                   debug overlay
+world/             pickups, the haul cache, interactables, doorways, gateways
+ui/                main menu, world viewport, HUD, stamina wheel, menus,
+                   ui scale, debug overlay
 tests/             headless smoke test + screenshot tool
-tools/             SFX + tileset generators, colour checker, greybox builder
+tools/             SFX + tileset generators, colour checker, map builders
 ```
 
 ## Standing rules

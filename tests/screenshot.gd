@@ -101,7 +101,10 @@ func _capture() -> void:
 	var level := _room as Level
 	if _fit_level and level != null:
 		var bounds := level.world_bounds()
-		var view := get_viewport().get_visible_rect().size
+		# The world's viewport, which is fixed at 1280x720 — not this node's,
+		# which is the window. Since the split they are different sizes, and
+		# framing a level against the window zooms to the wrong thing.
+		var view := Vector2(WorldView.BASE)
 		var camera := level.camera
 		if camera != null and bounds.size != Vector2.ZERO:
 			# Unbound the camera first — room limits would clamp the framing.
