@@ -61,6 +61,18 @@ func is_open() -> bool:
 	return _open
 
 
+## Open on a given page, or close if that page is already showing — so I is a
+## toggle for the inventory rather than a key that only ever opens.
+func show_page(page: int) -> void:
+	if _open and _tabs.current_tab == page:
+		close()
+		return
+	if not _open:
+		open()
+	if _open:
+		_tabs.current_tab = page
+
+
 func toggle() -> void:
 	if _open:
 		close()
@@ -96,7 +108,21 @@ func close() -> void:
 ## also `ui_cancel`, so once a Control inside the menu has focus the UI system
 ## consumes both before unhandled input is ever reached — and the menu becomes a
 ## room with no door. Taking them first is the only reliable fix.
+## Which page each direct key opens. Tab is the general toggle and reopens
+## whatever you were last looking at; these jump.
+const PAGE_KEYS := {
+	&"open_character": 0,
+	&"open_inventory": 1,
+	&"open_map": 2,
+}
+
+
 func _input(event: InputEvent) -> void:
+	for action in PAGE_KEYS:
+		if event.is_action_pressed(action):
+			show_page(PAGE_KEYS[action])
+			get_viewport().set_input_as_handled()
+			return
 	if event.is_action_pressed(&"open_menu"):
 		toggle()
 		get_viewport().set_input_as_handled()
@@ -121,7 +147,9 @@ func _character_text() -> String:
 	var lines := [
 		"",
 		"  [b]Health[/b]        %d / %d" % [stats.get("health", 0), stats.get("max_health", 0)],
-		"  [b]Stamina[/b]       %.0f" % stats.get("max_stamina", 0.0),
+		"  [b]Stamina[/b]       %.0f    [i]back in %.1fs after %.1fs[/i]" % [
+			stats.get("max_stamina", 0.0), stats.get("regen_time", 0.0),
+			stats.get("regen_delay", 0.0)],
 		"  [b]Carry[/b]         %d units" % stats.get("capacity", 0),
 		"",
 		"  [b]Move[/b]          %d px/s" % int(stats.get("move_speed", 0.0)),

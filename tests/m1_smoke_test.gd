@@ -108,7 +108,8 @@ func _hold(action: StringName) -> void:
 
 
 func _release_all() -> void:
-	for action in [&"move_up", &"move_down", &"move_left", &"move_right", &"attack", &"dodge", &"tool"]:
+	for action in [&"move_up", &"move_down", &"move_left", &"move_right", &"attack",
+			&"dodge", &"tool", &"interact"]:
 		Input.action_release(action)
 
 
@@ -366,8 +367,15 @@ func _test_stamina() -> void:
 		spends += 1
 	_check("pool holds exactly four dodges", spends == 4, "spent %d" % spends)
 
-	await _ticks(100)
-	_check_near("refills in ~1.5s", _player.stamina.current, 4.0, 0.05)
+	# Regen waits `regen_delay` before it starts. GDD §6 gives 1.5s to refill;
+	# the pause in front of it is what stops the pool refilling faster than
+	# anything can spend it, which is what made it decorative before sprinting
+	# existed (docs/M1-NOTES.md).
+	var settle: int = int((_player.stamina.regen_delay + 1.5) / TICK) + 20
+	await _ticks(settle)
+	_check_near("refills in ~1.5s after the delay", _player.stamina.current, 4.0, 0.05)
+	_check("and the delay is real", _player.stamina.regen_delay > 0.0,
+		"%.2fs" % _player.stamina.regen_delay)
 
 	# Four consecutive dodges at the fastest rate the cooldown allows.
 	await _reset_player()
@@ -390,6 +398,37 @@ func _test_stamina() -> void:
 	var regen_per_cycle: float = _player.stamina.regen_rate() * cycle
 	print("  NOTE  %.2f stamina regenerates per %.2fs dodge cycle vs 1.00 spent%s"
 		% [regen_per_cycle, cycle, " — pool never binds" if regen_per_cycle >= 1.0 else ""])
+
+
+	# Sprinting: hold the dash key while moving. This is the first thing in the
+	# game that makes the stamina pool bind at all — the cooldown was already
+	# doing the anti-panic-roll job on its own (docs/M1-NOTES.md).
+	await _reset_player()
+	_player.stamina.refill()
+	_hold(&"move_right")
+	await _ticks(20)
+	var walk := _player.motion_velocity.length()
+	_hold(&"dodge")
+	await _ticks(2)
+	# The tap becomes a dodge; wait it out, then the hold becomes a sprint.
+	await _ticks(40)
+	var sprint := _player.motion_velocity.length()
+	_check("holding dash sprints", _player.sprinting and sprint > walk * 1.2,
+		"walk %.0f -> sprint %.0f" % [walk, sprint])
+	var fuel := _player.stamina.current
+	await _ticks(30)
+	_check("and it costs stamina", _player.stamina.current < fuel,
+		"%.2f -> %.2f" % [fuel, _player.stamina.current])
+	# Run it dry and the sprint has to end rather than become free movement.
+	for i in 12:
+		await _ticks(30)
+		if not _player.sprinting:
+			break
+	_check("an empty pool ends the sprint", not _player.sprinting,
+		"stamina %.2f" % _player.stamina.current)
+	_release_all()
+	await _reset_player()
+	_player.stamina.refill()
 
 
 func _test_damage_and_death() -> void:
@@ -911,13 +950,16 @@ func _test_village() -> void:
 	# UI scale is whole-number only. A 1.5x interface duplicates every other row
 	# of pixels, which is the softness the viewport split exists to remove.
 	var was := UiScale.factor
-	UiScale.factor = 99
-	_check("ui scale is clamped, not trusted", UiScale.factor == UiScale.MAX_FACTOR,
-		"%d" % UiScale.factor)
-	UiScale.factor = 2
+	UiScale.factor = 99.0
+	_check("ui scale is clamped, not trusted",
+		is_equal_approx(UiScale.factor, UiScale.MAX_FACTOR), "%.1f" % UiScale.factor)
+	UiScale.factor = 1.37
+	_check("and snapped to a step, not honoured",
+		is_equal_approx(UiScale.factor, 1.5), "%.2f" % UiScale.factor)
+	UiScale.factor = 1.5
 	await _ticks(1)
-	_check("and it scales the layers it was given", Hud.scale.is_equal_approx(Vector2(2, 2)),
-		"%s" % Hud.scale)
+	_check("and it scales the layers it was given",
+		Hud.scale.is_equal_approx(Vector2(1.5, 1.5)), "%s" % Hud.scale)
 	UiScale.factor = was
 	await _ticks(1)
 
@@ -955,6 +997,21 @@ func _test_village() -> void:
 	_check("applying it twice does not stack",
 		level.player.inventory.capacity == before_carry + 6,
 		"%d" % level.player.inventory.capacity)
+	# Recovery is upgradeable, and applied as a ratio so it cannot compound.
+	var delay_before := level.player.stamina.regen_delay
+	sheet.apply(&"apothecary", {StatsComponent.STAMINA_REGEN: 100})
+	await _ticks(1)
+	_check("a building can speed stamina recovery",
+		is_equal_approx(level.player.stamina.regen_delay, delay_before * 0.5),
+		"%.2fs -> %.2fs" % [delay_before, level.player.stamina.regen_delay])
+	sheet.apply(&"apothecary", {StatsComponent.STAMINA_REGEN: 100})
+	await _ticks(1)
+	_check("and re-applying it does not compound",
+		is_equal_approx(level.player.stamina.regen_delay, delay_before * 0.5),
+		"%.2fs" % level.player.stamina.regen_delay)
+	sheet.revoke(&"apothecary")
+	await _ticks(1)
+
 	sheet.revoke(&"market")
 	await _ticks(1)
 	_check("un-building it takes exactly that back",

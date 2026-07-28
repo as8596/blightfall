@@ -20,12 +20,29 @@ const CARRY := &"carry"
 const DAMAGE := &"damage"
 const REACH := &"reach"
 const MOVE_SPEED := &"move_speed"
+## Extra points in the pool.
+const STAMINA := &"stamina"
+## Percent faster recovery — applied to both the pause before regen starts and
+## the time it takes to fill. A rested character is a different character, and
+## it is the kind of improvement a town can plausibly give you.
+const STAMINA_REGEN := &"stamina_regen"
 
 ## {source_id: {stat: delta}}. Keyed by source so a building being un-built —
 ## or a save being loaded — removes exactly what it added.
 var _modifiers: Dictionary = {}
 
 var _base: Dictionary = {}
+
+## Shipped recovery numbers, kept so a percentage can be applied to them
+## repeatedly without compounding.
+var base_max_stamina: float = 4.0
+var base_regen_delay: float = 0.7
+var base_regen_time: float = 1.5
+
+
+## How much faster recovery is than it shipped, as a multiplier.
+func regen_speed() -> float:
+	return 1.0 + float(bonus(STAMINA_REGEN)) / 100.0
 
 
 func _ready() -> void:
@@ -40,7 +57,16 @@ func _ready() -> void:
 		MOVE_SPEED: int(actor.get("move_speed") if actor.get("move_speed") != null else 328),
 		DAMAGE: 0,
 		REACH: 0,
+		STAMINA: 0,
+		STAMINA_REGEN: 0,
 	}
+	# Recovery timings are floats and are restored by ratio rather than by sum,
+	# so they are kept apart from the integer stats above.
+	var pool := actor.get_node_or_null(^"StaminaComponent") as StaminaComponent
+	if pool != null:
+		base_max_stamina = pool.max_stamina
+		base_regen_delay = pool.regen_delay
+		base_regen_time = pool.full_regen_time
 
 
 ## Grant `deltas` in the name of `source`. Re-granting the same source replaces

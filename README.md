@@ -23,9 +23,8 @@ It boots **fullscreen**; F11 toggles back to a window.
 **The world and the UI are rendered separately.** The world draws into a fixed
 1280×720 `SubViewport` with nearest filtering and is scaled up to fill the
 window; the UI is laid out at the window's real resolution, so text rasterises
-natively instead of being 720p type stretched. UI size is a whole-number setting
-in the Escape menu — whole numbers only, because a 1.5× interface duplicates
-every other row of pixels, which is the softness the split exists to remove.
+natively instead of being 720p type stretched. UI size is a setting in the Escape
+menu, 1×–4× in half steps.
 
 **Ambry has no enemies**, by design: it is mechanically incapable of hurting you
 (GDD §7). For the combat prototype, open
@@ -64,7 +63,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 192 assertions over the M1 systems and Ambry
+# headless self-check — 199 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -94,10 +93,12 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Move | WASD / arrows | left stick |
 | Attack | J | X |
 | Dash / dodge | Shift or Space | A |
+| Sprint | hold Shift while moving | hold A |
 | Interact | E | B |
 | Use selected item | K | Y |
 | Pause menu | Escape | Start |
 | Character menu | Tab | Select |
+| Character / Inventory / Map | C / I / M | — |
 | Hotbar select | 1–9, 0 or mouse wheel | — |
 
 `interact` opens doors. It is the general verb — `world/interactable.gd` is the

@@ -23,7 +23,7 @@ signal refused(amount: float)
 @export var full_regen_time: float = 1.5
 
 ## Pause before regen resumes after spending. 0 keeps the pool generous.
-@export var regen_delay: float = 0.0
+@export var regen_delay: float = 0.7
 
 var current: float
 var _delay_remaining: float = 0.0

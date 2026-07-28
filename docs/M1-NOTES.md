@@ -56,7 +56,7 @@ with real exports.
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 192 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 199 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -250,30 +250,21 @@ and the whole point of building it early is that you can go and find out.
 
 ## Tuning notes — for the human
 
-### 1. Stamina currently does nothing
+### 1. Stamina now binds — sprinting is what made it
 
-**The finding:** the dodge pool never binds. The minimum gap between dodges is
-0.36s of roll plus 0.12s of cooldown = 0.48s, and stamina regenerates at
-4 / 1.5s = 2.67/s, so 1.28 stamina comes back per dodge cycle against 1.00
-spent. You can roll forever. The cooldown is the only real limiter.
+**This was the standing finding, and it is resolved.** The dodge pool used to
+return 1.28 points per 0.48s dodge cycle against 1.00 spent, so it could never
+run out and the four-point pool was decoration.
 
-The smoke test prints this as a `NOTE` rather than failing, because the values
-are exactly what GDD §6 specifies — the interaction is what's new.
+Two changes fixed it. **Sprinting** — hold the dash key while moving — drains
+2.0/s, which is a real cost rather than a tap. And **`regen_delay` is 0.7s**
+rather than zero, so the pool does not begin refilling until you stop spending;
+without that no plausible drain rate outruns a 2.67/s refill. The first sprint
+test proved exactly that by passing on speed and failing on cost.
 
-**This may be correct.** GDD §6 says stamina is "a rhythm limiter that stops
-panic-rolling, not a resource to manage", and cites *Hyper Light Drifter*'s
-unlimited dash. A pool that only bites when you mash faster than the cooldown
-allows is arguably the design working. But right now it never bites at all, so
-the 4-dodge pool is decoration.
-
-**Three ways out,** in increasing severity — all one number in the inspector:
-
-- Raise `full_regen_time` past ~2.0s so sustained rolling drains.
-- Add `regen_delay` (currently 0.0) so regen pauses briefly after each roll.
-- Accept it, and cut stamina from M1 entirely rather than shipping a bar that
-  never moves.
-
-Decide this with hands on the controller in week 4, not from the arithmetic.
+**Recovery is upgradeable** (GDD §15 A7). `StatsComponent.STAMINA_REGEN` is a
+percentage applied to both the pause and the refill time, as a ratio so
+re-applying a building's bonus cannot compound it.
 
 ### 2. Values that are guesses, not GDD numbers
 

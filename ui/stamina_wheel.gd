@@ -21,12 +21,14 @@ extends Node2D
 ## The component to read. Left empty, it finds one on the parent.
 @export var stamina_path: NodePath
 
-@export var radius: float = 30.0
-@export var thickness: float = 5.0
+@export var radius: float = 15.0
+@export var thickness: float = 4.0
 
-## Centred just above the feet, so the ring reads as being around the character
-## rather than as a hat.
-@export var offset: Vector2 = Vector2(0.0, -10.0)
+## Above the head. The character is 96px tall with their origin at the feet, so
+## this clears the sprite with a little air. Small and overhead rather than
+## large and around the waist: at the waist it competes with the body you are
+## trying to read during a fight.
+@export var offset: Vector2 = Vector2(0.0, -118.0)
 
 ## Seconds to fade out once stamina is full again, and to fade in when it is not.
 @export var fade_time: float = 0.35

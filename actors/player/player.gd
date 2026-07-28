@@ -16,6 +16,18 @@ extends CharacterBody2D
 ## Not specified; slightly snappier than acceleration so stops read as crisp.
 @export var time_to_stop: float = 0.06
 
+## Sprinting. Holding the dash key after a dash keeps you moving fast and
+## empties the pool — which is the first thing in the game that makes stamina
+## bind at all. GDD §6 wanted "a rhythm limiter that stops panic-rolling"; the
+## dodge cooldown was already doing that job on its own, and the four-point pool
+## was decoration (docs/M1-NOTES.md).
+@export var sprint_speed_scale: float = 1.55
+## Points per second while sprinting. At 4 points and 2.0/s a sprint lasts two
+## seconds from full, which is a distance rather than a mode.
+@export var sprint_drain: float = 2.0
+## Below this, sprinting will not start. Stops a sprint that lasts a footstep.
+@export var sprint_minimum: float = 0.6
+
 @export_group("Combat")
 ## GDD §5: 0.8s i-frames on damage.
 @export var damage_invuln_time: float = 0.8
@@ -122,6 +134,10 @@ func _on_stats_changed() -> void:
 	health.set_max_health(stats.value(StatsComponent.MAX_HEALTH), false)
 	inventory.capacity = stats.value(StatsComponent.CARRY)
 	move_speed = float(stats.value(StatsComponent.MOVE_SPEED))
+	stamina.max_stamina = stats.base_max_stamina + float(stats.bonus(StatsComponent.STAMINA))
+	var faster := stats.regen_speed()
+	stamina.regen_delay = stats.base_regen_delay / faster
+	stamina.full_regen_time = stats.base_regen_time / faster
 	Events.player_stats_changed.emit(stat_block())
 	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
 
@@ -148,6 +164,8 @@ func stat_block() -> Dictionary:
 		"reach_bonus": stats.bonus(StatsComponent.REACH),
 		"granted_by": stats.sources(),
 		"dodge_distance": dodge.distance if dodge != null else 0.0,
+		"regen_delay": stamina.regen_delay,
+		"regen_time": stamina.full_regen_time,
 	}
 
 
@@ -239,6 +257,28 @@ func configure_hitbox(step: ComboStepData) -> void:
 		if rect != null:
 			rect.size = step.hitbox_size
 		_hitbox_shape.position = Vector2(step.hitbox_offset, 0.0)
+
+
+## True while the dash key is held, there is fuel, and the player is moving.
+## Sprinting is a *continuation* of the dash rather than its own verb: you
+## commit by tapping, and keeping your thumb down keeps the commitment.
+var sprinting: bool = false
+
+
+func update_sprint(delta: float) -> bool:
+	var wants := input.intent.dodge_held and input.intent.move != Vector2.ZERO
+	if not wants:
+		sprinting = false
+		return false
+	# Starting costs more than continuing, so a pool scraping the bottom does
+	# not flicker in and out of a sprint every frame.
+	if not sprinting and stamina.current < sprint_minimum:
+		return false
+	if not stamina.spend(sprint_drain * delta):
+		sprinting = false
+		return false
+	sprinting = true
+	return true
 
 
 func can_dodge() -> bool:

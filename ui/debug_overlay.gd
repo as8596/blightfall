@@ -23,6 +23,9 @@ var _player: Player
 
 
 func _ready() -> void:
+	# Onto the world image rather than the window corner: on an ultrawide the
+	# top-left of the window is a black bar.
+	UiScale.register(self)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = get_node_or_null(player_path) as Player
 	DebugSettings.changed.connect(_refresh_visibility)

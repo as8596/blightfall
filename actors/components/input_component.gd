@@ -49,6 +49,7 @@ func _process(delta: float) -> void:
 		intent.move = Vector2.ZERO
 		intent.raw_move = Vector2.ZERO
 		intent.attack_held = false
+		intent.dodge_held = false
 		_refresh_flags()
 		return
 
@@ -70,6 +71,7 @@ func _process(delta: float) -> void:
 			_hotbar_pressed = slot
 			break
 	intent.attack_held = Input.is_action_pressed(&"attack")
+	intent.dodge_held = Input.is_action_pressed(&"dodge")
 	_refresh_flags()
 
 

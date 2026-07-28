@@ -113,7 +113,7 @@ func _refresh() -> void:
 	if _buttons.size() >= 3:
 		_buttons[2].disabled = not SaveGame.has_save(SaveGame.current_slot)
 	if _scale_label != null:
-		_scale_label.text = "UI scale   %d x" % UiScale.factor
+		_scale_label.text = "UI scale   %.1f x" % UiScale.factor
 
 
 func _build() -> void:
@@ -156,7 +156,7 @@ func _build() -> void:
 	smaller.text = "-"
 	smaller.custom_minimum_size = Vector2(48, 40)
 	smaller.add_theme_font_size_override("font_size", 22)
-	smaller.pressed.connect(func() -> void: UiScale.factor -= 1)
+	smaller.pressed.connect(func() -> void: UiScale.factor -= UiScale.STEP)
 	scale_row.add_child(smaller)
 
 	_scale_label = Label.new()
@@ -170,10 +170,10 @@ func _build() -> void:
 	bigger.text = "+"
 	bigger.custom_minimum_size = Vector2(48, 40)
 	bigger.add_theme_font_size_override("font_size", 22)
-	bigger.pressed.connect(func() -> void: UiScale.factor += 1)
+	bigger.pressed.connect(func() -> void: UiScale.factor += UiScale.STEP)
 	scale_row.add_child(bigger)
 
-	UiScale.changed.connect(func(_f: int) -> void: _refresh())
+	UiScale.changed.connect(func(_f: float) -> void: _refresh())
 
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 12)

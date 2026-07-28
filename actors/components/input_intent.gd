@@ -23,3 +23,7 @@ var interact_buffered: bool = false
 
 ## Held state, for future charge attacks.
 var attack_held: bool = false
+
+## The dash key is still down. Tapping it dashes; keeping it down afterwards
+## sprints — see `PlayerMoveState`.
+var dodge_held: bool = false

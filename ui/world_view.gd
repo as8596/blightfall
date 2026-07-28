@@ -58,6 +58,11 @@ func _fit() -> void:
 	size = Vector2(BASE)
 	position = ((window - Vector2(BASE) * factor) * 0.5).floor()
 
+	# The UI hugs the picture, not the window. On a 21:9 monitor a 16:9 world
+	# leaves 440px of bar down each side, and a health bar sitting out on the
+	# bar is a health bar that has come loose from the game.
+	UiScale.set_content_rect(Rect2(position, Vector2(BASE) * factor))
+
 
 ## The scale the world is currently drawn at. The UI does not use it — that is
 ## the point — but the debug overlay reports it.
