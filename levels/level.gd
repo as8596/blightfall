@@ -47,6 +47,7 @@ func _ready() -> void:
 		camera.apply_room_bounds(_frameable(bounds.grow(camera_margin)))
 
 	place_player_at(spawn_marker)
+	ensure_player_inside()
 	_spawn_doorways()
 
 
@@ -61,11 +62,45 @@ func place_player_at(marker_name: String) -> bool:
 	var where := find_marker(marker_name)
 	var found := where != Vector2.INF
 	if not found:
+		# Loud, because the fallback is a guess. A door pointing at a marker that
+		# was renamed drops the player in the middle of the map, which looks like
+		# a broken door rather than a broken name.
+		push_warning("Level: no marker named '%s' in %s; using the map centre."
+			% [marker_name, name])
 		where = world_bounds().get_center()
 	player.global_position = where
 	if camera != null:
 		camera.set_target(player)
 	return found
+
+
+## Put the player back on solid ground if something has left them outside the
+## map, and say so.
+##
+## Two things can do that and neither raises an error on its own: a spawn marker
+## that no longer exists, and a save whose stored position has nothing to do
+## with this scene — `SaveGame.apply()` restores coordinates verbatim, because a
+## save entry is data and it has no idea what map it is landing in.
+##
+## The symptom is the player standing in the void beyond the top-left corner
+## with the camera unclamped, which reads as "the game spawned me wrong" and is
+## invisible to every test that does not check coordinates. Better to correct it
+## and leave a warning than to ship a game that occasionally starts you outside
+## the world.
+func ensure_player_inside() -> void:
+	if player == null:
+		return
+	var bounds := world_bounds()
+	if bounds.size == Vector2.ZERO or bounds.has_point(player.global_position):
+		return
+
+	var spawn := find_marker(spawn_marker)
+	var rescued := spawn if spawn != Vector2.INF else bounds.get_center()
+	push_warning("Level: player was at %s, outside %s — moved to %s."
+		% [player.global_position, bounds, rescued])
+	player.global_position = rescued
+	if camera != null:
+		camera.set_target(player)
 
 
 func _spawn_doorways() -> void:

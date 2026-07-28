@@ -857,6 +857,22 @@ func _test_village() -> void:
 		overhead != null and overhead.z_index > level.player.z_index
 			and overhead.get_used_rect().size == Vector2i.ZERO)
 
+	# ---- nobody starts outside the map.
+	var bounds := level.world_bounds()
+	_check("the spawn is inside the world",
+		bounds.has_point(level.player.global_position),
+		"%s in %s" % [level.player.global_position, bounds])
+	_check("and it is the gate marker, not a fallback",
+		level.player.global_position.distance_to(level.find_marker("PlayerSpawn")) < 1.0,
+		"%s" % level.player.global_position)
+	# A save restores a bare coordinate with no idea what map it lands in, so
+	# arriving out of bounds has to be corrected rather than honoured.
+	level.player.global_position = Vector2(-4000.0, -4000.0)
+	level.ensure_player_inside()
+	_check("a player left outside the world is put back",
+		bounds.has_point(level.player.global_position),
+		"%s" % level.player.global_position)
+
 	# ---- the walls are real.
 	var wall_player := level.player
 	_check("the level placed a player", wall_player != null)

@@ -169,6 +169,11 @@ func _swap(scene_path: String, spawn: String, payload: Dictionary) -> bool:
 	var scene := get_tree().current_scene
 	if scene != null and not spawn.is_empty() and scene.has_method(&"place_player_at"):
 		scene.call(&"place_player_at", spawn)
+	# A retry passes no spawn on purpose — you resume exactly where you saved.
+	# But a save carries a bare coordinate with no idea which map it is landing
+	# in, so the arrival still has to be checked before the fade lifts.
+	if scene != null and scene.has_method(&"ensure_player_inside"):
+		scene.call(&"ensure_player_inside")
 
 	_restore_cache()
 
