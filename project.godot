@@ -27,6 +27,7 @@ SaveGame="*res://systems/save/save_game.gd"
 ScreenFade="*res://autoloads/screen_fade.gd"
 Transition="*res://autoloads/transition.gd"
 Items="*res://autoloads/items.gd"
+Music="*res://autoloads/music.gd"
 Hud="*res://ui/hud.gd"
 
 [display]
