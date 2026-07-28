@@ -83,9 +83,22 @@ func _ready() -> void:
 		Events.player_health_changed.emit(current, maximum))
 	stamina.changed.connect(func(current: float, maximum: float) -> void:
 		Events.player_stamina_changed.emit(current, maximum))
+	inventory.changed.connect(func(units: int, limit: int) -> void:
+		Events.player_inventory_changed.emit(units, limit))
 	hurtbox.hit_taken.connect(_on_hit_taken)
 
 	state_machine.start()
+	# Deferred: a listener added later in the same frame — the HUD, on scene
+	# load — would miss values emitted during `_ready`, and then show zero hearts
+	# until the player first took damage.
+	_broadcast_state.call_deferred()
+
+
+## Push current values onto the bus for anything that has just started listening.
+func _broadcast_state() -> void:
+	Events.player_health_changed.emit(health.current, health.max_health)
+	Events.player_stamina_changed.emit(stamina.current, stamina.max_stamina)
+	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
 
 
 func _process(delta: float) -> void:

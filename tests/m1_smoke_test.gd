@@ -174,6 +174,14 @@ func _test_project_configuration() -> void:
 	for action in [&"move_up", &"move_down", &"move_left", &"move_right", &"attack", &"dodge", &"tool"]:
 		_check("input action '%s' exists" % action, InputMap.has_action(action))
 
+	var dodge_keys: Array[int] = []
+	for event in InputMap.action_get_events(&"dodge"):
+		var key := event as InputEventKey
+		if key != null:
+			dodge_keys.append(key.physical_keycode)
+	_check("dash is on shift", dodge_keys.has(KEY_SHIFT), "%s" % [dodge_keys])
+	_check("and still on space", dodge_keys.has(KEY_SPACE))
+
 
 func _test_movement() -> void:
 	print("\nMovement (328 px/s at 1280x720, full speed in 0.08s)")
@@ -832,6 +840,24 @@ func _test_village() -> void:
 	pickup.queue_free()
 	_check("doorways are interactable", doors.is_empty() or doors[0] is Interactable)
 	_check("the fade starts clear", not ScreenFade.is_covered() and ScreenFade.alpha() == 0.0)
+
+	# ---- the HUD. It holds no state; it hears the bus. The thing worth pinning
+	# is that it hears the player's *opening* values — a listener that only ever
+	# learns about changes shows zero hearts until you first take damage.
+	_check("the HUD knows the health it was never told about directly",
+		Hud.max_health > 0 and Hud.health > 0, "%d/%d" % [Hud.health, Hud.max_health])
+	_check("and the satchel's capacity", Hud.capacity > 0, "%d" % Hud.capacity)
+	var wheel := level.player.get_node_or_null("StaminaWheel")
+	_check("stamina is a ring on the character, not a bar in a corner", wheel != null)
+
+	# The limiter only ever speaks when it says no. `depleted` is a different
+	# moment — you can empty the pool on a dash that worked.
+	var refused := [false]
+	level.player.stamina.refused.connect(func(_a: float) -> void: refused[0] = true)
+	level.player.stamina.current = 0.0
+	_check("a dash you cannot afford is refused out loud",
+		not level.player.stamina.spend(1.0) and refused[0])
+	level.player.stamina.refill()
 
 	# Death has to lead somewhere. It used to be terminal outside the prototype
 	# room, which was fine when the prototype room was the only level and is not

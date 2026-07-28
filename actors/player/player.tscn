@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://resources/combat/player_combo.tres" id="2_combo"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://actors/components/inventory_component.gd" id="18_inv"]
 [ext_resource type="Script" path="res://actors/components/interactor_component.gd" id="20_interactor"]
 [ext_resource type="Resource" path="res://resources/animation/player_placeholder.tres" id="21_anim_set"]
+[ext_resource type="Script" path="res://ui/stamina_wheel.gd" id="22_wheel"]
 [ext_resource type="PackedScene" path="res://world/haul_cache.tscn" id="19_cache"]
 [ext_resource type="Script" path="res://actors/components/hitbox.gd" id="8_hitbox"]
 [ext_resource type="Script" path="res://actors/components/hurtbox.gd" id="9_hurtbox"]
@@ -140,3 +141,7 @@ script = ExtResource("20_interactor")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Interactor"]
 position = Vector2(0, -32)
 shape = SubResource("Circle_interactor")
+
+[node name="StaminaWheel" type="Node2D" parent="."]
+script = ExtResource("22_wheel")
+stamina_path = NodePath("../StaminaComponent")

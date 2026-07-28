@@ -12,34 +12,34 @@ script = ExtResource("1_overlay")
 [node name="Panel" type="Panel" parent="."]
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 402.0
-offset_bottom = 232.0
+offset_right = 528.0
+offset_bottom = 334.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBox_panel")
 
 [node name="Label" type="Label" parent="Panel"]
 offset_left = 8.0
 offset_top = 4.0
-offset_right = 392.0
-offset_bottom = 204.0
+offset_right = 518.0
+offset_bottom = 302.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.858824, 0.898039, 0.760784, 1)
-theme_override_constants/line_spacing = 2
-theme_override_font_sizes/font_size = 13
+theme_override_constants/line_spacing = 4
+theme_override_font_sizes/font_size = 18
 text = "debug"
 
 [node name="StaminaBack" type="ColorRect" parent="Panel"]
 offset_left = 8.0
-offset_top = 210.0
-offset_right = 188.0
-offset_bottom = 220.0
+offset_top = 310.0
+offset_right = 248.0
+offset_bottom = 324.0
 mouse_filter = 2
 color = Color(0.117647, 0.145098, 0.180392, 1)
 
 [node name="StaminaFill" type="ColorRect" parent="Panel"]
 offset_left = 8.0
-offset_top = 210.0
-offset_right = 188.0
-offset_bottom = 220.0
+offset_top = 310.0
+offset_right = 248.0
+offset_bottom = 324.0
 mouse_filter = 2
 color = Color(0.552941, 0.85098, 0.952941, 1)

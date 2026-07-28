@@ -21,6 +21,10 @@ signal enemy_died(enemy: Node)
 ## Emitted by a Hitbox the moment it connects, before hitstop is applied.
 signal hit_landed(attacker: Node, target: Node, damage: int)
 
+## The player's satchel changed. Carries totals rather than a delta, because
+## every listener wants "how full am I", not "what just happened".
+signal player_inventory_changed(carried: int, capacity: int)
+
 ## A material was picked up.
 signal material_collected(id: StringName, amount: int)
 

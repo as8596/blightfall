@@ -56,7 +56,7 @@ with real exports.
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 162 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 168 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and

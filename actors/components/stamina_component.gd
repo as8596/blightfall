@@ -10,6 +10,12 @@ signal changed(current: float, max_stamina: float)
 signal spent(amount: float)
 signal depleted
 
+## A spend was turned down for want of stamina. `depleted` fires when the pool
+## reaches zero, which is a different moment: you can empty it on a dash that
+## succeeded. This is the one where the limiter says no, and it is the only time
+## the player needs telling about stamina at all.
+signal refused(amount: float)
+
 ## 4 consecutive dodges (GDD §6).
 @export var max_stamina: float = 4.0
 
@@ -49,6 +55,7 @@ func can_spend(amount: float) -> bool:
 ## Returns false and changes nothing if the pool is too low.
 func spend(amount: float) -> bool:
 	if not can_spend(amount):
+		refused.emit(amount)
 		return false
 	current = maxf(current - amount, 0.0)
 	_delay_remaining = regen_delay
