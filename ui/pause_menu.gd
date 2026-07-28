@@ -70,7 +70,10 @@ func close() -> void:
 	closed.emit()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+## `_input` for the same reason the character menu uses it: a focused Button
+## swallows `ui_cancel`, and a pause menu you cannot close with Escape is worse
+## than no pause menu.
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
 		toggle()
 		get_viewport().set_input_as_handled()

@@ -80,7 +80,11 @@ func close() -> void:
 	closed.emit()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+## `_input`, not `_unhandled_input`. Tab is also `ui_focus_next` and Escape is
+## also `ui_cancel`, so once a Control inside the menu has focus the UI system
+## consumes both before unhandled input is ever reached — and the menu becomes a
+## room with no door. Taking them first is the only reliable fix.
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"open_menu"):
 		toggle()
 		get_viewport().set_input_as_handled()
@@ -112,9 +116,16 @@ func _character_text() -> String:
 		"  [b]Strike[/b]        %s" % stats.get("damage", "-"),
 		"  [b]Dash[/b]          %d px" % int(stats.get("dodge_distance", 0.0)),
 		"",
-		"  [i]Every one of these moves when Ambry does. Rebuild the forge and",
-		"  Strike changes; the apothecary and Health does.[/i]",
 	]
+	var granted: Array = stats.get("granted_by", [])
+	if granted.is_empty():
+		lines.append("  [i]Nothing in Ambry is standing that was not standing when you")
+		lines.append("  arrived. Every one of these numbers moves when that changes,")
+		lines.append("  and nothing else moves them.[/i]")
+	else:
+		lines.append("  [b]Granted by[/b]")
+		for source in granted:
+			lines.append("    %s" % String(source).capitalize())
 	return "\n".join(lines)
 
 

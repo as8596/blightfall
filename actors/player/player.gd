@@ -44,6 +44,7 @@ extends CharacterBody2D
 @onready var inventory: InventoryComponent = $InventoryComponent
 @onready var interactor: InteractorComponent = $Interactor
 @onready var items: ItemsComponent = $ItemsComponent
+@onready var stats: StatsComponent = $StatsComponent
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -93,6 +94,7 @@ func _ready() -> void:
 		Events.player_item_refused.emit(slot))
 	items.selection_changed.connect(func(slot: int) -> void:
 		Events.player_hotbar_selected.emit(slot))
+	stats.changed.connect(_on_stats_changed)
 	hurtbox.hit_taken.connect(_on_hit_taken)
 
 	state_machine.start()
@@ -110,6 +112,18 @@ func _broadcast_state() -> void:
 	Events.player_items_changed.emit(items.items, items.counts)
 	Events.player_hotbar_selected.emit(items.selected)
 	Events.player_stats_changed.emit(stat_block())
+
+
+## Push the village's contributions into the components that own the numbers.
+## Health raises its ceiling before anything reads it, for the same ordering
+## reason the save system has a test for: lowering a max first would clamp away
+## containers the player earned.
+func _on_stats_changed() -> void:
+	health.set_max_health(stats.value(StatsComponent.MAX_HEALTH), false)
+	inventory.capacity = stats.value(StatsComponent.CARRY)
+	move_speed = float(stats.value(StatsComponent.MOVE_SPEED))
+	Events.player_stats_changed.emit(stat_block())
+	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
 
 
 ## The character sheet, as data. Read off the live components and the combo
@@ -130,6 +144,9 @@ func stat_block() -> Dictionary:
 		"capacity": inventory.capacity,
 		"move_speed": move_speed,
 		"damage": strike,
+		"damage_bonus": stats.bonus(StatsComponent.DAMAGE),
+		"reach_bonus": stats.bonus(StatsComponent.REACH),
+		"granted_by": stats.sources(),
 		"dodge_distance": dodge.distance if dodge != null else 0.0,
 	}
 

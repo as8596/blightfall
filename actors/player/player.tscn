@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://resources/combat/player_combo.tres" id="2_combo"]
@@ -13,6 +13,7 @@
 [ext_resource type="Resource" path="res://resources/animation/player_placeholder.tres" id="21_anim_set"]
 [ext_resource type="Script" path="res://ui/stamina_wheel.gd" id="22_wheel"]
 [ext_resource type="Script" path="res://actors/components/items_component.gd" id="23_items"]
+[ext_resource type="Script" path="res://actors/components/stats_component.gd" id="25_stats"]
 [ext_resource type="Resource" path="res://resources/items/defs/bread.tres" id="24_bread"]
 [ext_resource type="PackedScene" path="res://world/haul_cache.tscn" id="19_cache"]
 [ext_resource type="Script" path="res://actors/components/hitbox.gd" id="8_hitbox"]
@@ -106,6 +107,9 @@ shape = SubResource("Rect_hurtbox")
 [node name="InventoryComponent" type="Node" parent="."]
 script = ExtResource("18_inv")
 capacity = 12
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("25_stats")
 
 [node name="ItemsComponent" type="Node" parent="."]
 script = ExtResource("23_items")

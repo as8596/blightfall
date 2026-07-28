@@ -888,6 +888,28 @@ func _test_village() -> void:
 	GameMenu.close()
 	await _ticks(1)
 	_check("and closing it gives time back", not get_tree().paused and Hud.enabled)
+
+	# GDD §15 A7: the village is the only thing that writes to the sheet.
+	var sheet: StatsComponent = level.player.stats
+	_check("a modifier with no source is refused",
+		not sheet.apply(&"", {StatsComponent.DAMAGE: 99}))
+	var before_carry := level.player.inventory.capacity
+	sheet.apply(&"market", {StatsComponent.CARRY: 6})
+	await _ticks(1)
+	_check("a building raises the number it grants",
+		level.player.inventory.capacity == before_carry + 6,
+		"%d -> %d" % [before_carry, level.player.inventory.capacity])
+	_check("and the sheet says which building",
+		GameMenu.stats.get("granted_by", []).has(&"market"))
+	sheet.apply(&"market", {StatsComponent.CARRY: 6})
+	await _ticks(1)
+	_check("applying it twice does not stack",
+		level.player.inventory.capacity == before_carry + 6,
+		"%d" % level.player.inventory.capacity)
+	sheet.revoke(&"market")
+	await _ticks(1)
+	_check("un-building it takes exactly that back",
+		level.player.inventory.capacity == before_carry)
 	# A menu opening over a scene change would sit on top of a level the player
 	# has not seen yet.
 	Transition.auto_retry = false

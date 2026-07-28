@@ -853,6 +853,47 @@ Four changes, each with a reason:
 material types remains the cap, and the gallows remains the project that costs
 materials and grants nothing.
 
+### A7 — The village modifies real stats (amends §15 A4)
+
+**Was (A4):** the rebuild state of Ambry *is* the character sheet. No numbers —
+your capabilities were buildings, and there was nothing else to show.
+**Now:** the player has real stats, and the projects move them.
+
+This reverses the most distinctive claim A4 made, so it is worth being honest
+about the trade rather than pretending it is a refinement.
+
+**What A4 was protecting.** "The village is your character sheet" meant the
+rebuild loop could never degrade into a shop that sells stat points — because
+there were no stat points. Every capability was a place, and a place is
+authored, sited and reacted to by the people who live there. That is still the
+best idea in the document.
+
+**Why it gave.** A4 left the player with nothing to look at and nothing to feel
+progress against between projects, and projects are expensive — a full satchel
+each for the high-cost ones. Eight discrete jumps across a campaign is very
+coarse pacing, and there was no way to answer "am I stronger than I was" except
+by remembering which buildings are standing. It also made a character screen
+impossible to write, which is a symptom rather than a cause but a telling one.
+
+**The rule that keeps A4's intent alive:** every stat modifier has a **named
+source**, and every source is a building. Nothing raises a number without
+something in Ambry standing that did not stand before. There is no XP, no level,
+no points to spend, and no way to increase a stat that is not "go and rebuild
+the thing". The village is no longer the sheet — it is the only thing that
+writes to it.
+
+| Stat | Moved by |
+|---|---|
+| Strike damage, then reach | The forge |
+| Carry capacity | The market |
+| Health | The apothecary, and heart shards |
+| Departure speed / safety | The watchpost |
+
+**The test that keeps it honest:** a stat with a modifier from no building is a
+bug. If a number ever moves for a reason the player cannot walk to and look at,
+A4 has been abandoned rather than amended, and this section is the record of
+what that would cost.
+
 ---
 
 *Living document. Revisit §2 monthly.*
