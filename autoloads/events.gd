@@ -25,6 +25,12 @@ signal hit_landed(attacker: Node, target: Node, damage: int)
 ## every listener wants "how full am I", not "what just happened".
 signal player_inventory_changed(carried: int, capacity: int)
 
+## The player's carried items changed — contents, counts, or which slot.
+signal player_items_changed(items: Array, counts: Array)
+
+## A slot was pressed and nothing happened. The HUD flashes it.
+signal player_item_refused(slot: int)
+
 ## A material was picked up.
 signal material_collected(id: StringName, amount: int)
 

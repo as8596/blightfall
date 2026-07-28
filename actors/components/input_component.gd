@@ -1,5 +1,8 @@
 class_name InputComponent
 extends Node
+
+## Hotbar keys, 1-9 then 0. Must match `ItemsComponent.slots`.
+const HOTBAR_SLOTS: int = 10
 ## The only place in the player's code that touches `Input` (GDD §12, rule 3).
 ##
 ## Produces an InputIntent the state machine consumes. Also owns input
@@ -24,6 +27,11 @@ var _attack_buffer: float = 0.0
 var _dodge_buffer: float = 0.0
 var _tool_buffer: float = 0.0
 var _interact_buffer: float = 0.0
+
+## Which hotbar slot was pressed this frame, or -1. Deliberately unbuffered:
+## eating is not a combat verb, and a queued meal that fires half a second after
+## the danger has passed is a meal thrown away.
+var _hotbar_pressed: int = -1
 
 
 func _process(delta: float) -> void:
@@ -51,6 +59,11 @@ func _process(delta: float) -> void:
 		_tool_buffer = buffer_time
 	if Input.is_action_just_pressed(&"interact"):
 		_interact_buffer = buffer_time
+	_hotbar_pressed = -1
+	for slot in HOTBAR_SLOTS:
+		if Input.is_action_just_pressed(&"hotbar_%d" % (slot + 1)):
+			_hotbar_pressed = slot
+			break
 	intent.attack_held = Input.is_action_pressed(&"attack")
 	_refresh_flags()
 
@@ -93,6 +106,12 @@ func consume_interact() -> bool:
 	_interact_buffer = 0.0
 	intent.interact_buffered = false
 	return true
+
+
+## The hotbar slot pressed this frame, or -1. Reading it does not clear it; it
+## is rebuilt every frame from the raw input.
+func hotbar_pressed() -> int:
+	return _hotbar_pressed if enabled else -1
 
 
 func clear_buffers() -> void:

@@ -1,7 +1,7 @@
 extends CanvasLayer
 ## The three things the player has to be able to read without stopping.
 ##
-## **Hearts** bottom-left, **satchel** bottom-right. Stamina is not here at all —
+## **Hotbar** bottom-centre, **hearts** bottom-left, **satchel** bottom-right. Stamina is not here at all —
 ## it is a ring around the character (`ui/stamina_wheel.gd`), where you are
 ## already looking when you dash. Bottom-aligned because the debug overlay owns the top-left corner and
 ## BUILD-PLAN week 1 rule 2 says that never comes off; a HUD you have to hide a
@@ -21,11 +21,13 @@ const LAYER: int = 64
 
 const MARGIN: Vector2 = Vector2(28.0, 24.0)
 
-const HEART_SIZE: float = 26.0
-const HEART_STEP: float = 32.0
-
-const HEART_FULL := Color(0.80, 0.28, 0.26)
-const HEART_EMPTY := Color(0.20, 0.16, 0.16, 0.85)
+## Health is a bar, not a row of hearts (amends GDD §5's wording). It keeps one
+## tick per heart, though: "two hits left" is a decision you can make mid-fight
+## and "31%" is not, so the discreteness the hearts were carrying stays.
+const HEALTH_SIZE: Vector2 = Vector2(232.0, 18.0)
+const HEALTH_FULL := Color(0.80, 0.28, 0.26)
+const HEALTH_LOW := Color(0.88, 0.46, 0.24)
+const HEALTH_BACK := Color(0.20, 0.16, 0.16, 0.85)
 const HEART_EDGE := Color(0.10, 0.08, 0.08, 0.9)
 
 const SATCHEL_SIZE: Vector2 = Vector2(148.0, 14.0)
@@ -41,10 +43,21 @@ const TEXT := Color(0.95, 0.92, 0.85)
 ## in a window and thin across a fullscreen monitor.
 const FONT_SIZE: int = 20
 
+const SLOT_SIZE: float = 52.0
+const SLOT_GAP: float = 6.0
+const SLOT_BACK := Color(0.13, 0.11, 0.10, 0.82)
+const SLOT_EDGE := Color(0.42, 0.35, 0.26)
+const SLOT_REFUSED := Color(0.86, 0.45, 0.30)
+
 var health: int = 0
 var max_health: int = 0
 var carried: int = 0
 var capacity: int = 0
+var slot_items: Array = []
+var slot_counts: Array = []
+
+## Seconds left on the "that did nothing" flash, per slot.
+var _refused: Dictionary = {}
 
 ## Off for a title screen or a cutscene. Nothing sets it yet.
 var enabled: bool = true:
@@ -69,6 +82,8 @@ func _ready() -> void:
 
 	Events.player_health_changed.connect(_on_health)
 	Events.player_inventory_changed.connect(_on_inventory)
+	Events.player_items_changed.connect(_on_items)
+	Events.player_item_refused.connect(_on_item_refused)
 
 
 func _on_health(current: int, maximum: int) -> void:
@@ -83,37 +98,56 @@ func _on_inventory(units: int, limit: int) -> void:
 	_canvas.queue_redraw()
 
 
+func _on_items(entries: Array, counts: Array) -> void:
+	slot_items = entries.duplicate()
+	slot_counts = counts.duplicate()
+	_canvas.queue_redraw()
+
+
+func _on_item_refused(slot: int) -> void:
+	_refused[slot] = 0.45
+	set_process(true)
+	_canvas.queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if _refused.is_empty():
+		set_process(false)
+		return
+	for slot in _refused.keys():
+		_refused[slot] -= delta
+		if _refused[slot] <= 0.0:
+			_refused.erase(slot)
+	_canvas.queue_redraw()
+
+
 # --------------------------------------------------------------------- drawing
 
 func _draw_hud() -> void:
 	var size := _canvas.size
-	_draw_hearts(Vector2(MARGIN.x, size.y - MARGIN.y - HEART_SIZE))
+	_draw_health(Vector2(MARGIN.x, size.y - MARGIN.y - HEALTH_SIZE.y))
+	_draw_hotbar(size)
 	_draw_satchel(Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y))
 
 
-## GDD §5: six hearts to start, twelve at most. Discrete, because "three hits
-## left" is a thing you can act on and "62%" is not.
-func _draw_hearts(origin: Vector2) -> void:
-	for i in max_health:
-		_draw_heart(origin + Vector2(i * HEART_STEP, 0.0), i < health)
-
-
-func _draw_heart(at: Vector2, filled: bool) -> void:
-	var body := HEART_FULL if filled else HEART_EMPTY
-	var s := HEART_SIZE
-	var lobe := s * 0.27
-	# Outline first, as a slightly larger copy underneath — cheaper than stroking
-	# and it keeps the hearts legible against a pale floor as well as a dark one.
-	for pass_index in 2:
-		var colour := HEART_EDGE if pass_index == 0 else body
-		var grow: float = 2.0 if pass_index == 0 else 0.0
-		_canvas.draw_circle(at + Vector2(lobe, lobe * 1.15), lobe + grow, colour, true, -1.0, false)
-		_canvas.draw_circle(at + Vector2(s - lobe, lobe * 1.15), lobe + grow, colour, true, -1.0, false)
-		_canvas.draw_colored_polygon(PackedVector2Array([
-			at + Vector2(-grow, lobe * 1.15),
-			at + Vector2(s + grow, lobe * 1.15),
-			at + Vector2(s * 0.5, s + grow),
-		]), colour)
+## One tick per heart container, so the bar still answers "how many more hits"
+## at a glance. Turns warm below a quarter — the only moment the bar needs to
+## raise its voice.
+func _draw_health(origin: Vector2) -> void:
+	if max_health <= 0:
+		return
+	var ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
+	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), HEALTH_SIZE + Vector2(4, 4)), HEART_EDGE)
+	_canvas.draw_rect(Rect2(origin, HEALTH_SIZE), HEALTH_BACK)
+	_canvas.draw_rect(
+		Rect2(origin, Vector2(HEALTH_SIZE.x * ratio, HEALTH_SIZE.y)),
+		HEALTH_LOW if ratio <= 0.25 else HEALTH_FULL
+	)
+	var step := HEALTH_SIZE.x / float(max_health)
+	for i in range(1, max_health):
+		var x := origin.x + step * i
+		_canvas.draw_line(Vector2(x, origin.y), Vector2(x, origin.y + HEALTH_SIZE.y),
+			HEART_EDGE, 2.0)
 
 
 ## The haul. This is the one that carries GDD §15 A4 — the interesting decision
@@ -138,3 +172,50 @@ func _draw_satchel(origin: Vector2) -> void:
 	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE,
 		Color(0.05, 0.04, 0.04, 0.9))
 	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
+
+
+
+## Five slots, centred along the bottom edge — the row the hand finds without
+## looking, and the reason the bar is slots rather than a bag: a hotbar that
+## cannot show everything it holds is a menu wearing a hotbar's clothes.
+##
+## Numbered, because the binding *is* the affordance. An unlabelled row teaches
+## nobody that 1–5 do anything.
+func _draw_hotbar(screen: Vector2) -> void:
+	var count: int = slot_items.size()
+	if count <= 0:
+		return
+	var width := count * SLOT_SIZE + (count - 1) * SLOT_GAP
+	var origin := Vector2((screen.x - width) * 0.5, screen.y - MARGIN.y - SLOT_SIZE)
+	var font := ThemeDB.fallback_font
+
+	for i in count:
+		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP), 0.0)
+		var box := Rect2(at, Vector2(SLOT_SIZE, SLOT_SIZE))
+		_canvas.draw_rect(box, SLOT_BACK)
+		var edge: Color = SLOT_REFUSED if _refused.has(i) else SLOT_EDGE
+		_canvas.draw_rect(box, edge, false, 2.0)
+
+		var item: ItemData = slot_items[i] if slot_items[i] is ItemData else null
+		if item != null and item.icon != null:
+			# Icons are drawn to fit rather than 1:1: the uploaded set is not all
+			# one size, and a hotbar where the bread is bigger than the key reads
+			# as a bug rather than as bread.
+			var pad := 6.0
+			_canvas.draw_texture_rect(item.icon,
+				Rect2(at + Vector2(pad, pad), Vector2(SLOT_SIZE - pad * 2.0, SLOT_SIZE - pad * 2.0)),
+				false)
+
+		_canvas.draw_string(font, at + Vector2(4.0, 14.0), "0" if i == 9 else str(i + 1),
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, Color(0.75, 0.70, 0.62, 0.85))
+
+		var held: int = int(slot_counts[i]) if i < slot_counts.size() else 0
+		if item != null and held > 1:
+			var label := str(held)
+			var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+
+			var text_at := at + Vector2(SLOT_SIZE - w - 4.0, SLOT_SIZE - 5.0)
+			_canvas.draw_string(font, text_at + Vector2(1, 1), label,
+				HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
+			_canvas.draw_string(font, text_at, label,
+				HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)

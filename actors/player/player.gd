@@ -43,6 +43,7 @@ extends CharacterBody2D
 @onready var animation: AnimationComponent = $AnimationComponent
 @onready var inventory: InventoryComponent = $InventoryComponent
 @onready var interactor: InteractorComponent = $Interactor
+@onready var items: ItemsComponent = $ItemsComponent
 
 ## Last committed facing. Drives hitbox placement and the default dodge
 ## direction. Starts down because that is where a character faces at rest.
@@ -85,6 +86,10 @@ func _ready() -> void:
 		Events.player_stamina_changed.emit(current, maximum))
 	inventory.changed.connect(func(units: int, limit: int) -> void:
 		Events.player_inventory_changed.emit(units, limit))
+	items.changed.connect(func() -> void:
+		Events.player_items_changed.emit(items.items, items.counts))
+	items.refused.connect(func(slot: int) -> void:
+		Events.player_item_refused.emit(slot))
 	hurtbox.hit_taken.connect(_on_hit_taken)
 
 	state_machine.start()
@@ -99,6 +104,7 @@ func _broadcast_state() -> void:
 	Events.player_health_changed.emit(health.current, health.max_health)
 	Events.player_stamina_changed.emit(stamina.current, stamina.max_stamina)
 	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
+	Events.player_items_changed.emit(items.items, items.counts)
 
 
 func _process(delta: float) -> void:
@@ -109,6 +115,7 @@ func _process(delta: float) -> void:
 			next_combo_index = 0
 
 	_try_interact()
+	_try_hotbar()
 
 
 ## Interacting is handled here rather than in a state, because it is not a state
@@ -126,6 +133,17 @@ func _try_interact() -> void:
 		# interact that fires the moment you walk up to a door is worse than
 		# dropping it.
 		pass
+
+
+## Same gating as interacting: standing or walking only. Eating out of a dodge
+## would make the i-frames a free window to heal in, which is a different game.
+func _try_hotbar() -> void:
+	if not (state_machine.is_in(&"Idle") or state_machine.is_in(&"Move")):
+		return
+	var slot := input.hotbar_pressed()
+	if slot >= 0:
+		@warning_ignore("return_value_discarded")
+		items.use(slot, self)
 
 
 ## Accelerate toward `desired` and move. Knockback rides on top rather than
@@ -235,6 +253,7 @@ func save_data() -> Dictionary:
 		"max_health": health.max_health,
 		"max_stamina": stamina.max_stamina,
 		"inventory": inventory.save_data(),
+		"items": items.save_data(),
 	}
 
 

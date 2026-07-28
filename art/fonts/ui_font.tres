@@ -1,0 +1,8 @@
+[gd_resource type="FontVariation" load_steps=3 format=3]
+
+[ext_resource type="FontFile" path="res://art/fonts/dico.ttf" id="1_dico"]
+[ext_resource type="FontFile" path="res://art/fonts/alagard.ttf" id="2_alagard"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("2_alagard")])
+base_font = ExtResource("1_dico")

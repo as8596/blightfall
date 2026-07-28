@@ -89,6 +89,7 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Dash / dodge | Shift or Space | A |
 | Interact | E | B |
 | Tool | K | Y |
+| Hotbar | 1–9, 0 | — |
 
 `interact` opens doors. It is the general verb — `world/interactable.gd` is the
 base class talking, building, resting and the chest will all use — but doors are
@@ -135,15 +136,15 @@ resources/
   combat/          the player's combo, as a tunable .tres
   enemy_data/      one .tres per enemy
 autoloads/         Events, Rng, HitStop, Sfx, DebugSettings, SaveGame,
-                   ScreenFade, Transition
+                   ScreenFade, Transition, Items, Hud
 levels/
   level.gd         composes a map with a player and a camera
   ambry/           the village, greyboxed — map + level scene
   prototype/       the hand-placed box room (combat test bed)
 camera/            the camera rig, which is not a child of the player
-art/               shaders, and sprites/tilesets/palettes once M2 starts
+art/               shaders, fonts, sprites, tilesets, icons
 world/             pickups, the haul cache, interactables and doorways
-ui/                debug overlay
+ui/                HUD, stamina wheel, debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, greybox builder
 ```
