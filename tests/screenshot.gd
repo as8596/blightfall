@@ -36,6 +36,10 @@ var _fit_level: bool = false
 ## thing being drawn over you.
 var _stand_at: Vector2 = Vector2.INF
 
+## `--face=n|s|e|w` points the player, for checking the directional sprites
+## without walking them around.
+var _face: String = ""
+
 ## `--xp=N` awards experience, for checking a bar that is otherwise empty in
 ## every fresh scene.
 var _grant_xp: int = 0
@@ -77,6 +81,8 @@ func _capture() -> void:
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
+		elif arg.begins_with("--face="):
+			_face = arg.trim_prefix("--face=")
 		elif arg.begins_with("--xp="):
 			_grant_xp = arg.trim_prefix("--xp=").to_int()
 		elif arg.begins_with("--pointer="):
@@ -139,6 +145,13 @@ func _capture() -> void:
 
 	if player == null and (_attack or _use_placeholder_animations or _stand_at != Vector2.INF):
 		push_warning("screenshot: no player in this scene — some flags did nothing.")
+
+	if _face != "" and player != null:
+		const HEADINGS := {
+			"n": Vector2.UP, "s": Vector2.DOWN, "e": Vector2.RIGHT, "w": Vector2.LEFT,
+		}
+		player.facing = HEADINGS.get(_face, Vector2.DOWN)
+		await _wait_ticks(2)
 
 	if _grant_xp > 0 and player != null:
 		player.experience.grant(_grant_xp)

@@ -3,13 +3,18 @@
 
     python3 tools/gen_placeholder_animations.py
 
-Composites the reference body into 128x128 frames at the documented anchor and
-offsets it per frame, producing real multi-frame strips in exactly the format
+Composites the reference bodies into 128x128 frames at the documented anchor and
+offsets each per frame, producing real multi-frame strips in exactly the format
 the game expects. They are not animation — a body sliding around is not a walk
 cycle — but they are enough to prove the whole path end to end before a single
 real frame is drawn: strip slicing, the feet-on-origin offset, direction
 flipping, and above all that attack frames advance off the combo's frame data
 rather than off a frame rate.
+
+**Three bodies, four directions.** Which body a strip uses is read off its own
+name, so `_up` cannot silently get the front view — which is exactly what it
+had been doing, and the reason the character faced the camera while walking
+north. West is east flipped at runtime, so there is no fourth body to draw.
 
 Replace these with real exports from Pixelorama one animation at a time.
 """
@@ -87,14 +92,24 @@ def composite(body, frames):
     return sheet, width
 
 
+def facing_of(name: str) -> str:
+    """Which of the three bodies a strip is drawn from, off its own name."""
+    facing = name.rsplit("_", 1)[-1]
+    assert facing in ref.BUILDERS_64, f"{name}: unknown facing '{facing}'"
+    return facing
+
+
 def main() -> None:
     os.makedirs(OUT_DIR, exist_ok=True)
-    body = ref.build_64()
+    # Three bodies, built once each: south faces the camera, north is the back
+    # of the head, and east is the profile. West is east flipped at runtime
+    # (`AnimationComponent._flip`), which is why there is no fourth.
+    bodies = {facing: build() for facing, build in ref.BUILDERS_64.items()}
     print(f"writing {len(STRIPS)} strips to {OUT_DIR}")
     for name, frames in STRIPS.items():
-        sheet, width = composite(body, frames)
+        sheet, width = composite(bodies[facing_of(name)], frames)
         ref.png(os.path.join(OUT_DIR, name + ".png"), sheet, width, FRAME)
-        print(f"  {name}.png  {len(frames)} frames  {width}x{FRAME}")
+        print(f"  {name}.png  {len(frames)} frames  {width}x{FRAME}  {facing_of(name)}")
 
 
 if __name__ == "__main__":

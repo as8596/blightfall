@@ -54,9 +54,30 @@ feet-on-origin offset, direction flipping, and attack frames advancing off the
 combo's frame data rather than off a frame rate. Replace it one clip at a time
 with real exports.
 
+**Four directions, three bodies.** `gen_size_study.py` now draws the reference
+figure three ways — facing the camera, from behind, and in profile — and the
+animation generator picks one per strip off the strip's own name. West is east
+flipped at runtime, which is why there is no fourth.
+
+This was a real bug rather than a missing feature: every strip had been
+composited from the front-facing body, so the character walked north facing the
+camera. Every existing assertion passed through it, because they checked *which
+strip* was selected and never what was in it. `_check_distinct_directions`
+compares the pixels now.
+
+The profile is the awkward one and it is worth knowing why. The front and back
+views are drawn as a mirrored half — a face is symmetric — but a profile has a
+nose on one side and the back of a skull on the other, so it is built from a
+separate set of asymmetric primitives on a signed offset from the centre line.
+Its torso is also deliberately deeper than a real chest: a profile loses both
+arms from the silhouette, and at that width the head looks enormous.
+
+All three keep the same vertical landmarks — collar 45, belt 69, knee 84, sole
+95 — so one table of per-frame offsets stays correct in every direction.
+
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 199 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 219 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and

@@ -91,6 +91,34 @@ func _check_near(label: String, actual: float, expected: float, tolerance: float
 	)
 
 
+## Every clip's three strips must be three different pictures.
+##
+## Cheap to check and impossible to notice otherwise: a `_up` strip that is
+## secretly the front view satisfies "facing north uses the up strip" perfectly.
+func _check_distinct_directions(set: ActorAnimationSet) -> void:
+	var clips := {
+		"idle": set.idle, "walk": set.walk, "attack_1": set.attack_1,
+		"dodge": set.dodge, "hurt": set.hurt, "death": set.death,
+	}
+	var same: Array[String] = []
+	for label in clips:
+		var clip: SpriteAnimation = clips[label]
+		if clip == null:
+			continue
+		var pairs := [["down", clip.down, "up", clip.up],
+			["down", clip.down, "side", clip.side],
+			["up", clip.up, "side", clip.side]]
+		for pair in pairs:
+			var a: Texture2D = pair[1]
+			var b: Texture2D = pair[3]
+			if a == null or b == null:
+				continue
+			if a.get_image().get_data() == b.get_image().get_data():
+				same.append("%s %s==%s" % [label, pair[0], pair[2]])
+	_check("north, south and east are three different pictures", same.is_empty(),
+		", ".join(same))
+
+
 # ------------------------------------------------------------------ harness
 
 func _ticks(count: int) -> void:
@@ -619,6 +647,12 @@ func _test_animation() -> void:
 	_player.facing = Vector2.UP
 	await _ticks(2)
 	_check("facing north uses the up strip", anim.sprite.texture == set.idle.up)
+
+	# Picking the right strip is worth nothing if the strips are the same
+	# picture. They were: the generator composited the front-facing body into
+	# every direction, so the character walked north facing the camera and every
+	# check above still passed. Compare the pixels.
+	_check_distinct_directions(set)
 
 	# The load-bearing one: attack frames track the combo's phase boundaries,
 	# not a frame rate. Hit 1 is windup 0.08 / active 0.10 / recovery 0.16.

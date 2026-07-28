@@ -160,6 +160,58 @@ class Canvas:
         self.px(self.w // 2 - 1 - x, y, c)
         self.px(self.w // 2 + x, y, c)
 
+    # ---- asymmetric primitives, for the profile ---------------------------
+    #
+    # Everything above mirrors about the centre line, which is exactly right
+    # for a character facing the camera and exactly wrong for one in profile:
+    # a face seen side-on has a nose on one side and a bun of hair on the
+    # other. These take a signed offset `d` from the centre line instead —
+    # d = 0 is the first column right of centre, d = -1 the first column left.
+
+    def at(self, d, y, c):
+        self.px(self.w // 2 + d, y, c)
+
+    def band(self, y, d0, d1, c):
+        for d in range(d0, d1 + 1):
+            self.at(d, y, c)
+
+    def block(self, y0, y1, d0, d1, c):
+        for y in range(y0, y1 + 1):
+            self.band(y, d0, d1, c)
+
+    def wedge(self, y0, y1, back0, front0, back1, front1, c):
+        """A panel whose back and front edges each ease from y0 to y1."""
+        for y in range(y0, y1 + 1):
+            t = (y - y0) / max(y1 - y0, 1)
+            self.band(y,
+                      int(round(back0 + (back1 - back0) * t)),
+                      int(round(front0 + (front1 - front0) * t)), c)
+
+    def blob(self, dc, cy, rx, ry, c, y0=None, y1=None,
+             d_max=None, d_min=None, inner_rx=0):
+        """An ellipse centred off the axis, optionally cut off in x.
+
+        `d_max` is what lets hair sit over the back of a skull without
+        swallowing the face in front of it.
+        """
+        for y in range(int(cy - ry), int(cy + ry) + 1):
+            if (y0 is not None and y < y0) or (y1 is not None and y > y1):
+                continue
+            t = (y - cy) / ry
+            if abs(t) > 1.0:
+                continue
+            k = math.sqrt(1.0 - t * t)
+            hw = int(round(rx * k))
+            hole = int(round(inner_rx * k)) if inner_rx else 0
+            for d in range(dc - hw, dc + hw + 1):
+                if hole and abs(d - dc) < hole:
+                    continue
+                if d_max is not None and d > d_max:
+                    continue
+                if d_min is not None and d < d_min:
+                    continue
+                self.at(d, y, c)
+
     def outline(self, c='#'):
         """One-pixel dark border around the whole silhouette."""
         add = []
@@ -176,9 +228,14 @@ class Canvas:
             self.g[y][x] = c
 
 
-def build_64():
-    c = Canvas(W64, H64)
+def _facing_body(c):
+    """Legs, torso, belt, arms and neck — everything symmetric about the axis.
 
+    Shared by the front and back views because from either side the body reads
+    the same. The vertical landmarks — collar 45, belt 69, knee 84, sole 95 —
+    are the contract: they are the same in all three views, so a walk offset or
+    an attack lunge authored against one direction is right in every direction.
+    """
     # ---- legs and boots (drawn first; the tunic overlaps them)
     for y in range(74, 95):
         c.span(y, 13, 'P', inner=2)
@@ -195,7 +252,6 @@ def build_64():
 
     # ---- torso
     c.taper(45, 70, 17, 14, 'T')
-    c.taper(48, 68, 8, 6, 'U')                    # lit chest panel
     c.rect(45, 47, 11, 't')                       # collar
     for y in range(48, 70):                       # flank folds
         c.span(y, 14, 't', inner=11)
@@ -205,8 +261,6 @@ def build_64():
     # ---- belt
     c.rect(69, 73, 15, 'L')
     c.rect(72, 73, 15, 'l')
-    c.rect(70, 73, 3, 'K')                        # buckle
-    c.px(31, 71, 'l'); c.px(32, 71, 'l')
 
     # ---- arms
     for y in range(47, 70):
@@ -224,12 +278,26 @@ def build_64():
     # ---- neck
     c.rect(40, 47, 7, 'S')
     c.rect(40, 43, 7, 's')                        # jaw shadow on the neck
+    return c
 
-    # ---- head
+
+def _skull(c):
+    """The hair mass shared by the front and back views."""
     c.ellipse(24, 15, 20, 'H', y0=2)              # hair mass
     c.ellipse(24, 15, 20, 'h', y0=2, inner_rx=13)  # hair rim shadow
     c.ellipse(20, 10, 11, 'G', y0=4)              # crown
     c.ellipse(17, 5, 6, 'g', y0=6)                # specular
+    return c
+
+
+def build_64():
+    """Facing the camera. South, and the view everything else is measured off."""
+    c = _skull(_facing_body(Canvas(W64, H64)))
+
+    c.taper(48, 68, 8, 6, 'U')                    # lit chest panel
+    c.rect(70, 73, 3, 'K')                        # buckle
+    c.px(31, 71, 'l'); c.px(32, 71, 'l')
+
     c.ellipse(28, 12, 16, 'S', y0=18)             # face
     c.ellipse(28, 12, 16, 's', y0=18, inner_rx=10)  # cheek shading
     c.ellipse(26, 8, 9, 'W', y0=20, y1=32)        # forehead light
@@ -261,6 +329,145 @@ def build_64():
 
     c.outline()
     return c.g
+
+
+def build_64_up():
+    """Walking away. North.
+
+    The read has to survive being 64 pixels tall on a moving character, so it
+    is carried by three things a player registers without looking: **no face**,
+    hair continuing down past the jawline to the nape, and **no belt buckle**.
+    Everything else is deliberately identical to the front view — a back that
+    is a different character is worse than a back that is plain.
+    """
+    c = _skull(_facing_body(Canvas(W64, H64)))
+
+    # Hair covers the whole skull and the nape. The front view's face ellipse
+    # is replaced by the same shape in hair, one row shallower so a sliver of
+    # neck shows beneath it.
+    c.ellipse(27, 13, 15, 'H', y0=18, y1=38)
+    c.ellipse(27, 13, 15, 'h', y0=30, y1=38)      # shadow where it falls
+    c.ellipse(22, 9, 10, 'G', y0=18, y1=27)       # crown light carries over
+
+    for y in range(36, 39):                       # ragged hairline
+        c.span(y, 10 - (y - 36) * 3, 'h')
+
+    for dx in range(11, 14):                      # ears, seen edge-on
+        for y in range(29, 35):
+            c.pair(dx, y, 'S')
+        c.pair(13, y, 's')
+
+    # Shoulder blades catch the light; a single spine crease keeps the back
+    # from reading as a flat board.
+    c.taper(48, 62, 11, 8, 'U')
+    c.taper(49, 68, 2, 1, 't')
+
+    c.outline()
+    return c.g
+
+
+def build_64_side():
+    """In profile, facing right. East — and west is this flipped, which is why
+    only one strip is drawn (`SpriteAnimation.side`).
+
+    Nothing here can be mirrored: the nose is on one side and the back of the
+    skull is on the other, so this is built from the asymmetric primitives and
+    laid out on a signed offset from the centre line.
+
+    It keeps the front view's vertical landmarks exactly — collar 45, belt 69,
+    knee 84, sole 95 — so the shared per-frame offsets in
+    `gen_placeholder_animations.py` land the same way in all three directions.
+    """
+    c = Canvas(W64, H64)
+
+    # A profile loses both arms from the silhouette, so a torso as narrow as a
+    # real one leaves the head looking enormous. Chest depth here is about
+    # three-fifths of the front view's shoulder-to-shoulder, which is roughly
+    # true of a person and reads as the same character rather than a thinner one.
+
+    # ---- legs: one mass, with the far leg as a shadow behind it
+    c.block(74, 94, -10, 8, 'P')
+    c.block(74, 94, -10, -5, 'p')                 # far leg
+    c.block(84, 88, -3, 6, 'p')                   # knee
+    c.block(87, 94, -10, 12, 'B')                 # boot, toe forward
+    c.block(88, 90, -8, 8, 'b')                   # cuff
+    c.block(93, 94, -10, 12, '#')                 # sole
+
+    # ---- torso: shoulders back a little, chest forward
+    c.wedge(45, 70, -13, 12, -12, 11, 'T')
+    c.block(45, 47, -11, 9, 't')                  # collar
+    c.wedge(48, 68, -13, -9, -12, -8, 't')        # the back is the shadow side
+    c.wedge(48, 66, 6, 12, 5, 11, 'U')            # and the chest the lit one
+
+    # ---- belt, buckle at the front edge
+    c.block(69, 73, -13, 12, 'L')
+    c.block(72, 73, -13, 12, 'l')
+    c.block(70, 73, 8, 12, 'K')
+
+    # ---- the near arm, hanging just forward of the body
+    c.wedge(47, 65, -6, 6, -5, 6, 'A')
+    c.block(63, 65, -6, 6, 't')                   # cuff
+    c.block(66, 74, -3, 7, 'S')                   # hand
+    c.block(70, 74, 3, 3, '#')                    # one finger separation
+
+    # ---- neck, set forward of the spine
+    c.block(40, 47, -5, 6, 'S')
+    c.block(40, 46, -5, -2, 's')
+
+    # ---- head, in three passes, and the order is the whole trick.
+    #
+    # Face first. Then hair over it — right across above the brow, back-only
+    # below, which is what turns a symmetric skull into a profile. Then the
+    # features last, so nothing paints over them.
+    c.blob(3, 28, 10, 16, 'S', y0=16)             # face
+    c.blob(3, 28, 10, 16, 's', y0=16, d_max=-2)   # shaded toward the back
+    # The face ellipse alone lets the jaw recede into nothing, so the chin is
+    # built back on by hand and tapered rather than squared off.
+    c.band(39, -4, 9, 'S')
+    c.band(40, -4, 9, 'S')
+    c.band(41, -3, 8, 'S')
+    c.band(42, -2, 7, 'S')
+    c.band(43, -1, 5, 's')
+    c.blob(4, 26, 6, 9, 'W', y0=20, y1=31)        # cheekbone light
+
+    # The nose is the single cheapest thing that says "profile", and it only
+    # works if it breaks the silhouette.
+    c.band(32, 12, 14, 's')
+    c.band(33, 12, 15, 's')
+    c.band(34, 11, 15, 's')
+    c.band(35, 11, 13, 'h')                       # underside
+    c.band(36, 10, 11, 's')
+    c.band(39, 6, 9, 'h')                         # mouth
+
+    c.blob(0, 23, 12, 19, 'H', y0=3, y1=24)       # crown, right across
+    # The hairline steps back as it descends rather than dropping straight —
+    # a flat cut-off reads as a curtain hung down the middle of the face.
+    c.blob(0, 23, 12, 19, 'H', y0=25, y1=28, d_max=-1)
+    c.blob(0, 23, 12, 19, 'H', y0=29, y1=33, d_max=-3)
+    c.blob(0, 23, 12, 19, 'H', y0=34, y1=39, d_max=-5)
+    c.blob(0, 23, 12, 19, 'h', y0=3, y1=39, inner_rx=10)   # rim shadow
+    c.blob(-1, 19, 8, 10, 'G', y0=4, y1=22)       # crown light
+    c.blob(-3, 16, 4, 6, 'g', y0=6)               # specular
+    c.block(22, 24, 2, 12, 'h')                   # under the fringe
+
+    # ---- one eye, one ear. Both are what sell a profile.
+    c.block(29, 32, 3, 8, 'W')
+    c.block(29, 31, 4, 7, 'E')
+    c.at(5, 30, 'e'); c.at(6, 30, 'e')
+    c.block(26, 27, 2, 11, 'h')                   # brow
+    c.block(29, 35, -4, 0, 'S')                   # ear, forward of the hair
+    c.block(31, 34, -3, -1, 's')
+    c.block(29, 35, 1, 1, 'h')                    # crease, or it is just cheek
+
+    c.outline()
+    return c.g
+
+
+BUILDERS_64 = {
+    "down": build_64,
+    "up": build_64_up,
+    "side": build_64_side,
+}
 
 
 # --------------------------------------------------------------------------
