@@ -33,6 +33,14 @@ signal player_items_changed(items: Array, counts: Array)
 ## everything else (GDD §12 rule 1).
 signal player_stats_changed(stats: Dictionary)
 
+## Progress toward the next level: points into this level, points it needs, and
+## the level itself.
+signal player_xp_changed(current: int, needed: int, level: int)
+
+## A level was just crossed. Nothing grants a stat off this — the village does
+## that (GDD §15 A7) — but it is the hook for the moment being *marked*.
+signal player_leveled(level: int)
+
 ## Which hotbar slot the tool verb will use.
 signal player_hotbar_selected(slot: int)
 

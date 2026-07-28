@@ -877,10 +877,9 @@ impossible to write, which is a symptom rather than a cause but a telling one.
 
 **The rule that keeps A4's intent alive:** every stat modifier has a **named
 source**, and every source is a building. Nothing raises a number without
-something in Ambry standing that did not stand before. There is no XP, no level,
-no points to spend, and no way to increase a stat that is not "go and rebuild
-the thing". The village is no longer the sheet — it is the only thing that
-writes to it.
+something in Ambry standing that did not stand before. There are no points to
+spend and no way to increase a stat that is not "go and rebuild the thing". The
+village is no longer the sheet — it is the only thing that writes to it.
 
 | Stat | Moved by |
 |---|---|
@@ -893,6 +892,32 @@ writes to it.
 bug. If a number ever moves for a reason the player cannot walk to and look at,
 A4 has been abandoned rather than amended, and this section is the record of
 what that would cost.
+
+### A8 — There is XP, and it buys nothing (amends A7)
+
+**Was (A7):** "there is no XP, no level". **Now:** there is. The HUD carries a
+thin bar under health, gold as it fills, silent until pointed at.
+
+A7 wrote that line while arguing against stat points, and it overshot — it
+banned the *counter* along with the *shop*. Those are separable, and separating
+them is the whole of this amendment:
+
+- **A level grants nothing.** `ExperienceComponent` emits `player_leveled` and
+  stops. Every stat still comes from `StatsComponent`, still carries the id of
+  the building that granted it, and is still refused without one.
+- **So the bar answers "how far along am I", not "what did I earn".** The
+  answer to the second question is still a walk through Ambry looking at what
+  is standing.
+
+Kills fill it — `EnemyData.xp_value`, which had been sitting unread since M1.
+What a level is eventually *for* is deliberately unanswered; the honest options
+are a title, a story beat, or a gate on which projects Ambry will attempt. What
+it must not become is a stat, and `_test_experience` asserts exactly that, so
+the day someone adds the convenient exception the suite says so.
+
+**The risk, stated plainly:** a progress bar that pays out nothing is a bar
+players will eventually resent. This is a placeholder for a decision, not the
+decision.
 
 ---
 

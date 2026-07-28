@@ -36,6 +36,14 @@ var _fit_level: bool = false
 ## thing being drawn over you.
 var _stand_at: Vector2 = Vector2.INF
 
+## `--xp=N` awards experience, for checking a bar that is otherwise empty in
+## every fresh scene.
+var _grant_xp: int = 0
+
+## `--pointer=x,y` puts the cursor somewhere, in window pixels. Hover states are
+## invisible to a harness that never moves the mouse.
+var _pointer: Vector2 = Vector2.INF
+
 var _room: Node
 
 
@@ -69,6 +77,12 @@ func _capture() -> void:
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
+		elif arg.begins_with("--xp="):
+			_grant_xp = arg.trim_prefix("--xp=").to_int()
+		elif arg.begins_with("--pointer="):
+			var at := arg.trim_prefix("--pointer=").split(",")
+			if at.size() == 2:
+				_pointer = Vector2(float(at[0]), float(at[1]))
 		elif arg.begins_with("--attack="):
 			_attack = true
 			_attack_delay = arg.trim_prefix("--attack=").to_int()
@@ -125,6 +139,16 @@ func _capture() -> void:
 
 	if player == null and (_attack or _use_placeholder_animations or _stand_at != Vector2.INF):
 		push_warning("screenshot: no player in this scene — some flags did nothing.")
+
+	if _grant_xp > 0 and player != null:
+		player.experience.grant(_grant_xp)
+		await _wait_ticks(2)
+
+	if _pointer != Vector2.INF:
+		Input.warp_mouse(_pointer)
+		# Two full frames: one for the warp to land, one for whatever polls it.
+		await get_tree().process_frame
+		await get_tree().process_frame
 
 	if _attack and player != null:
 		# The swing follows the cursor, and a headless cursor sits at (0, 0) —

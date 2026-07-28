@@ -57,6 +57,7 @@ extends CharacterBody2D
 @onready var interactor: InteractorComponent = $Interactor
 @onready var items: ItemsComponent = $ItemsComponent
 @onready var stats: StatsComponent = $StatsComponent
+@onready var experience: ExperienceComponent = $ExperienceComponent
 @onready var weapon_arc: WeaponArc = $WeaponArc
 
 ## Last committed facing. Drives hitbox placement and the default dodge
@@ -108,7 +109,15 @@ func _ready() -> void:
 	items.selection_changed.connect(func(slot: int) -> void:
 		Events.player_hotbar_selected.emit(slot))
 	stats.changed.connect(_on_stats_changed)
+	experience.changed.connect(func(current: int, need: int, level: int) -> void:
+		Events.player_xp_changed.emit(current, need, level))
+	experience.leveled.connect(func(level: int) -> void:
+		Events.player_leveled.emit(level))
 	hurtbox.hit_taken.connect(_on_hit_taken)
+	# `EnemyData.xp_value` has been sitting there unread since M1. This is what
+	# reads it — off the bus rather than off a reference, because the enemy has
+	# no business knowing a player exists (GDD §12 rule 1).
+	Events.enemy_died.connect(_on_enemy_died)
 
 	state_machine.start()
 	# Deferred: a listener added later in the same frame — the HUD, on scene
@@ -125,6 +134,13 @@ func _broadcast_state() -> void:
 	Events.player_items_changed.emit(items.items, items.counts)
 	Events.player_hotbar_selected.emit(items.selected)
 	Events.player_stats_changed.emit(stat_block())
+	Events.player_xp_changed.emit(experience.current, experience.needed(), experience.level)
+
+
+func _on_enemy_died(enemy: Node) -> void:
+	var data: EnemyData = enemy.get("data") if enemy != null else null
+	if data != null:
+		experience.grant(data.xp_value)
 
 
 ## Push the village's contributions into the components that own the numbers.
@@ -374,6 +390,7 @@ func save_data() -> Dictionary:
 		"max_stamina": stamina.max_stamina,
 		"inventory": inventory.save_data(),
 		"items": items.save_data(),
+		"experience": experience.save_data(),
 	}
 
 
@@ -393,6 +410,10 @@ func load_data(data: Dictionary) -> void:
 	var carried: Variant = data.get("inventory")
 	if carried is Dictionary:
 		inventory.load_data(carried)
+
+	var earned: Variant = data.get("experience")
+	if earned is Dictionary:
+		experience.load_data(earned)
 
 	# Whatever the player was doing when they saved, they are standing still now.
 	motion_velocity = Vector2.ZERO

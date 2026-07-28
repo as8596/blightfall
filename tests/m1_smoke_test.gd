@@ -62,6 +62,7 @@ func _run() -> void:
 	await _test_damage_and_death()
 	await _test_enemy_behaviour()
 	await _test_animation()
+	await _test_experience()
 	await _test_save_load()
 	await _test_haul()
 	await _test_village()
@@ -653,6 +654,64 @@ func _test_animation() -> void:
 	_check("clearing art restores the placeholder", not anim.has_art())
 
 
+## Experience, and the guard rail that comes with it.
+##
+## The last check is the important one. GDD §15 A7 said there was no XP; there
+## is now, and the thing A7 was really protecting is that a level hands out
+## nothing — the village is still the only route to a bigger number. That is a
+## rule that decays the moment someone adds a convenient exception, so it is
+## asserted rather than written down.
+func _test_experience() -> void:
+	print("\nExperience (GDD §15 A7, amended: levels exist, they still grant nothing)")
+	await _reset_player()
+
+	var xp := _player.experience
+	_check("player carries an experience component", xp != null)
+	if xp == null:
+		return
+
+	xp.current = 0
+	xp.level = 1
+	var need := xp.needed()
+	_check("a fresh character is level 1 with nothing banked", xp.level == 1 and xp.current == 0)
+
+	var seen: Array = []
+	var on_changed := func(current: int, needed: int, level: int) -> void:
+		seen.append([current, needed, level])
+	xp.changed.connect(on_changed)
+
+	xp.grant(need - 1)
+	_check("points accumulate", xp.current == need - 1 and xp.level == 1,
+		"%d/%d at level %d" % [xp.current, xp.needed(), xp.level])
+	_check("granting announces itself", seen.size() == 1)
+
+	xp.grant(1)
+	_check("crossing the threshold levels up", xp.level == 2, "level %d" % xp.level)
+	_check("the remainder carries, it does not reset", xp.current == 0, str(xp.current))
+	_check("the next level costs more", xp.needed() > need,
+		"%d vs %d" % [xp.needed(), need])
+
+	# A single fat award must not be quietly capped at one level.
+	var before := xp.level
+	xp.grant(xp.needed() * 4)
+	_check("one large award can cross several levels", xp.level > before + 1,
+		"level %d from %d" % [xp.level, before])
+
+	xp.grant(-50)
+	_check("a negative award does nothing", xp.current >= 0)
+	xp.changed.disconnect(on_changed)
+
+	# The rule A7 exists to protect: levelling is not a stat source.
+	var stats_before := _player.stat_block().duplicate()
+	var sources_before: int = _player.stats.sources().size()
+	xp.grant(xp.needed())
+	await _ticks(2)
+	_check("levelling grants no stats", _player.stat_block() == stats_before,
+		"a level must never write a stat — only a rebuilt building may (GDD §15 A7)")
+	_check("levelling adds no stat source", _player.stats.sources().size() == sources_before)
+	_check("a modifier still needs a source", not _player.stats.apply(&"", {"damage": 5}))
+
+
 func _test_save_load() -> void:
 	print("\nSave/load (JSON, versioned, atomic)")
 	const SLOT := 9
@@ -667,8 +726,11 @@ func _test_save_load() -> void:
 	_player.global_position = Vector2(1234, 567)
 	_player.facing = Vector2.LEFT
 	_player.health.take_damage(2)
+	_player.experience.grant(17)
 	var saved_position := _player.global_position
 	var saved_health := _player.health.current
+	var saved_xp := _player.experience.current
+	var saved_level := _player.experience.level
 
 	_check("save writes", SaveGame.save_slot(SLOT), SaveGame.last_error())
 	_check("slot now exists", SaveGame.has_save(SLOT))
@@ -676,6 +738,8 @@ func _test_save_load() -> void:
 	_player.global_position = Vector2(10, 10)
 	_player.facing = Vector2.DOWN
 	_player.health.heal(99)
+	_player.experience.current = 0
+	_player.experience.level = 99
 
 	_check("load reads back", SaveGame.load_slot(SLOT), SaveGame.last_error())
 	_check("position restored", _player.global_position.is_equal_approx(saved_position),
@@ -683,6 +747,9 @@ func _test_save_load() -> void:
 	_check("facing restored", _player.facing.is_equal_approx(Vector2.LEFT))
 	_check("health restored", _player.health.current == saved_health,
 		"%d vs %d" % [_player.health.current, saved_health])
+	_check("experience restored", _player.experience.current == saved_xp
+		and _player.experience.level == saved_level,
+		"%d at level %d" % [_player.experience.current, _player.experience.level])
 	_check("player is idle after loading", _player.state_machine.is_in(&"Idle"))
 
 	# The file is data, and readable data at that.

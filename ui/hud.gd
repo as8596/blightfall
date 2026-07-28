@@ -30,6 +30,17 @@ const HEALTH_LOW := Color(0.88, 0.46, 0.24)
 const HEALTH_BACK := Color(0.20, 0.16, 0.16, 0.85)
 const HEART_EDGE := Color(0.10, 0.08, 0.08, 0.9)
 
+## Experience sits under health and is deliberately thin. It is the one bar on
+## screen that never needs reading mid-fight — nothing about it changes a
+## decision — so it gets a sliver of the eye and no number at all until asked.
+##
+## Empty is the same neutral the other bars sit in; filled is gold, which is the
+## only place gold appears on the HUD.
+const XP_SIZE: Vector2 = Vector2(232.0, 6.0)
+const XP_GAP: float = 6.0
+const XP_BACK := Color(0.20, 0.16, 0.16, 0.85)
+const XP_FILL := Color(0.85, 0.70, 0.28)
+
 const SATCHEL_SIZE: Vector2 = Vector2(148.0, 14.0)
 const SATCHEL_BACK := Color(0.14, 0.12, 0.11, 0.85)
 const SATCHEL_FILL := Color(0.78, 0.60, 0.32)
@@ -69,6 +80,12 @@ var _refused: Dictionary = {}
 var _health_rect: Rect2 = Rect2()
 var _health_hovered: bool = false
 
+var xp: int = 0
+var xp_needed: int = 0
+var level: int = 1
+var _xp_rect: Rect2 = Rect2()
+var _xp_hovered: bool = false
+
 ## Off for a title screen or a cutscene. Nothing sets it yet.
 var enabled: bool = true:
 	set(value):
@@ -96,6 +113,7 @@ func _ready() -> void:
 	Events.player_items_changed.connect(_on_items)
 	Events.player_item_refused.connect(_on_item_refused)
 	Events.player_hotbar_selected.connect(_on_selected)
+	Events.player_xp_changed.connect(_on_xp)
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
 	# whatever is underneath it — so it cannot be told by `gui_input`.
@@ -125,15 +143,30 @@ func _on_item_refused(slot: int) -> void:
 	_canvas.queue_redraw()
 
 
+func _on_xp(current: int, needed: int, at_level: int) -> void:
+	xp = current
+	xp_needed = needed
+	level = at_level
+	_canvas.queue_redraw()
+
+
 func _on_selected(slot: int) -> void:
 	selected = slot
 	_canvas.queue_redraw()
 
 
 func _process(delta: float) -> void:
-	var hovered := _health_rect.has_point(_canvas.get_local_mouse_position())
+	var pointer := _canvas.get_local_mouse_position()
+	var hovered := _health_rect.has_point(pointer)
 	if hovered != _health_hovered:
 		_health_hovered = hovered
+		_canvas.queue_redraw()
+
+	var on_xp := _xp_rect.has_point(pointer)
+	# Redrawn every frame while hovered, not only on the way in: the bubble
+	# follows the pointer, so a stale frame is a bubble left behind.
+	if on_xp or on_xp != _xp_hovered:
+		_xp_hovered = on_xp
 		_canvas.queue_redraw()
 
 	if _refused.is_empty():
@@ -149,9 +182,15 @@ func _process(delta: float) -> void:
 
 func _draw_hud() -> void:
 	var size := _canvas.size
-	_draw_health(Vector2(MARGIN.x, size.y - MARGIN.y - HEALTH_SIZE.y))
+	# Health first, then experience beneath it — so the stack still ends level
+	# with the satchel on the far side rather than hanging below it.
+	var xp_top := size.y - MARGIN.y - XP_SIZE.y
+	_draw_health(Vector2(MARGIN.x, xp_top - XP_GAP - HEALTH_SIZE.y))
+	_draw_experience(Vector2(MARGIN.x, xp_top))
 	_draw_hotbar(size)
 	_draw_satchel(Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y))
+	# Last, so it sits over everything it might overlap.
+	_draw_cursor_bubble()
 
 
 ## One tick per heart container, so the bar still answers "how many more hits"
@@ -186,6 +225,51 @@ func _draw_health(origin: Vector2) -> void:
 	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
 		FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
 	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
+
+
+## Thin, quiet, and mute until pointed at. No ticks either — a level is not a
+## countable resource the way heart containers are, so dividing it up would
+## imply a granularity that does not exist.
+func _draw_experience(origin: Vector2) -> void:
+	if xp_needed <= 0:
+		return
+	var ratio: float = clampf(float(xp) / float(xp_needed), 0.0, 1.0)
+	_xp_rect = Rect2(origin, XP_SIZE)
+	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), XP_SIZE + Vector2(4, 4)), HEART_EDGE)
+	_canvas.draw_rect(Rect2(origin, XP_SIZE), XP_BACK)
+	if ratio > 0.0:
+		# At least a pixel of gold once there is any progress at all. A bar six
+		# pixels tall rounds the first few points away to nothing otherwise, and
+		# "I killed something and nothing moved" is the wrong feedback.
+		_canvas.draw_rect(Rect2(origin, Vector2(maxf(XP_SIZE.x * ratio, 1.0), XP_SIZE.y)), XP_FILL)
+
+
+## The label that follows the pointer.
+##
+## A bubble rather than a caption pinned to the bar, because the bar is six
+## pixels tall — anything anchored to it either overlaps the health bar above or
+## falls off the bottom of the screen. Following the cursor also means the
+## number appears where the player is already looking.
+func _draw_cursor_bubble() -> void:
+	if not _xp_hovered or xp_needed <= 0:
+		return
+	var font := ThemeDB.fallback_font
+	var label := "Level %d   %d / %d" % [level, xp, xp_needed]
+	var text := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE)
+	var pad := Vector2(10.0, 6.0)
+	var box := text + pad * 2.0
+
+	# Above and to the right of the pointer, then pushed back inside the screen
+	# rather than clipped — the bar lives in a bottom corner, which is exactly
+	# where a naive offset runs off the edge.
+	var at := _canvas.get_local_mouse_position() + Vector2(16.0, -box.y - 8.0)
+	at.x = clampf(at.x, 4.0, maxf(_canvas.size.x - box.x - 4.0, 4.0))
+	at.y = clampf(at.y, 4.0, maxf(_canvas.size.y - box.y - 4.0, 4.0))
+
+	_canvas.draw_rect(Rect2(at, box), Color(0.09, 0.08, 0.07, 0.94))
+	_canvas.draw_rect(Rect2(at, box), SLOT_EDGE, false, 2.0)
+	_canvas.draw_string(font, at + pad + Vector2(0.0, text.y * 0.8), label,
+		HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
 
 
 ## The haul. This is the one that carries GDD §15 A4 — the interesting decision

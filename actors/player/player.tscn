@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3]
+[gd_scene load_steps=29 format=3]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://resources/combat/player_combo.tres" id="2_combo"]
@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://actors/components/items_component.gd" id="23_items"]
 [ext_resource type="Script" path="res://actors/components/stats_component.gd" id="25_stats"]
 [ext_resource type="Script" path="res://actors/player/weapon_arc.gd" id="26_arc"]
+[ext_resource type="Script" path="res://actors/components/experience_component.gd" id="27_xp"]
 [ext_resource type="Resource" path="res://resources/items/defs/bread.tres" id="24_bread"]
 [ext_resource type="PackedScene" path="res://world/haul_cache.tscn" id="19_cache"]
 [ext_resource type="Script" path="res://actors/components/hitbox.gd" id="8_hitbox"]
@@ -111,6 +112,9 @@ capacity = 12
 
 [node name="StatsComponent" type="Node" parent="."]
 script = ExtResource("25_stats")
+
+[node name="ExperienceComponent" type="Node" parent="."]
+script = ExtResource("27_xp")
 
 [node name="ItemsComponent" type="Node" parent="."]
 script = ExtResource("23_items")
