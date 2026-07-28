@@ -298,12 +298,16 @@ def build_64():
     c.rect(70, 73, 3, 'K')                        # buckle
     c.px(31, 71, 'l'); c.px(32, 71, 'l')
 
-    c.ellipse(28, 12, 16, 'S', y0=18)             # face
-    c.ellipse(28, 12, 16, 's', y0=18, inner_rx=10)  # cheek shading
-    c.ellipse(26, 8, 9, 'W', y0=20, y1=32)        # forehead light
+    c.ellipse(28, 12, 16, 'S', y0=15)             # face
+    c.ellipse(28, 12, 16, 's', y0=15, inner_rx=10)  # cheek shading
+    c.ellipse(26, 8, 9, 'W', y0=18, y1=32)        # forehead light
 
-    for y in range(18, 21):                       # fringe over the brow
-        c.span(y, 13 - (y - 18), 'h')
+    # The fringe stops well clear of the brow. Sitting on it — which it did —
+    # reads as hair hanging in the eyes rather than as a hairline, and it costs
+    # the face the one flat area that makes the features legible at this size.
+    c.span(15, 13, 'h')
+    c.span(16, 12, 'h')
+    c.span(17, 10, 'h')
 
     # ---- face detail
     for dx in range(3, 10):                       # brows
@@ -347,7 +351,7 @@ def build_64_up():
     # neck shows beneath it.
     c.ellipse(27, 13, 15, 'H', y0=18, y1=38)
     c.ellipse(27, 13, 15, 'h', y0=30, y1=38)      # shadow where it falls
-    c.ellipse(22, 9, 10, 'G', y0=18, y1=27)       # crown light carries over
+    c.ellipse(22, 9, 10, 'G', y0=18)              # crown light carries over
 
     for y in range(36, 39):                       # ragged hairline
         c.span(y, 10 - (y - 36) * 3, 'h')
@@ -364,6 +368,21 @@ def build_64_up():
 
     c.outline()
     return c.g
+
+
+# Front edge of the hair at each row of the profile, as an offset from the
+# centre line. Read by `build_64_side`; a table because a formula that produced
+# this shape would be less readable than the shape itself.
+# It drops almost straight from the crown to the brow — a forehead in profile
+# is a near-vertical strip, and a hairline that slopes across it at 45 degrees
+# is exactly what "hair hanging over the face" looks like. Only past the brow
+# does it sweep back, to the temple and then behind the ear.
+SIDE_HAIRLINE = {
+    18: 9, 19: 9, 20: 9, 21: 9, 22: 8, 23: 8,
+    24: 7, 25: 5, 26: 3, 27: 1,
+    28: 0, 29: 0, 30: 0, 31: 0, 32: 0,
+    33: -3, 34: -3, 35: -3, 36: -3, 37: -3, 38: -3, 39: -3,
+}
 
 
 def build_64_side():
@@ -416,46 +435,52 @@ def build_64_side():
 
     # ---- head, in three passes, and the order is the whole trick.
     #
-    # Face first. Then hair over it — right across above the brow, back-only
-    # below, which is what turns a symmetric skull into a profile. Then the
-    # features last, so nothing paints over them.
-    c.blob(3, 28, 10, 16, 'S', y0=16)             # face
-    c.blob(3, 28, 10, 16, 's', y0=16, d_max=-2)   # shaded toward the back
+    # Face first. Then hair over it — right across above the hairline, nothing
+    # below it. Then the features last, so nothing paints over them.
+    #
+    # The face sits further forward than the skull rather than concentric with
+    # it. That is what leaves a forehead to see: a face centred on the same axis
+    # as the hair has its front edge under the hair's, and the only skin left is
+    # a sliver that widens into a wedge as it descends.
+    c.blob(3, 28, 10, 16, 'S', y0=15)             # face
+    c.blob(3, 28, 10, 16, 's', y0=15, d_max=-1)   # shaded toward the back
     # The face ellipse alone lets the jaw recede into nothing, so the chin is
     # built back on by hand and tapered rather than squared off.
-    c.band(39, -4, 9, 'S')
-    c.band(40, -4, 9, 'S')
-    c.band(41, -3, 8, 'S')
-    c.band(42, -2, 7, 'S')
-    c.band(43, -1, 5, 's')
-    c.blob(4, 26, 6, 9, 'W', y0=20, y1=31)        # cheekbone light
+    c.band(39, -4, 10, 'S')
+    c.band(40, -4, 10, 'S')
+    c.band(41, -3, 9, 'S')
+    c.band(42, -2, 8, 'S')
+    c.band(43, -1, 6, 's')
+    c.blob(4, 26, 6, 9, 'W', y0=21, y1=32)        # cheekbone light
 
     # The nose is the single cheapest thing that says "profile", and it only
     # works if it breaks the silhouette.
-    c.band(32, 12, 14, 's')
-    c.band(33, 12, 15, 's')
-    c.band(34, 11, 15, 's')
-    c.band(35, 11, 13, 'h')                       # underside
-    c.band(36, 10, 11, 's')
-    c.band(39, 6, 9, 'h')                         # mouth
+    c.band(33, 13, 15, 's')
+    c.band(34, 13, 16, 's')
+    c.band(35, 12, 16, 's')
+    c.band(36, 12, 15, 'h')                       # underside
+    c.band(37, 11, 12, 's')
+    c.band(40, 6, 9, 'h')                         # mouth
 
-    c.blob(0, 23, 12, 19, 'H', y0=3, y1=24)       # crown, right across
-    # The hairline steps back as it descends rather than dropping straight —
-    # a flat cut-off reads as a curtain hung down the middle of the face.
-    c.blob(0, 23, 12, 19, 'H', y0=25, y1=28, d_max=-1)
-    c.blob(0, 23, 12, 19, 'H', y0=29, y1=33, d_max=-3)
-    c.blob(0, 23, 12, 19, 'H', y0=34, y1=39, d_max=-5)
-    c.blob(0, 23, 12, 19, 'h', y0=3, y1=39, inner_rx=10)   # rim shadow
-    c.blob(-1, 19, 8, 10, 'G', y0=4, y1=22)       # crown light
-    c.blob(-3, 16, 4, 6, 'g', y0=6)               # specular
-    c.block(22, 24, 2, 12, 'h')                   # under the fringe
+    # ---- hair, row by row along `SIDE_HAIRLINE`
+    # Every hair pass is clipped to the hairline, the rim shadow included. It
+    # was not, and a shadow drawn across the full ellipse lands on the forehead
+    # and the cheek — which is most of what "hanging over the face" looked like.
+    for y in range(4, 41):
+        front = 99 if y <= 17 else SIDE_HAIRLINE[min(y, 39)]
+        c.blob(-1, 22, 12, 18, 'H', y0=y, y1=y, d_max=front)
+        c.blob(-1, 22, 12, 18, 'h', y0=y, y1=y, d_max=front, inner_rx=10)
+        if y > 17:                                # a darker edge along the line
+            c.at(front, y, 'h')
+    c.blob(-2, 18, 8, 10, 'G', y0=5, y1=21)       # crown light
+    c.blob(-4, 15, 4, 6, 'g', y0=7)               # specular
 
     # ---- one eye, one ear. Both are what sell a profile.
-    c.block(29, 32, 3, 8, 'W')
-    c.block(29, 31, 4, 7, 'E')
-    c.at(5, 30, 'e'); c.at(6, 30, 'e')
-    c.block(26, 27, 2, 11, 'h')                   # brow
-    c.block(29, 35, -4, 0, 'S')                   # ear, forward of the hair
+    c.block(30, 33, 4, 9, 'W')
+    c.block(30, 32, 5, 8, 'E')
+    c.at(6, 31, 'e'); c.at(7, 31, 'e')
+    c.block(27, 28, 3, 12, 'h')                   # brow
+    c.block(29, 35, -4, 0, 'S')                   # ear, in front of the hair
     c.block(31, 34, -3, -1, 's')
     c.block(29, 35, 1, 1, 'h')                    # crease, or it is just cheek
 
