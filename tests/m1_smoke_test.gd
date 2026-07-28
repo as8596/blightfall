@@ -847,6 +847,20 @@ func _test_village() -> void:
 	_check("the HUD knows the health it was never told about directly",
 		Hud.max_health > 0 and Hud.health > 0, "%d/%d" % [Hud.health, Hud.max_health])
 	_check("and the satchel's capacity", Hud.capacity > 0, "%d" % Hud.capacity)
+	# The hotbar selects; the tool verb uses. Skimming must never eat anything.
+	var kit: ItemsComponent = level.player.items
+	kit.select(0)
+	var before := kit.count_at(0)
+	kit.cycle(3)
+	_check("the wheel moves the selection", kit.selected == 3, "slot %d" % kit.selected)
+	kit.cycle(-5)
+	_check("and wraps rather than stopping dead", kit.selected == kit.slots - 2,
+		"slot %d" % kit.selected)
+	_check("skimming past a slot does not use it", kit.count_at(0) == before)
+	kit.select(0)
+	_check("the tool verb is what uses the selected slot",
+		Items.has(&"bread") and kit.item_at(0) != null)
+
 	var wheel := level.player.get_node_or_null("StaminaWheel")
 	_check("stamina is a ring on the character, not a bar in a corner", wheel != null)
 

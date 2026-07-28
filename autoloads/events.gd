@@ -28,6 +28,9 @@ signal player_inventory_changed(carried: int, capacity: int)
 ## The player's carried items changed — contents, counts, or which slot.
 signal player_items_changed(items: Array, counts: Array)
 
+## Which hotbar slot the tool verb will use.
+signal player_hotbar_selected(slot: int)
+
 ## A slot was pressed and nothing happened. The HUD flashes it.
 signal player_item_refused(slot: int)
 

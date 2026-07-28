@@ -90,6 +90,8 @@ func _ready() -> void:
 		Events.player_items_changed.emit(items.items, items.counts))
 	items.refused.connect(func(slot: int) -> void:
 		Events.player_item_refused.emit(slot))
+	items.selection_changed.connect(func(slot: int) -> void:
+		Events.player_hotbar_selected.emit(slot))
 	hurtbox.hit_taken.connect(_on_hit_taken)
 
 	state_machine.start()
@@ -105,6 +107,7 @@ func _broadcast_state() -> void:
 	Events.player_stamina_changed.emit(stamina.current, stamina.max_stamina)
 	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
 	Events.player_items_changed.emit(items.items, items.counts)
+	Events.player_hotbar_selected.emit(items.selected)
 
 
 func _process(delta: float) -> void:
@@ -140,10 +143,15 @@ func _try_interact() -> void:
 func _try_hotbar() -> void:
 	if not (state_machine.is_in(&"Idle") or state_machine.is_in(&"Move")):
 		return
+	# Numbers and the wheel *select*; the tool verb uses. Skimming the bar must
+	# never eat anything on the way past.
 	var slot := input.hotbar_pressed()
 	if slot >= 0:
+		items.select(slot)
+	items.cycle(input.take_hotbar_scroll())
+	if input.consume_tool():
 		@warning_ignore("return_value_discarded")
-		items.use(slot, self)
+		items.use_selected(self)
 
 
 ## Accelerate toward `desired` and move. Knockback rides on top rather than

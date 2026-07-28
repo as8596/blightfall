@@ -48,6 +48,7 @@ const SLOT_GAP: float = 6.0
 const SLOT_BACK := Color(0.13, 0.11, 0.10, 0.82)
 const SLOT_EDGE := Color(0.42, 0.35, 0.26)
 const SLOT_REFUSED := Color(0.86, 0.45, 0.30)
+const SLOT_SELECTED := Color(0.95, 0.88, 0.70)
 
 var health: int = 0
 var max_health: int = 0
@@ -56,8 +57,15 @@ var capacity: int = 0
 var slot_items: Array = []
 var slot_counts: Array = []
 
+var selected: int = 0
+
 ## Seconds left on the "that did nothing" flash, per slot.
 var _refused: Dictionary = {}
+
+## Where the health bar last drew, so hover-testing uses the same rectangle the
+## player is actually pointing at rather than a second copy of the maths.
+var _health_rect: Rect2 = Rect2()
+var _health_hovered: bool = false
 
 ## Off for a title screen or a cutscene. Nothing sets it yet.
 var enabled: bool = true:
@@ -84,6 +92,11 @@ func _ready() -> void:
 	Events.player_inventory_changed.connect(_on_inventory)
 	Events.player_items_changed.connect(_on_items)
 	Events.player_item_refused.connect(_on_item_refused)
+	Events.player_hotbar_selected.connect(_on_selected)
+	# Always processing: the hover test polls the pointer. The canvas ignores
+	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
+	# whatever is underneath it — so it cannot be told by `gui_input`.
+	set_process(true)
 
 
 func _on_health(current: int, maximum: int) -> void:
@@ -106,13 +119,21 @@ func _on_items(entries: Array, counts: Array) -> void:
 
 func _on_item_refused(slot: int) -> void:
 	_refused[slot] = 0.45
-	set_process(true)
+	_canvas.queue_redraw()
+
+
+func _on_selected(slot: int) -> void:
+	selected = slot
 	_canvas.queue_redraw()
 
 
 func _process(delta: float) -> void:
+	var hovered := _health_rect.has_point(_canvas.get_local_mouse_position())
+	if hovered != _health_hovered:
+		_health_hovered = hovered
+		_canvas.queue_redraw()
+
 	if _refused.is_empty():
-		set_process(false)
 		return
 	for slot in _refused.keys():
 		_refused[slot] -= delta
@@ -137,6 +158,7 @@ func _draw_health(origin: Vector2) -> void:
 	if max_health <= 0:
 		return
 	var ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
+	_health_rect = Rect2(origin, HEALTH_SIZE)
 	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), HEALTH_SIZE + Vector2(4, 4)), HEART_EDGE)
 	_canvas.draw_rect(Rect2(origin, HEALTH_SIZE), HEALTH_BACK)
 	_canvas.draw_rect(
@@ -148,6 +170,19 @@ func _draw_health(origin: Vector2) -> void:
 		var x := origin.x + step * i
 		_canvas.draw_line(Vector2(x, origin.y), Vector2(x, origin.y + HEALTH_SIZE.y),
 			HEART_EDGE, 2.0)
+
+	# On hover only. The bar's job is to be readable without reading — a number
+	# sitting on it permanently is a number the eye stops at every time it
+	# glances down, which is the opposite of what a bar is for.
+	if not _health_hovered:
+		return
+	var font := ThemeDB.fallback_font
+	var label := "%d / %d" % [health, max_health]
+	var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+	var at := origin + Vector2((HEALTH_SIZE.x - width) * 0.5, -8.0)
+	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
+		FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
+	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
 
 
 ## The haul. This is the one that carries GDD §15 A4 — the interesting decision
@@ -193,7 +228,12 @@ func _draw_hotbar(screen: Vector2) -> void:
 		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP), 0.0)
 		var box := Rect2(at, Vector2(SLOT_SIZE, SLOT_SIZE))
 		_canvas.draw_rect(box, SLOT_BACK)
-		var edge: Color = SLOT_REFUSED if _refused.has(i) else SLOT_EDGE
+		var chosen := i == selected
+		var edge: Color = SLOT_REFUSED if _refused.has(i) else (SLOT_SELECTED if chosen else SLOT_EDGE)
+		if chosen:
+			# Grown outward rather than recoloured alone, so the selection is
+			# legible at a glance and in a screenshot with no colour at all.
+			_canvas.draw_rect(box.grow(3.0), edge, false, 3.0)
 		_canvas.draw_rect(box, edge, false, 2.0)
 
 		var item: ItemData = slot_items[i] if slot_items[i] is ItemData else null

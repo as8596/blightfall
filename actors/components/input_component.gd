@@ -33,6 +33,11 @@ var _interact_buffer: float = 0.0
 ## the danger has passed is a meal thrown away.
 var _hotbar_pressed: int = -1
 
+## Accumulated wheel steps since the last read. A mouse wheel presses and
+## releases within one frame, so `is_action_just_pressed` in `_process` drops
+## flicks; this is filled from `_unhandled_input` instead.
+var _hotbar_scroll: int = 0
+
 
 func _process(delta: float) -> void:
 	_attack_buffer = maxf(_attack_buffer - delta, 0.0)
@@ -106,6 +111,24 @@ func consume_interact() -> bool:
 	_interact_buffer = 0.0
 	intent.interact_buffered = false
 	return true
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not enabled:
+		return
+	if event.is_action_pressed(&"hotbar_next"):
+		_hotbar_scroll += 1
+	elif event.is_action_pressed(&"hotbar_prev"):
+		_hotbar_scroll -= 1
+
+
+## Wheel steps since the last call, and clears them. Unlike the buffered verbs
+## this is read-and-consume, because two flicks in one frame should move two
+## slots rather than one.
+func take_hotbar_scroll() -> int:
+	var steps := _hotbar_scroll
+	_hotbar_scroll = 0
+	return steps if enabled else 0
 
 
 ## The hotbar slot pressed this frame, or -1. Reading it does not clear it; it

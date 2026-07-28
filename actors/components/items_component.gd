@@ -17,6 +17,8 @@ signal changed
 signal used(item: ItemData, slot: int)
 ## Nothing there, or nothing it could do. The HUD flashes the slot.
 signal refused(slot: int)
+## Which slot the tool verb will act on.
+signal selection_changed(slot: int)
 
 ## Ten, bound to 1-9 and 0. The row the hand finds without looking is five;
 ## the row the player is willing to scan is ten.
@@ -30,6 +32,10 @@ signal refused(slot: int)
 var items: Array[ItemData] = []
 var counts: Array[int] = []
 
+## The slot the tool button uses. Selection is separate from use so the hotbar
+## can be skimmed with the wheel without eating anything on the way past.
+var selected: int = 0
+
 
 func _ready() -> void:
 	items.resize(slots)
@@ -37,6 +43,29 @@ func _ready() -> void:
 	for item in starting_items:
 		if item != null:
 			add(item)
+
+
+## Point at `slot`, wrapping. Wrapping rather than clamping because the wheel
+## has no ends and stopping dead at slot 10 feels like a fault.
+func select(slot: int) -> void:
+	if items.is_empty():
+		return
+	var target: int = posmod(slot, items.size())
+	if target == selected:
+		return
+	selected = target
+	selection_changed.emit(selected)
+
+
+func cycle(steps: int) -> void:
+	if steps != 0:
+		select(selected + steps)
+
+
+## Use whatever is selected. This is what the tool verb does — GDD §5 calls it
+## "context-dependent", and the hotbar is the context.
+func use_selected(actor: Node) -> bool:
+	return use(selected, actor)
 
 
 func item_at(slot: int) -> ItemData:

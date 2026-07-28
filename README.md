@@ -57,7 +57,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 168 assertions over the M1 systems and Ambry
+# headless self-check — 172 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -88,16 +88,16 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Attack | J | X |
 | Dash / dodge | Shift or Space | A |
 | Interact | E | B |
-| Tool | K | Y |
-| Hotbar | 1–9, 0 | — |
+| Use selected item | K | Y |
+| Hotbar select | 1–9, 0 or mouse wheel | — |
 
 `interact` opens doors. It is the general verb — `world/interactable.gd` is the
 base class talking, building, resting and the chest will all use — but doors are
 its only user so far.
 
-`tool` is mapped but not wired to anything — M1 has no tools, not even the
-Cinderflask (BUILD-PLAN). The action exists so the input map is complete on day
-one rather than being edited during M3.
+`tool` is what uses the selected hotbar slot. GDD §5 calls it
+"context-dependent", and the hotbar is the context. Numbers and the wheel only
+*select* — skimming the bar must never eat anything on the way past.
 
 ## Debug keys
 
