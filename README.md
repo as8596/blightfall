@@ -87,14 +87,20 @@ BUILD-PLAN week 1, rule 2: the overlay goes in first and never comes out. It
 shows state name, stamina, i-frames, active hitbox and combo index at all times,
 because none of those are things you can see by squinting at a 0.10s window.
 
-| Key | |
-|---|---|
-| F1 | toggle the overlay |
-| F2 | draw hitboxes (red) and hurtboxes (blue, yellow while invulnerable) |
-| F3 | slow motion — how you read frame data with your eyes |
-| F4 | spawn another enemy |
-| F5 | reset the room |
-| F6 / F7 | save / load slot 1 |
+| Key | | Where |
+|---|---|---|
+| F1 | toggle the overlay | everywhere |
+| F2 | draw hitboxes (red) and hurtboxes (blue, yellow while invulnerable) | everywhere |
+| F3 | slow motion — how you read frame data with your eyes | everywhere |
+| F4 | spawn another enemy | prototype room only |
+| F5 | reset the room | prototype room only |
+| F6 / F7 | save / load slot 1 | prototype room only |
+
+F1–F3 live in the `DebugSettings` autoload, so they work in any scene. **F4–F7
+are handled by `prototype_room.gd` and do nothing anywhere else** — including
+Ambry, where they are silent rather than broken. They belong to the combat test
+bed; F4 has nothing to spawn in a village with no enemies, and F5/F6/F7 want a
+real rest point rather than a debug key.
 
 ## Layout
 
