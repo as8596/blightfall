@@ -47,7 +47,7 @@ func open() -> void:
 	# Never over a transition: the scene is being torn down and a menu that
 	# survives into the next one would be sitting on top of a level the player
 	# has not seen yet.
-	if _open or Transition.is_busy():
+	if _open or Transition.is_busy() or GameMenu.is_open():
 		return
 	_open = true
 	_refresh()
@@ -64,8 +64,9 @@ func close() -> void:
 		return
 	_open = false
 	_root.visible = false
-	get_tree().paused = false
-	Hud.enabled = true
+	if not GameMenu.is_open():
+		get_tree().paused = false
+		Hud.enabled = true
 	closed.emit()
 
 

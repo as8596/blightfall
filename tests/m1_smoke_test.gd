@@ -875,6 +875,19 @@ func _test_village() -> void:
 	await _ticks(1)
 	_check("closing gives the game back",
 		not PauseMenu.is_open() and not get_tree().paused and Hud.enabled)
+
+	# Tab, and the two menus not fighting over who owns time.
+	GameMenu.open()
+	await _ticks(1)
+	_check("tab opens the character menu", GameMenu.is_open() and get_tree().paused)
+	_check("the sheet was pushed to it, not fetched",
+		not GameMenu.stats.is_empty() and int(GameMenu.stats.get("max_health", 0)) > 0,
+		"%s" % [GameMenu.stats.get("max_health", 0)])
+	PauseMenu.open()
+	_check("escape does not stack a second menu on top", not PauseMenu.is_open())
+	GameMenu.close()
+	await _ticks(1)
+	_check("and closing it gives time back", not get_tree().paused and Hud.enabled)
 	# A menu opening over a scene change would sit on top of a level the player
 	# has not seen yet.
 	Transition.auto_retry = false

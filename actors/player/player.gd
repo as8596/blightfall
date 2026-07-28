@@ -81,7 +81,8 @@ func _ready() -> void:
 	animation.bind(state_machine)
 	health.died.connect(_on_died)
 	health.changed.connect(func(current: int, maximum: int) -> void:
-		Events.player_health_changed.emit(current, maximum))
+		Events.player_health_changed.emit(current, maximum)
+		Events.player_stats_changed.emit(stat_block()))
 	stamina.changed.connect(func(current: float, maximum: float) -> void:
 		Events.player_stamina_changed.emit(current, maximum))
 	inventory.changed.connect(func(units: int, limit: int) -> void:
@@ -108,6 +109,29 @@ func _broadcast_state() -> void:
 	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
 	Events.player_items_changed.emit(items.items, items.counts)
 	Events.player_hotbar_selected.emit(items.selected)
+	Events.player_stats_changed.emit(stat_block())
+
+
+## The character sheet, as data. Read off the live components and the combo
+## resource rather than kept as a second copy — a sheet that can disagree with
+## the game is worse than no sheet.
+func stat_block() -> Dictionary:
+	var dodge := state_machine.get_node_or_null("Dodge")
+	var strike := "-"
+	if combo != null and combo.length() > 0:
+		var steps: Array[String] = []
+		for i in combo.length():
+			steps.append(str(combo.step(i).damage))
+		strike = " / ".join(steps)
+	return {
+		"health": health.current,
+		"max_health": health.max_health,
+		"max_stamina": stamina.max_stamina,
+		"capacity": inventory.capacity,
+		"move_speed": move_speed,
+		"damage": strike,
+		"dodge_distance": dodge.distance if dodge != null else 0.0,
+	}
 
 
 func _process(delta: float) -> void:

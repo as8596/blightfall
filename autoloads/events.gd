@@ -28,6 +28,11 @@ signal player_inventory_changed(carried: int, capacity: int)
 ## The player's carried items changed — contents, counts, or which slot.
 signal player_items_changed(items: Array, counts: Array)
 
+## Everything a character sheet needs, as one dictionary. Pushed rather than
+## fetched: the moment a UI panel knows how to find the player, so does
+## everything else (GDD §12 rule 1).
+signal player_stats_changed(stats: Dictionary)
+
 ## Which hotbar slot the tool verb will use.
 signal player_hotbar_selected(slot: int)
 
