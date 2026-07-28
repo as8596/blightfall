@@ -22,6 +22,15 @@ var materials: Dictionary = {}
 
 var _root: Control
 var _tabs: TabContainer
+
+## Grid slot panels, and the pane that describes whichever one you are pointing
+## at. Kept as references rather than looked up by name every refresh.
+var _slot_panels: Array[Panel] = []
+var _slot_icons: Array[TextureRect] = []
+var _slot_counts: Array[Label] = []
+var _detail: RichTextLabel
+var _satchel: Label
+var _hovered: int = -1
 var _pages: Dictionary = {}
 var _open: bool = false
 
@@ -99,7 +108,7 @@ func _input(event: InputEvent) -> void:
 
 func _refresh() -> void:
 	_pages["Character"].text = _character_text()
-	_pages["Inventory"].text = _inventory_text()
+	_refresh_inventory()
 	_pages["Map"].text = _map_text()
 
 
@@ -129,31 +138,70 @@ func _character_text() -> String:
 	return "\n".join(lines)
 
 
-func _inventory_text() -> String:
-	var lines := ["", "  [b]Carried[/b]"]
-	var any := false
-	for i in Hud.slot_items.size():
-		var item: ItemData = Hud.slot_items[i] if Hud.slot_items[i] is ItemData else null
-		if item == null:
-			continue
-		any = true
-		var held: int = int(Hud.slot_counts[i]) if i < Hud.slot_counts.size() else 1
-		var count := " ×%d" % held if held > 1 else ""
-		lines.append("    %d.  %s%s" % [(i + 1) % 10, item.display_name, count])
-		if not item.description.is_empty():
-			lines.append("        [i]%s[/i]" % item.description)
-	if not any:
-		lines.append("    [i]Nothing.[/i]")
+## The grid is the inventory; the pane underneath is what it is for. Hovering is
+## the read and the hotbar number is the write — a slot you can point at but not
+## identify is a slot the player has to remember, which is what a menu exists to
+## remove.
+func _refresh_inventory() -> void:
+	for i in _slot_panels.size():
+		var item := _item_in(i)
+		_slot_icons[i].texture = item.icon if item != null else null
+		var held: int = int(Hud.slot_counts[i]) if i < Hud.slot_counts.size() else 0
+		_slot_counts[i].text = str(held) if item != null and held > 1 else ""
+		_slot_panels[i].modulate = Color.WHITE if item != null else Color(1, 1, 1, 0.45)
 
-	lines.append("")
-	lines.append("  [b]Satchel[/b]   %d / %d" % [Hud.carried, Hud.capacity])
+	_detail.text = _detail_text()
+
+	var line := "  Satchel   %d / %d" % [Hud.carried, Hud.capacity]
 	if materials.is_empty():
-		lines.append("    [i]Empty. Materials go here — they are what the town is")
-		lines.append("    rebuilt out of.[/i]")
+		line += "      (empty — materials are what the town is rebuilt out of)"
 	else:
 		for id in materials:
-			lines.append("    %s  ×%d" % [String(id).capitalize(), int(materials[id])])
+			line += "      %s x%d" % [String(id).capitalize(), int(materials[id])]
+	_satchel.text = line
+
+
+func _item_in(slot: int) -> ItemData:
+	if slot < 0 or slot >= Hud.slot_items.size():
+		return null
+	return Hud.slot_items[slot] if Hud.slot_items[slot] is ItemData else null
+
+
+## Falls back to the selected slot when nothing is hovered, so the pane is never
+## blank for someone playing on a pad or the number keys.
+func _detail_text() -> String:
+	var slot: int = _hovered if _hovered >= 0 else Hud.selected
+	var item := _item_in(slot)
+	if item == null:
+		return "\n  [i]Nothing in that slot.[/i]"
+
+	var kinds := ["Consumable", "Tool", "Key"]
+	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
+	var lines := [
+		"",
+		"  [b]%s[/b]    [i]%s[/i]" % [item.display_name, kind],
+	]
+	if item.heals > 0:
+		lines.append("  Restores %d health." % item.heals)
+	if item.kind == ItemData.Kind.TOOL:
+		lines.append("  Used with the tool key.")
+	if item.kind == ItemData.Kind.KEY:
+		lines.append("  Not something you use. It opens something.")
+	if item.stack_size > 1:
+		lines.append("  Stacks to %d." % item.stack_size)
+	if not item.description.is_empty():
+		lines.append("")
+		lines.append("  [i]%s[/i]" % item.description)
 	return "\n".join(lines)
+
+
+func _on_slot_hover(slot: int, entered: bool) -> void:
+	if entered:
+		_hovered = slot
+	elif _hovered == slot:
+		_hovered = -1
+	if _open:
+		_detail.text = _detail_text()
 
 
 func _map_text() -> String:
@@ -201,14 +249,96 @@ func _build() -> void:
 	_tabs.add_theme_stylebox_override("panel", panel)
 	_root.add_child(_tabs)
 
-	for page_name in ["Character", "Inventory", "Map"]:
-		var text := RichTextLabel.new()
-		text.name = page_name
-		text.bbcode_enabled = true
-		text.scroll_active = true
-		text.add_theme_font_size_override("normal_font_size", 20)
-		text.add_theme_font_size_override("bold_font_size", 20)
-		text.add_theme_font_size_override("italics_font_size", 20)
-		text.add_theme_color_override("default_color", Color(0.92, 0.89, 0.82))
+	_tabs.add_child(_build_inventory_page())
+
+	for page_name in ["Character", "Map"]:
+		var text := _text_page(page_name)
 		_tabs.add_child(text)
 		_pages[page_name] = text
+	# Character first, then the grid, then the map.
+	_tabs.move_child(_tabs.get_node("Character"), 0)
+
+
+func _text_page(page_name: String) -> RichTextLabel:
+	var text := RichTextLabel.new()
+	text.name = page_name
+	text.bbcode_enabled = true
+	text.scroll_active = true
+	text.add_theme_font_size_override("normal_font_size", 20)
+	text.add_theme_font_size_override("bold_font_size", 20)
+	text.add_theme_font_size_override("italics_font_size", 20)
+	text.add_theme_color_override("default_color", Color(0.92, 0.89, 0.82))
+	return text
+
+
+## Ten slots in two rows of five, matching the hotbar exactly — same order, same
+## numbers. A menu that rearranges the bar it describes teaches the player two
+## layouts for one thing.
+func _build_inventory_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Inventory"
+	page.add_theme_constant_override("separation", 14)
+
+	var grid := GridContainer.new()
+	grid.columns = 5
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	page.add_child(grid)
+
+	for i in 10:
+		var slot := Panel.new()
+		slot.custom_minimum_size = Vector2(78, 78)
+		slot.mouse_filter = Control.MOUSE_FILTER_STOP
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(0.13, 0.11, 0.10)
+		box.border_color = Color(0.42, 0.35, 0.26)
+		box.set_border_width_all(2)
+		slot.add_theme_stylebox_override("panel", box)
+
+		var icon := TextureRect.new()
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.offset_left = 8.0
+		icon.offset_top = 8.0
+		icon.offset_right = -8.0
+		icon.offset_bottom = -8.0
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(icon)
+
+		var number := Label.new()
+		number.text = str((i + 1) % 10)
+		number.position = Vector2(5, 1)
+		number.add_theme_font_size_override("font_size", 13)
+		number.add_theme_color_override("font_color", Color(0.75, 0.70, 0.62, 0.85))
+		number.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(number)
+
+		var count := Label.new()
+		count.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		count.offset_left = -34.0
+		count.offset_top = -30.0
+		count.offset_right = -6.0
+		count.offset_bottom = -4.0
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.add_theme_font_size_override("font_size", 18)
+		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(count)
+
+		slot.mouse_entered.connect(_on_slot_hover.bind(i, true))
+		slot.mouse_exited.connect(_on_slot_hover.bind(i, false))
+
+		grid.add_child(slot)
+		_slot_panels.append(slot)
+		_slot_icons.append(icon)
+		_slot_counts.append(count)
+
+	_detail = _text_page("Detail")
+	_detail.custom_minimum_size = Vector2(0, 150)
+	page.add_child(_detail)
+
+	_satchel = Label.new()
+	_satchel.add_theme_font_size_override("font_size", 20)
+	_satchel.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
+	page.add_child(_satchel)
+	return page

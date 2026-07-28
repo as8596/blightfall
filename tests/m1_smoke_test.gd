@@ -889,6 +889,23 @@ func _test_village() -> void:
 	await _ticks(1)
 	_check("and closing it gives time back", not get_tree().paused and Hud.enabled)
 
+	# The inventory grid describes what you point at, and falls back to the
+	# selected slot so the pane is never blank on a pad.
+	level.player.items.add(Items.get_item(&"stew"), 2)
+	GameMenu.open()
+	await _ticks(1)
+	GameMenu._on_slot_hover(1, true)
+	_check("hovering a slot describes it", GameMenu._detail.text.contains("Meat stew"),
+		GameMenu._detail.text.strip_edges().substr(0, 40))
+	GameMenu._on_slot_hover(1, false)
+	level.player.items.select(0)
+	GameMenu._on_slot_hover(-1, false)
+	_check("and with nothing hovered it falls back to the selected slot",
+		GameMenu._detail.text.contains("loaf"),
+		GameMenu._detail.text.strip_edges().substr(0, 40))
+	GameMenu.close()
+	await _ticks(1)
+
 	# GDD §15 A7: the village is the only thing that writes to the sheet.
 	var sheet: StatsComponent = level.player.stats
 	_check("a modifier with no source is refused",
