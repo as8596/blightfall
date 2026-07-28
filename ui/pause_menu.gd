@@ -22,6 +22,7 @@ signal closed
 
 var _root: Control
 var _buttons: Array[Button] = []
+var _scale_label: Label
 var _open: bool = false
 
 
@@ -111,6 +112,8 @@ func _refresh() -> void:
 	# broken button rather than as an empty slot.
 	if _buttons.size() >= 3:
 		_buttons[2].disabled = not SaveGame.has_save(SaveGame.current_slot)
+	if _scale_label != null:
+		_scale_label.text = "UI scale   %d x" % UiScale.factor
 
 
 func _build() -> void:
@@ -118,6 +121,7 @@ func _build() -> void:
 	_root.name = "PauseMenu"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiScale.register(self, _root)
 
 	var scrim := ColorRect.new()
 	scrim.color = Color(0.04, 0.04, 0.05, 0.72)
@@ -142,6 +146,38 @@ func _build() -> void:
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 18)
 	column.add_child(spacer)
+
+	var scale_row := HBoxContainer.new()
+	scale_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	scale_row.add_theme_constant_override("separation", 12)
+	column.add_child(scale_row)
+
+	var smaller := Button.new()
+	smaller.text = "-"
+	smaller.custom_minimum_size = Vector2(48, 40)
+	smaller.add_theme_font_size_override("font_size", 22)
+	smaller.pressed.connect(func() -> void: UiScale.factor -= 1)
+	scale_row.add_child(smaller)
+
+	_scale_label = Label.new()
+	_scale_label.custom_minimum_size = Vector2(176, 40)
+	_scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_scale_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_scale_label.add_theme_font_size_override("font_size", 20)
+	scale_row.add_child(_scale_label)
+
+	var bigger := Button.new()
+	bigger.text = "+"
+	bigger.custom_minimum_size = Vector2(48, 40)
+	bigger.add_theme_font_size_override("font_size", 22)
+	bigger.pressed.connect(func() -> void: UiScale.factor += 1)
+	scale_row.add_child(bigger)
+
+	UiScale.changed.connect(func(_f: int) -> void: _refresh())
+
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 12)
+	column.add_child(gap)
 
 	for entry in [
 		["Resume", close],

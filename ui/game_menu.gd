@@ -14,6 +14,9 @@ extends CanvasLayer
 ## Escape over Tab should reach the pause menu, not the other way round.
 const LAYER: int = 108
 
+## Ten on the bar, thirty in the pack.
+const SLOT_COUNT: int = 40
+
 signal opened
 signal closed
 
@@ -225,6 +228,7 @@ func _build() -> void:
 	_root.name = "GameMenu"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
+	UiScale.register(self, _root)
 
 	var scrim := ColorRect.new()
 	scrim.color = Color(0.05, 0.04, 0.04, 0.86)
@@ -271,23 +275,40 @@ func _text_page(page_name: String) -> RichTextLabel:
 	return text
 
 
-## Ten slots in two rows of five, matching the hotbar exactly — same order, same
-## numbers. A menu that rearranges the bar it describes teaches the player two
-## layouts for one thing.
+## Forty slots: the hotbar across the top, then three rows of pack, then the
+## description. The top row is the same ten slots in the same order with the
+## same numbers as the bar on screen — a menu that rearranges the bar it
+## describes teaches the player two layouts for one thing.
 func _build_inventory_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Inventory"
 	page.add_theme_constant_override("separation", 14)
 
 	var grid := GridContainer.new()
-	grid.columns = 5
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.columns = 10
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
 	page.add_child(grid)
 
-	for i in 10:
+	for i in SLOT_COUNT:
+		if i == 10:
+			# A gap under the first row. That row is the hotbar — the same ten
+			# slots, in the same order, with the same numbers — and the three
+			# below are the pack. Running them together would make forty
+			# identical boxes and hide the only distinction that matters.
+			var gap := Control.new()
+			gap.custom_minimum_size = Vector2(0, 14)
+			page.add_child(gap)
+			page.move_child(gap, 1)
+			var pack := GridContainer.new()
+			pack.columns = 10
+			pack.add_theme_constant_override("h_separation", 6)
+			pack.add_theme_constant_override("v_separation", 6)
+			page.add_child(pack)
+			page.move_child(pack, 2)
+			grid = pack
 		var slot := Panel.new()
-		slot.custom_minimum_size = Vector2(78, 78)
+		slot.custom_minimum_size = Vector2(62, 62)
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color(0.13, 0.11, 0.10)
@@ -307,7 +328,8 @@ func _build_inventory_page() -> Control:
 		slot.add_child(icon)
 
 		var number := Label.new()
-		number.text = str((i + 1) % 10)
+		# Only the hotbar row is numbered; the pack has no keys to advertise.
+		number.text = str((i + 1) % 10) if i < 10 else ""
 		number.position = Vector2(5, 1)
 		number.add_theme_font_size_override("font_size", 13)
 		number.add_theme_color_override("font_color", Color(0.75, 0.70, 0.62, 0.85))

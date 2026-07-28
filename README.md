@@ -20,6 +20,13 @@ Open the project in Godot 4.6+ and press F5. `levels/ambry/ambry_level.tscn` is
 the main scene — the village, with the wall to the north and the gate south.
 It boots **fullscreen**; F11 toggles back to a window.
 
+**The world and the UI are rendered separately.** The world draws into a fixed
+1280×720 `SubViewport` with nearest filtering and is scaled up to fill the
+window; the UI is laid out at the window's real resolution, so text rasterises
+natively instead of being 720p type stretched. UI size is a whole-number setting
+in the Escape menu — whole numbers only, because a 1.5× interface duplicates
+every other row of pixels, which is the softness the split exists to remove.
+
 **Ambry has no enemies**, by design: it is mechanically incapable of hurting you
 (GDD §7). For the combat prototype, open
 `levels/prototype/prototype_room.tscn` and press **F6** to run just that scene.
@@ -57,7 +64,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 189 assertions over the M1 systems and Ambry
+# headless self-check — 192 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -146,7 +153,8 @@ levels/
 camera/            the camera rig, which is not a child of the player
 art/               shaders, fonts, sprites, tilesets, icons
 world/             pickups, the haul cache, interactables and doorways
-ui/                HUD, stamina wheel, pause + character menus, debug overlay
+ui/                world viewport, HUD, stamina wheel, menus, ui scale,
+                   debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, greybox builder
 ```

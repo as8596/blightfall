@@ -113,7 +113,7 @@ script = ExtResource("25_stats")
 
 [node name="ItemsComponent" type="Node" parent="."]
 script = ExtResource("23_items")
-slots = 10
+slots = 40
 starting_items = Array[Resource("res://resources/items/item_data.gd")]([ExtResource("24_bread")])
 
 [node name="StateMachine" type="Node" parent="."]

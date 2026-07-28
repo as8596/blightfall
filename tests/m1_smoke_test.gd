@@ -33,8 +33,17 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	# Built inside a SubViewport at the world's real size, because that is how
+	# the game runs it now (`ui/world_view.gd`). Left as a plain child, anything
+	# asking `get_viewport_rect()` gets the *window* — 64x64 under a headless
+	# display server — and every on-screen check answers a question nobody asked.
+	var view := SubViewport.new()
+	view.size = WorldView.BASE
+	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(view)
+
 	_world = Node2D.new()
-	add_child(_world)
+	view.add_child(_world)
 
 	_build_room()
 	_player = PLAYER_SCENE.instantiate()
@@ -150,9 +159,13 @@ func _test_project_configuration() -> void:
 		ProjectSettings.get_setting("display/window/size/viewport_width") == 1280
 			and ProjectSettings.get_setting("display/window/size/viewport_height") == 720
 	)
+	# Stretch is off: the world is scaled by its own SubViewport
+	# (`ui/world_view.gd`) and the UI is laid out at the window's real
+	# resolution. Letting the engine stretch both would put 720p text on a 1440p
+	# monitor, which is the thing the split exists to stop.
 	_check(
-		"stretch mode is canvas_items",
-		ProjectSettings.get_setting("display/window/stretch/mode") == "canvas_items"
+		"engine stretch is off; the world scales itself",
+		ProjectSettings.get_setting("display/window/stretch/mode") == "disabled"
 	)
 	_check(
 		"2D transforms snap to pixel",
@@ -437,7 +450,7 @@ func _test_enemy_behaviour() -> void:
 	await _ticks(4)
 
 	_check("enemy begins in Idle", enemy.state_machine.initial_state == &"Idle")
-	_check("enemy is on screen", enemy.is_on_screen())
+	_check("enemy is on screen", enemy.is_on_screen(),)
 
 	# The player is a target the moment it exists; the enemy should notice.
 	var seen: Dictionary = {}
@@ -808,7 +821,7 @@ func _test_village() -> void:
 
 	# Doorways are markers in the map; Level is what turns them into Area2Ds.
 	var doors: Array[Doorway] = []
-	for child in level.get_children():
+	for child in level.world.get_children():
 		var door := child as Doorway
 		if door != null:
 			doors.append(door)
@@ -827,6 +840,10 @@ func _test_village() -> void:
 	# transition that blanks the screen must never fire by accident.
 	_check("interact is bound", InputMap.has_action(&"interact"))
 	_check("the player has an interactor", level.player.interactor != null)
+	_check("the world renders into its own 1280x720 viewport",
+		level.world.get_viewport() is SubViewport
+			and level.world.get_viewport().size == WorldView.BASE,
+		"%s" % [level.world.get_viewport().size if level.world.get_viewport() else null])
 	_check("which looks for the Interactable layer",
 		level.player.interactor.collision_mask == Interactable.LAYER,
 		"mask %d, layer %d" % [level.player.interactor.collision_mask, Interactable.LAYER])
@@ -854,8 +871,10 @@ func _test_village() -> void:
 	kit.cycle(3)
 	_check("the wheel moves the selection", kit.selected == 3, "slot %d" % kit.selected)
 	kit.cycle(-5)
-	_check("and wraps rather than stopping dead", kit.selected == kit.slots - 2,
-		"slot %d" % kit.selected)
+	# Wraps within the hotbar row, not the whole forty-slot pack — the wheel is a
+	# bar control and should not walk off the end of the visible row.
+	_check("and wraps within the hotbar rather than into the pack",
+		kit.selected == ItemsComponent.HOTBAR_SLOTS - 2, "slot %d" % kit.selected)
 	_check("skimming past a slot does not use it", kit.count_at(0) == before)
 	kit.select(0)
 	_check("the tool verb is what uses the selected slot",
@@ -888,6 +907,19 @@ func _test_village() -> void:
 	GameMenu.close()
 	await _ticks(1)
 	_check("and closing it gives time back", not get_tree().paused and Hud.enabled)
+
+	# UI scale is whole-number only. A 1.5x interface duplicates every other row
+	# of pixels, which is the softness the viewport split exists to remove.
+	var was := UiScale.factor
+	UiScale.factor = 99
+	_check("ui scale is clamped, not trusted", UiScale.factor == UiScale.MAX_FACTOR,
+		"%d" % UiScale.factor)
+	UiScale.factor = 2
+	await _ticks(1)
+	_check("and it scales the layers it was given", Hud.scale.is_equal_approx(Vector2(2, 2)),
+		"%s" % Hud.scale)
+	UiScale.factor = was
+	await _ticks(1)
 
 	# The inventory grid describes what you point at, and falls back to the
 	# selected slot so the pane is never blank on a pad.

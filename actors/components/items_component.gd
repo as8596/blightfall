@@ -20,9 +20,13 @@ signal refused(slot: int)
 ## Which slot the tool verb will act on.
 signal selection_changed(slot: int)
 
-## Ten, bound to 1-9 and 0. The row the hand finds without looking is five;
-## the row the player is willing to scan is ten.
-@export_range(1, 10) var slots: int = 10
+## Forty: ten on the hotbar, bound to 1-9 and 0, and thirty behind Tab. The
+## hotbar is the first ten by definition rather than by a flag, so "what is on
+## my bar" needs no second list to stay in step with.
+@export_range(1, 60) var slots: int = 40
+
+## How many of those slots the hotbar shows.
+const HOTBAR_SLOTS: int = 10
 
 ## Filled from the inspector for a starting kit.
 @export var starting_items: Array[ItemData] = []
@@ -50,7 +54,9 @@ func _ready() -> void:
 func select(slot: int) -> void:
 	if items.is_empty():
 		return
-	var target: int = posmod(slot, items.size())
+	# Wraps within the hotbar. The wheel is a bar control; it should not walk off
+	# the end of the visible row into the pack.
+	var target: int = posmod(slot, mini(HOTBAR_SLOTS, items.size()))
 	if target == selected:
 		return
 	selected = target

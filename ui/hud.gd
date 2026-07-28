@@ -87,6 +87,7 @@ func _ready() -> void:
 	_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_canvas.draw.connect(_draw_hud)
 	add_child(_canvas)
+	UiScale.register(self, _canvas)
 
 	Events.player_health_changed.connect(_on_health)
 	Events.player_inventory_changed.connect(_on_inventory)
@@ -217,7 +218,9 @@ func _draw_satchel(origin: Vector2) -> void:
 ## Numbered, because the binding *is* the affordance. An unlabelled row teaches
 ## nobody that 1–5 do anything.
 func _draw_hotbar(screen: Vector2) -> void:
-	var count: int = slot_items.size()
+	# Only the hotbar's share. The pack behind Tab uses the same array, and
+	# drawing all forty across the bottom of the screen would be a wall.
+	var count: int = mini(slot_items.size(), ItemsComponent.HOTBAR_SLOTS)
 	if count <= 0:
 		return
 	var width := count * SLOT_SIZE + (count - 1) * SLOT_GAP

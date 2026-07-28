@@ -125,8 +125,12 @@ func _restore_cache() -> void:
 		_cache = {}
 		return
 
+	# Asked of the level rather than looked up by path: the player moved inside a
+	# SubViewport when the world and the UI were split, and a hard-coded
+	# "Player" path fails silently — the cache simply never comes back, and the
+	# stake disappears with it.
 	var scene := get_tree().current_scene
-	var player := scene.get_node_or_null("Player") as Player if scene != null else null
+	var player: Player = scene.get("player") if scene != null else null
 	if player != null and player.haul_cache_scene != null:
 		@warning_ignore("return_value_discarded")
 		HaulCache.drop(get_tree(), player.haul_cache_scene, player.get_parent(),

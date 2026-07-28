@@ -11,6 +11,11 @@ extends Node2D
 ## hand-maintained copy of the map's size is a number that silently goes stale
 ## the first time a room grows by one tile.
 
+## The world lives inside a fixed-resolution SubViewport so the UI can sit
+## outside it at the window's real resolution — see `ui/world_view.gd`. These
+## paths are relative to that world root, not to this node.
+@export var world_path: NodePath = ^"WorldView/SubViewport/World"
+
 ## The map scene instance holding the TileMapLayers.
 @export var map_path: NodePath = ^"Map"
 @export var player_path: NodePath = ^"Player"
@@ -32,9 +37,14 @@ extends Node2D
 ## markers with metadata — and the level is what turns that data into nodes.
 const DOORWAY_SCENE: PackedScene = preload("res://world/doorway.tscn")
 
-@onready var map: Node2D = get_node_or_null(map_path) as Node2D
-@onready var player: Player = get_node_or_null(player_path) as Player
-@onready var camera: CameraRig = get_node_or_null(camera_path) as CameraRig
+@onready var world: Node2D = get_node_or_null(world_path) as Node2D
+@onready var map: Node2D = _in_world(map_path) as Node2D
+@onready var player: Player = _in_world(player_path) as Player
+@onready var camera: CameraRig = _in_world(camera_path) as CameraRig
+
+
+func _in_world(path: NodePath) -> Node:
+	return world.get_node_or_null(path) if world != null else null
 
 
 func _ready() -> void:
@@ -116,7 +126,9 @@ func _spawn_doorways() -> void:
 		door.target_scene = String(marker.get_meta("target_scene", ""))
 		door.target_spawn = String(marker.get_meta("target_spawn", "PlayerSpawn"))
 		door.prompt = String(marker.get_meta("prompt", "Enter"))
-		add_child(door)
+		# Into the world, not onto this node — outside the SubViewport it would
+		# be in window space and collide with nothing.
+		world.add_child(door)
 		door.global_position = marker.global_position
 
 
@@ -145,7 +157,11 @@ func world_bounds() -> Rect2:
 ## smaller than 1280×720, so the limit rect grows to at least a screen around
 ## the room's centre and the empty margin is allowed to show.
 func _frameable(bounds: Rect2) -> Rect2:
-	var view := get_viewport_rect().size
+	# The world's viewport, which is fixed at 1280x720, not the window — the
+	# window's size is now a display concern and must not move the camera.
+	var view := Vector2(WorldView.BASE)
+	if world != null and world.get_viewport() != null:
+		view = world.get_viewport().get_visible_rect().size
 	var size := Vector2(maxf(bounds.size.x, view.x), maxf(bounds.size.y, view.y))
 	return Rect2(bounds.get_center() - size * 0.5, size)
 
