@@ -39,7 +39,7 @@ const INTERIOR_DIR := "res://levels/ambry/interiors"
 const TILES: Array = [
 	["dirt_path", false], ["grass_yard", false], ["cobble", false], ["floorboards", false],
 	["wall", true], ["wall_inner", true], ["roof", false], ["fence", true],
-	["door", false], ["window", true], ["hearth", false], ["well", true],
+	["door", true], ["window", true], ["hearth", false], ["well", true],
 	["plot_empty", false], ["plot_ruined", false], ["stockpile", true], ["bed_save", false],
 	["gate", true], ["npc_marker", false], ["blight_creep", true], ["void", true],
 	["bell", true], ["garden", false], ["tent", true], ["rubble_wall", true],
@@ -473,9 +473,12 @@ func _assert_layout(layers: Array[TileMapLayer], overhead: TileMapLayer) -> void
 	for entry in BUILDINGS:
 		if String(entry[5]) != "south":
 			continue
-		var door := _door_cell(entry)
-		if not reached.has(door):
-			unreachable.append("%s door %s" % [entry[0], door])
+		# The doorstep, not the doorway. Doors are solid — they are a wall you
+		# open with a keypress, not a gap you walk through — so what has to be
+		# reachable is the tile you stand on to press it.
+		var step := _door_cell(entry) + Vector2i(0, 1)
+		if not reached.has(step):
+			unreachable.append("%s doorstep %s" % [entry[0], step])
 	for entry in POIS:
 		if String(entry[3]) == "north":
 			continue
@@ -805,10 +808,13 @@ func _build_interior(tileset: TileSet, entry: Array) -> void:
 	root.add_child(spawn)
 	spawn.owner = root
 
+	# Same rule inside: the door is solid, so the tile in front of it is what
+	# has to be standable. A room you cannot get to the door of is a room you
+	# cannot leave.
 	var layers: Array[TileMapLayer] = [ground, objects]
 	var reached := _flood(layers, Vector2i(door_offset, size.y - 3))
-	if not reached.has(door):
-		_fail("%s: the door is not reachable from the spawn" % id)
+	if not reached.has(door + Vector2i(0, -1)):
+		_fail("%s: the doorstep is not reachable from the spawn" % id)
 
 	var packed := PackedScene.new()
 	packed.pack(root)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://resources/combat/player_combo.tres" id="2_combo"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://actors/components/animation_component.gd" id="17_anim"]
 [ext_resource type="Script" path="res://actors/components/inventory_component.gd" id="18_inv"]
 [ext_resource type="Script" path="res://actors/components/interactor_component.gd" id="20_interactor"]
+[ext_resource type="Resource" path="res://resources/animation/player_placeholder.tres" id="21_anim_set"]
 [ext_resource type="PackedScene" path="res://world/haul_cache.tscn" id="19_cache"]
 [ext_resource type="Script" path="res://actors/components/hitbox.gd" id="8_hitbox"]
 [ext_resource type="Script" path="res://actors/components/hurtbox.gd" id="9_hurtbox"]
@@ -71,6 +72,7 @@ flash_time = 0.08
 
 [node name="AnimationComponent" type="Node" parent="."]
 script = ExtResource("17_anim")
+animations = ExtResource("21_anim_set")
 sprite_path = NodePath("../Visual")
 body_height = 96.0
 placeholder_size = Vector2(64, 96)

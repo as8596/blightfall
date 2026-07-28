@@ -472,18 +472,30 @@ func _test_animation() -> void:
 	await _reset_player()
 	var anim := _player.animation
 
-	# With no art assigned the actor still runs, on a generated box.
-	_check("runs with no art", not anim.has_art() and anim.sprite.texture != null)
-	_check("placeholder is body-sized",
-		anim.sprite.texture.get_size() == Vector2(64, 96),
-		str(anim.sprite.texture.get_size()))
-	_check("feet sit on the node origin", anim.sprite.offset.is_equal_approx(Vector2(0, -48)),
-		str(anim.sprite.offset))
-
+	# The player ships with art now, and it has to be showing from the first
+	# frame — the initial state is entered without a transition, so an actor
+	# that only picks up its sprite on the *next* state change is invisible
+	# until it moves.
 	var set: ActorAnimationSet = load("res://resources/animation/player_placeholder.tres")
 	_check("placeholder animation set loads", set != null and set.idle != null)
 	if set == null:
 		return
+	_check("the player has art assigned", anim.has_art())
+	_check("and is showing it while merely standing there",
+		anim.sprite.texture != null and _player.state_machine.is_in(&"Idle"),
+		"texture=%s state=%s" % [anim.sprite.texture, _player.state_machine.current_state_name()])
+	_check("feet sit on the node origin", anim.sprite.offset.is_equal_approx(Vector2(0, -48)),
+		str(anim.sprite.offset))
+
+	# An actor with no art at all still has to run — that is what keeps a
+	# grey-box enemy working while its sprites are being drawn.
+	anim.animations = null
+	await _ticks(2)
+	_check("an actor with no art falls back to a box",
+		not anim.has_art() and anim.sprite.texture != null)
+	_check("and the box is body-sized",
+		anim.sprite.texture.get_size() == Vector2(64, 96),
+		str(anim.sprite.texture.get_size()))
 
 	anim.animations = set
 	await _ticks(2)
@@ -892,6 +904,18 @@ func _test_village() -> void:
 			"walked from y=%.0f to y=%.0f, wall face at y=1056" % [start_y, stopped_at])
 		_check("and it was actually walking", stopped_at < start_y - 32.0,
 			"moved %.0fpx" % (start_y - stopped_at))
+
+		# A door is a wall you open with a keypress. Walking into one has to stop
+		# you, or the interact verb is decoration and every building is open.
+		# The home's door is at tile (6, 30); its south face is y = 31 * 64.
+		wall_player.global_position = Vector2(6.5 * 64.0, 33.0 * 64.0)
+		await _ticks(2)
+		Input.action_press(&"move_up")
+		await _ticks(60)
+		Input.action_release(&"move_up")
+		await _ticks(2)
+		_check("a door stops a body too", wall_player.global_position.y > 1984.0,
+			"stopped at y=%.0f, door face at y=2016" % wall_player.global_position.y)
 
 	level.queue_free()
 	await _ticks(2)

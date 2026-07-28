@@ -44,7 +44,7 @@ TILES = [
     ("fence",         (0x6e, 0x5c, 0x42), "post",  True),
 
     # village features
-    ("door",          (0xb0, 0x94, 0x55), "ring",  False),
+    ("door",          (0xb0, 0x94, 0x55), "ring",  True),   # shut; E opens it
     ("window",        (0x8f, 0xa6, 0xb5), "cross", True),
     ("hearth",        (0xc2, 0x7a, 0x3a), "bloom", False),   # the warmth
     ("well",          (0x6a, 0x6f, 0x74), "ring",  True),

@@ -76,6 +76,13 @@ func _ready() -> void:
 	_apply_offset()
 	if animations == null:
 		_install_placeholder()
+	else:
+		# The setter above bails out when it runs before `_ready` — which is
+		# always, for a set assigned in the scene file rather than at runtime —
+		# and promises that `_ready` will pick it up. This is that promise.
+		sprite.modulate = Color.WHITE
+		if animations.idle != null:
+			play(animations.idle)
 
 
 ## Called by the actor once its state machine exists.

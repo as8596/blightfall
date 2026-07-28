@@ -17,6 +17,7 @@ texture_region_size = Vector2i(64, 64)
 3:1/0 = 0
 3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 1:2/0 = 0
 1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 2:2/0 = 0
@@ -52,42 +53,42 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_31u30")
 
-[node name="Home" type="Node2D" unique_id=1123442935]
+[node name="Home" type="Node2D" unique_id=1988103176]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=89257730]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=64145899]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAADAAAAAAABAAAAAAADAAAAAAACAAAAAAADAAAAAAADAAAAAAADAAAAAAAEAAAAAAADAAAAAAAFAAAAAAADAAAAAAAGAAAAAAADAAAAAAAHAAAAAAADAAAAAAAIAAAAAAADAAAAAAAAAAEAAAADAAAAAAABAAEAAAADAAAAAAACAAEAAAADAAAAAAADAAEAAAADAAAAAAAEAAEAAAADAAAAAAAFAAEAAAADAAAAAAAGAAEAAAADAAAAAAAHAAEAAAADAAAAAAAIAAEAAAADAAAAAAAAAAIAAAADAAAAAAABAAIAAAADAAAAAAACAAIAAAADAAAAAAADAAIAAAADAAAAAAAEAAIAAAADAAAAAAAFAAIAAAADAAAAAAAGAAIAAAADAAAAAAAHAAIAAAADAAAAAAAIAAIAAAADAAAAAAAAAAMAAAADAAAAAAABAAMAAAADAAAAAAACAAMAAAADAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAAAAQAAAADAAAAAAABAAQAAAADAAAAAAACAAQAAAADAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAAAAUAAAADAAAAAAABAAUAAAADAAAAAAACAAUAAAADAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAAAAYAAAADAAAAAAABAAYAAAADAAAAAAACAAYAAAADAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=1841289855]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=760775728]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAEAAAAAAAYAAAAAAAEAAAABAAAAAAAAAAEAAAABAAYAAAAAAAEAAAACAAAAAAABAAIAAAACAAYAAAAAAAEAAAADAAAAAAAAAAEAAAADAAYAAAAAAAEAAAAEAAAAAAAAAAEAAAAEAAYAAAAAAAIAAAAFAAAAAAAAAAEAAAAFAAYAAAAAAAEAAAAGAAAAAAABAAIAAAAGAAYAAAAAAAEAAAAHAAAAAAAAAAEAAAAHAAYAAAAAAAEAAAAIAAAAAAAAAAEAAAAIAAYAAAAAAAEAAAAAAAEAAAAAAAEAAAAIAAEAAAAAAAEAAAAAAAIAAAAAAAEAAAAIAAIAAAAAAAEAAAAAAAMAAAAAAAEAAAAIAAMAAAAAAAEAAAAAAAQAAAAAAAEAAAAIAAQAAAAAAAEAAAAAAAUAAAAAAAEAAAAIAAUAAAAAAAEAAAACAAIAAAAAAAYAAAAGAAIAAAADAAMAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=303521051]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1524123080]
 
-[node name="Poi_home_chest" type="Marker2D" parent="PointsOfInterest" unique_id=1542898414]
+[node name="Poi_home_chest" type="Marker2D" parent="PointsOfInterest" unique_id=1735702619]
 position = Vector2(160, 224)
 metadata/poi_id = "home_chest"
 metadata/note = "store the haul"
 metadata/district = "interior"
 
-[node name="Poi_home_bed" type="Marker2D" parent="PointsOfInterest" unique_id=1069112465]
+[node name="Poi_home_bed" type="Marker2D" parent="PointsOfInterest" unique_id=449290639]
 position = Vector2(416, 224)
 metadata/poi_id = "home_bed"
 metadata/note = "save + rest"
 metadata/district = "interior"
 
-[node name="NpcMarkers" type="Node2D" parent="." unique_id=636786044]
+[node name="NpcMarkers" type="Node2D" parent="." unique_id=500362296]
 
-[node name="Doorways" type="Node2D" parent="." unique_id=1181554096]
+[node name="Doorways" type="Node2D" parent="." unique_id=519669955]
 
-[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=1102988596]
+[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=2035724832]
 position = Vector2(288, 416)
 metadata/target_scene = "res://levels/ambry/ambry_level.tscn"
 metadata/target_spawn = "Door_home"
 metadata/prompt = "Leave"
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=82983488]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=348035513]
 position = Vector2(288, 288)

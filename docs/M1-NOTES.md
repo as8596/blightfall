@@ -45,9 +45,18 @@ Two things from the GDD that also aren't here, on purpose:
   already at the feet, so the setup is right, but with one enemy and no props
   there is nothing yet to sort.
 
+**The player now wears the placeholder animation set** rather than a flat box —
+`resources/animation/player_placeholder.tres`, built by
+`tools/gen_placeholder_animations.py` from the 64×96 reference figure. It is not
+animation; it is the reference body composited at the documented anchor and
+slid around per frame. What it proves is the whole path: strip slicing, the
+feet-on-origin offset, direction flipping, and attack frames advancing off the
+combo's frame data rather than off a frame rate. Replace it one clip at a time
+with real exports.
+
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 159 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 162 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and

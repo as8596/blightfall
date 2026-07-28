@@ -38,6 +38,24 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
+## F11 — fullscreen, and the way back out.
+##
+## Living here is a stopgap. Display mode is a real setting rather than a debug
+## toggle and belongs in the options screen GDD §14 calls for; it is here now
+## because there is no options screen, and a game that starts fullscreen with no
+## way back to a window is worse than one that never went fullscreen.
+##
+## The project boots fullscreen (`display/window/size/mode=3`). Note that 720p
+## content on a 1080p display is a 1.5x upscale, so pixels are very slightly
+## uneven — see docs/M1-NOTES.md. An "integer scaling only" option is the fix,
+## and it is the same options screen's job.
+func toggle_fullscreen() -> void:
+	var windowed := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED
+	DisplayServer.window_set_mode(
+		DisplayServer.WINDOW_MODE_FULLSCREEN if windowed else DisplayServer.WINDOW_MODE_WINDOWED
+	)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or not key.pressed or key.echo:
@@ -51,4 +69,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		KEY_F3:
 			slow_motion = not slow_motion
+			get_viewport().set_input_as_handled()
+		KEY_F11:
+			toggle_fullscreen()
 			get_viewport().set_input_as_handled()

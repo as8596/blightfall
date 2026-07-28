@@ -47,6 +47,11 @@ func start(msg: Dictionary = {}) -> void:
 	set_process(true)
 	set_physics_process(true)
 	_enter_state(initial_state, msg)
+	# Entering the initial state *is* a state change, and listeners have no other
+	# way to learn about it. Without this an actor stays on whatever its sprite
+	# happened to be until it first moves — which looks like a missing sprite,
+	# not like a missing signal.
+	state_changed.emit(&"", initial_state)
 
 
 func _process(delta: float) -> void:

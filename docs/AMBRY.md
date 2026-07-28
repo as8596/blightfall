@@ -252,6 +252,10 @@ fade. A door that blanks the screen and moves you somewhere must never fire
 because you brushed past it on the way to the square. Once there is a fade, the
 deliberate press *is* the safety rather than the tax.
 
+**The door tile is solid.** A door you can walk through makes the interact verb
+decoration and every building open — so the tile collides, and the assertions
+check that the *doorstep* is reachable rather than the doorway itself.
+
 `world/doorway.gd` extends `world/interactable.gd` and carries the run across
 the threshold using `SaveGame.capture()` / `apply()`, so walking into the inn
 with a full satchel and walking out empty is a bug that cannot happen quietly.

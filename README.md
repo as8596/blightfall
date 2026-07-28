@@ -18,6 +18,7 @@ built, what is deliberately missing, and what needs tuning by hand.
 
 Open the project in Godot 4.6+ and press F5. `levels/ambry/ambry_level.tscn` is
 the main scene — the village, with the wall to the north and the gate south.
+It boots **fullscreen**; F11 toggles back to a window.
 
 **Ambry has no enemies**, by design: it is mechanically incapable of hurting you
 (GDD §7). For the combat prototype, open
@@ -56,7 +57,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 159 assertions over the M1 systems and Ambry
+# headless self-check — 162 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -108,6 +109,7 @@ because none of those are things you can see by squinting at a 0.10s window.
 | F1 | toggle the overlay | everywhere |
 | F2 | draw hitboxes (red) and hurtboxes (blue, yellow while invulnerable) | everywhere |
 | F3 | slow motion — how you read frame data with your eyes | everywhere |
+| F11 | fullscreen / windowed | everywhere |
 | F4 | spawn another enemy | prototype room only |
 | F5 | reset the room | prototype room only |
 | F6 / F7 | save / load slot 1 | prototype room only |
