@@ -25,13 +25,29 @@ the main scene — the village, with the wall to the north and the gate south.
 
 Controls and debug keys are below.
 
-**First run on a new machine:** Godot builds its `.godot/` import cache the
-first time it *opens the project in the editor*, and that cache is gitignored,
-so a fresh clone does not have one. Let the import progress bar finish before
-pressing F5 — running the game first creates a half-built cache that then never
-rebuilds itself, and every `class_name` in the project fails to resolve. The
-symptom is a scene that loads with no player in it. The fix is to delete
-`.godot/` and reopen the editor.
+### Open the editor after every pull
+
+Godot imports changed files when it **opens the project in the editor**. The
+`.godot/` cache is gitignored, so it is per-machine, and nothing else refreshes
+it. In particular, hitting **Run from the Project Manager does not import** — it
+launches the game against whatever the cache last held, so a `git pull` that
+changed scripts or scenes appears to do nothing at all.
+
+The symptoms are strange rather than obviously stale, because the game is
+loading a coherent *old* project: a level that spawns the player at (0, 0)
+outside the map, a character that will not move, a missing debug overlay, a
+scene with no player in it. None of it looks like a caching problem.
+
+So after pulling: **open the project in the editor and let the import progress
+bar finish** before running. Or from a terminal:
+
+```
+godot --headless --path . --import
+```
+
+If it still misbehaves, delete `.godot/` and reopen the editor — running the
+game with no cache at all creates a half-built one that then never rebuilds
+itself.
 
 **Don't put comments in `project.godot`.** The editor rewrites that file on
 save, stripping comments and dropping any setting left at its default. It is
