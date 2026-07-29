@@ -273,9 +273,10 @@ Small, known, and each one is a thing that will be more annoying later.
 - **The XP bar pays nothing.** Recorded as GDD §15 A8, deliberately, with the
   risk stated. It is a placeholder for a decision.
 - **`the_beginning.wav` is 27 MB.** Every clone carries it.
-- **39 orphaned `.png.import` files** in `art/icons/items/` pointing at PNGs
-  that were moved into subfolders. Harmless, untidy, and they will confuse
-  someone eventually.
+- ~~39 orphaned `.png.import` files.~~ **Removed.** They were not harmless: an
+  `.import` with no source file is one Godot rewrites, and a rewritten tracked
+  file that a later commit deletes blocks `git pull` with "your local changes
+  would be overwritten". Which is exactly what it did.
 - **The prototype room is still the only combat space**, and it is reachable
   only by opening the scene and pressing F6. Orchardfall has six areas and no
   enemies in any of them.

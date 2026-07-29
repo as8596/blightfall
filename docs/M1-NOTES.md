@@ -194,6 +194,19 @@ trade, and the player's to make (GDD §14).
 `tests/font_sheet.tscn` renders the UI font at a dozen sizes for judging this by
 eye, which is the only way to judge it.
 
+**`.import` files are committed; `.godot/` is not.** That is Godot's own
+guidance and it is right — the `.import` carries the resource's UID, and losing
+it re-imports every texture with a new one and breaks every reference.
+
+The consequence to know about: Godot **rewrites** those files on import, so they
+show up as local changes on a machine that has opened the project. That is
+normal churn. It only becomes a problem when a file has no source PNG beside it
+— then it is rewritten by one machine and deleted by another, and `git pull`
+stops with "your local changes would be overwritten". There were 39 of those,
+left behind when icons were sorted into subfolders, and they have been removed.
+If moving an image ever leaves an `.import` behind again, delete it in the same
+commit.
+
 **Physics runs at 60 ticks/second.** You will not find that in `project.godot`,
 because 60 is Godot's default and the editor drops the line. It matters anyway:
 every number in GDD §5 is expressed in seconds and converted against this rate,
