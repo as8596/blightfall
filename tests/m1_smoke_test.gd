@@ -451,23 +451,39 @@ func _test_type_scale() -> void:
 	_check("snap() rounds onto it", TypeScale.snap(21) == 16 and TypeScale.snap(25) == 32
 		and TypeScale.snap(1) == TypeScale.STEP)
 
-	# ...and nothing anywhere gets a bold or an italic invented for it.
+	# ...and nothing anywhere gets a weight invented for it.
 	#
-	# The fonts ship one weight each. Asked for bold, Godot emboldens — it smears
-	# every glyph sideways by a fraction of a pixel; asked for italic, it shears
-	# them off the grid. Both are fine on a vector typeface and both turn a pixel
-	# font to mush, and it is the item description pane where it showed up.
-	# `art/fonts/ui_theme.tres` points all three at the normal face.
+	# Asked for a bold it does not have, Godot *emboldens* — smearing every glyph
+	# sideways by a fraction of a pixel; asked for an italic, it *shears* them off
+	# the grid. Both are fine on a vector typeface and both turn a pixel font to
+	# mush, and it was the item description pane where it showed up.
+	#
+	# The rule is not "every slot is the same face" — that was the old rule, from
+	# when no face in the project had a bold. Pixel Operator ships a drawn one, so
+	# bold is now a *different* file and that is the point of it. The rule is that
+	# every slot resolves to a real file:
+	#
+	#   bold          -> a drawn bold, not the regular smeared
+	#   italic        -> the regular, because no pixel font here has an italic
+	#   bold italic   -> the drawn bold, for the same reason
+	#
+	# What would fail is a slot resolving to nothing, which is when Godot falls
+	# back to synthesising.
 	var rich := RichTextLabel.new()
 	add_child(rich)
 	var normal := rich.get_theme_font(&"normal_font")
 	var faked: Array[String] = []
 	for slot in [&"bold_font", &"italics_font", &"bold_italics_font", &"mono_font"]:
-		if rich.get_theme_font(slot) != normal:
+		if rich.get_theme_font(slot) == null:
 			faked.append(String(slot))
 	_check("rich text has a font at all", normal != null)
-	_check("and bold and italic are the same face, not synthesised", faked.is_empty(),
+	_check("every weight resolves to a real face rather than a synthesised one",
+		faked.is_empty(),
 		", ".join(faked))
+	_check("italic is the regular face, because no pixel font here has one",
+		rich.get_theme_font(&"italics_font") == normal)
+	_check("and bold is a drawn bold rather than the regular",
+		rich.get_theme_font(&"bold_font") != normal)
 	rich.queue_free()
 
 

@@ -51,6 +51,10 @@ const BODY := "ebe3d2"
 
 const PORTRAIT: Texture2D = preload("res://art/sprites/player/player_portrait.png")
 
+## Headings and names get the display face; prose gets the body face from the
+## theme. See art/fonts/README.md — the split is the point, not a decoration.
+const DISPLAY: Font = preload("res://art/fonts/ui_display.tres")
+
 ## Inventory metrics, in one place because they are a budget rather than a
 ## preference: the window is 1280 wide, the hotbar is twelve slots across, and a
 ## column either side of it has to fit in what is left. At 62px — the size before
@@ -226,6 +230,14 @@ func _key(text: String) -> String:
 	return "[color=%s]%s[/color]" % [KEY, text]
 
 
+## An item's name, in the display face. `[font]` takes a path rather than a
+## resource, which is why this is a string constant and not `DISPLAY`.
+const DISPLAY_PATH := "res://art/fonts/ui_display.tres"
+
+func _named(text: String) -> String:
+	return "[font=%s][color=%s]%s[/color][/font]" % [DISPLAY_PATH, KEY, text]
+
+
 func _aside(text: String) -> String:
 	return "[color=%s]%s[/color]" % [ASIDE, text]
 
@@ -288,7 +300,7 @@ func _detail_text() -> String:
 	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
 	var lines := [
 		"",
-		"  %s    %s" % [_key(item.display_name), _kind(kind)],
+		"  %s    %s" % [_named(item.display_name), _kind(kind)],
 	]
 	if item.heals > 0:
 		lines.append("  Restores %d health." % item.heals)
@@ -436,6 +448,7 @@ func _framed(title: String, tip: String = "") -> VBoxContainer:
 		var heading := Label.new()
 		heading.text = title.to_upper()
 		heading.tooltip_text = tip
+		heading.add_theme_font_override("font", DISPLAY)
 		heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
 		column.add_child(heading)
@@ -808,6 +821,7 @@ func _build_character_column() -> VBoxContainer:
 
 	_who = Label.new()
 	_who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_who.add_theme_font_override("font", DISPLAY)
 	_who.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_who.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
 	column.add_child(_who)

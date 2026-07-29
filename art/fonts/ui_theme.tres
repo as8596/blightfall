@@ -1,26 +1,30 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" load_steps=3 format=3]
 
-; The interface theme, and it exists for one reason: to stop Godot inventing a
-; bold and an italic that the fonts do not have.
+; The interface theme. Two fonts, on purpose.
 ;
-; `dico`, `alagard` and `cavalhatriz` ship a single weight each. Asked for bold,
-; Godot *emboldens* — it smears each glyph sideways by a fraction of a pixel.
-; Asked for italic, it *skews* — it shears the glyph off the pixel grid. Both are
-; reasonable approximations for a vector typeface and both are illegible on a
-; pixel font: the strokes stop being whole pixels, which is the one thing the
-; whole font depends on.
+; **Body is Pixel Operator** (`ui_font.tres`) — everything you read a sentence
+; of. **Display is Alagard** (`ui_display.tres`) — headings, speaker names, item
+; names, anything you read one word of. Character where character is free,
+; legibility where it is load-bearing.
 ;
-; So bold, italic and bold-italic are all pointed at the same face as normal.
-; `[b]` and `[i]` still parse, they just render as text. Emphasis is carried by
-; colour instead — see `ui/game_menu.gd`.
+; Bold is real now. Pixel Operator ships a drawn Bold, so `[b]` no longer has to
+; be faked; before this, Godot *emboldened* — smearing each glyph sideways by a
+; fraction of a pixel, which costs a pixel font the whole-pixel strokes it
+; depends on.
+;
+; **Italic is still pointed at the regular face**, and that is not an oversight.
+; No pixel font in the shortlist ships one, and asked for italic Godot *skews* —
+; shearing the glyphs off the grid. `[i]` parses and renders as plain text. The
+; axes that exist here are weight and colour.
 
 [ext_resource type="Font" path="res://art/fonts/ui_font.tres" id="1_font"]
+[ext_resource type="Font" path="res://art/fonts/ui_font_bold.tres" id="2_bold"]
 
 [resource]
 default_font = ExtResource("1_font")
 default_font_size = 16
-RichTextLabel/fonts/bold_font = ExtResource("1_font")
-RichTextLabel/fonts/bold_italics_font = ExtResource("1_font")
+RichTextLabel/fonts/bold_font = ExtResource("2_bold")
+RichTextLabel/fonts/bold_italics_font = ExtResource("2_bold")
 RichTextLabel/fonts/italics_font = ExtResource("1_font")
 RichTextLabel/fonts/mono_font = ExtResource("1_font")
 RichTextLabel/fonts/normal_font = ExtResource("1_font")

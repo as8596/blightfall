@@ -603,6 +603,9 @@ func _build() -> void:
 	row.add_child(_column)
 
 	_speaker = Label.new()
+	# The one word on screen you read as a name rather than as text.
+	_speaker.add_theme_font_override("font",
+		load("res://art/fonts/ui_display.tres") as Font)
 	_speaker.add_theme_font_size_override("font_size", NAME_SIZE)
 	_speaker.add_theme_color_override("font_color", EDGE)
 	_column.add_child(_speaker)

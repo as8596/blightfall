@@ -1,0 +1,16 @@
+[gd_resource type="FontVariation" load_steps=3 format=3]
+
+; The voice: things you read one word of. Panel headings, a speaker's name, an
+; item's name, the title.
+;
+; Alagard has period character and middling legibility, which is exactly the
+; right trade for two words in 30px and exactly the wrong one for a paragraph.
+; Splitting the two jobs is what lets each font be good at its own — see
+; art/fonts/README.md.
+
+[ext_resource type="FontFile" path="res://art/fonts/alagard.ttf" id="1_display"]
+[ext_resource type="FontFile" path="res://art/fonts/pixel_operator.ttf" id="2_body"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("2_body")])
+base_font = ExtResource("1_display")

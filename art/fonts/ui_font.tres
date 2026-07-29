@@ -1,8 +1,19 @@
 [gd_resource type="FontVariation" load_steps=3 format=3]
 
-[ext_resource type="FontFile" path="res://art/fonts/dico.ttf" id="1_dico"]
+; The workhorse: everything you read a sentence of.
+;
+; Pixel Operator, because it is the only candidate that got the digits right.
+; `dico` — what this used to be — draws `1` as a bare serifed stem with no flag,
+; so `12` reads as `I2` wherever a number starts with one: carry capacity, stack
+; counts, any health above nine. See art/fonts/README.md for the comparison.
+;
+; `alagard` stays on as a fallback, which is glyph coverage rather than design:
+; it supplies anything Pixel Operator lacks. The *deliberate* use of alagard is
+; `ui_display.tres`.
+
+[ext_resource type="FontFile" path="res://art/fonts/pixel_operator.ttf" id="1_body"]
 [ext_resource type="FontFile" path="res://art/fonts/alagard.ttf" id="2_alagard"]
 
 [resource]
 fallbacks = Array[Font]([ExtResource("2_alagard")])
-base_font = ExtResource("1_dico")
+base_font = ExtResource("1_body")

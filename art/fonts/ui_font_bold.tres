@@ -1,0 +1,15 @@
+[gd_resource type="FontVariation" load_steps=3 format=3]
+
+; A real bold, drawn as a bold rather than synthesised by smearing the regular
+; sideways. Pixel Operator ships one, which is why `[b]` means something again.
+;
+; There is still no italic — no pixel font in the shortlist had one, and Godot's
+; synthetic version shears the glyphs off the pixel grid. Emphasis has two axes
+; here: weight and colour.
+
+[ext_resource type="FontFile" path="res://art/fonts/pixel_operator_bold.ttf" id="1_bold"]
+[ext_resource type="FontFile" path="res://art/fonts/alagard.ttf" id="2_alagard"]
+
+[resource]
+fallbacks = Array[Font]([ExtResource("2_alagard")])
+base_font = ExtResource("1_bold")
