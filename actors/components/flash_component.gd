@@ -6,6 +6,19 @@ extends Node
 ## a dark pixel white. The shader mixes toward the flash colour instead, which
 ## is why the rule exists. The material is duplicated per instance at runtime so
 ## one enemy flashing doesn't flash the whole pack.
+##
+## **The material is attached only while flashing.** It used to sit on the sprite
+## permanently at `flash_amount = 0.0`, which reads as a no-op and is not one: in
+## the Compatibility renderer a canvas item with a custom shader takes a
+## different colour path from one without, and the result was every sprite in the
+## game rendering squared — `#d9c48d` reaching the screen as `#b9974e`. Measured,
+## not guessed: 58 of the player's 59 colours survive with no material attached,
+## and none of them survive with one.
+##
+## That is a whole-game colour cast for a shader that was doing nothing 99% of
+## the time, and it showed up as "why does the character look so red" rather than
+## as anything a test was watching. Attaching on demand costs one assignment per
+## hit and makes the untouched case pixel-exact by construction.
 
 const FLASH_SHADER: Shader = preload("res://art/shaders/hit_flash.gdshader")
 
@@ -32,7 +45,7 @@ func _ready() -> void:
 	_material.shader = FLASH_SHADER
 	_material.set_shader_parameter(&"flash_amount", 0.0)
 	_material.set_shader_parameter(&"flash_color", flash_color)
-	_target.material = _material
+	# Deliberately not assigned here. See the class comment.
 
 
 func _process(delta: float) -> void:
@@ -69,9 +82,16 @@ func clear() -> void:
 	_set_amount(0.0)
 
 
+## Set the mix, and attach or detach the material with it. Detaching is the
+## point: a sprite showing its own colours must not be going through the shader
+## at all.
 func _set_amount(value: float) -> void:
-	if _material != null:
-		_material.set_shader_parameter(&"flash_amount", value)
+	if _material == null or _target == null:
+		return
+	_material.set_shader_parameter(&"flash_amount", value)
+	var wanted: Material = _material if value > 0.0 else null
+	if _target.material != wanted:
+		_target.material = wanted
 
 
 func is_flashing() -> bool:

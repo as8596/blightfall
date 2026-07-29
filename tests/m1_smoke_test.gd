@@ -173,6 +173,38 @@ func _check_near(label: String, actual: float, expected: float, tolerance: float
 ##
 ## Cheap to check and impossible to notice otherwise: a `_up` strip that is
 ## secretly the front view satisfies "facing north uses the up strip" perfectly.
+## A sprite that is not flashing must not be going through the flash shader.
+##
+## This is not tidiness. In the Compatibility renderer a canvas item carrying a
+## custom shader takes a different colour path from one without, and leaving the
+## material attached at `flash_amount = 0.0` — which reads as a no-op — squared
+## every colour the actor drew: the player's `#d9c48d` linen reached the screen
+## as `#b9974e`. It looked like the art was wrong, and no test was watching,
+## because every assertion here is about positions and states rather than about
+## what colour came out.
+func _check_flash_is_off_by_default() -> void:
+	var flash: FlashComponent = _player.get_node_or_null("FlashComponent")
+	if flash == null:
+		for child in _player.get_children():
+			if child is FlashComponent:
+				flash = child
+	_check("the player has a flash component", flash != null)
+	if flash == null:
+		return
+	var visual := _player.get_node_or_null("Visual") as CanvasItem
+	_check("and its sprite carries no material while nothing is hitting it",
+		visual != null and visual.material == null,
+		str(visual.material) if visual != null else "no Visual")
+
+	flash.flash()
+	await _ticks(1)
+	_check("a hit attaches the shader", visual.material != null)
+	# 0.08s at 60Hz, plus a frame for the component to notice.
+	await _ticks(8)
+	_check("and it comes off again when the flash ends", visual.material == null,
+		str(visual.material))
+
+
 ## Eight-way facing: the octant snap, the deadband that stops it flickering, and
 ## the fallback chain that lets three-strip and eight-strip actors share one
 ## component.
@@ -890,6 +922,7 @@ func _test_animation() -> void:
 	# check above still passed. Compare the pixels.
 	_check_distinct_directions(set)
 	_check_eight_way(set)
+	await _check_flash_is_off_by_default()
 
 	# The load-bearing one: attack frames track the combo's phase boundaries,
 	# not a frame rate. Hit 1 is windup 0.08 / active 0.10 / recovery 0.16.
