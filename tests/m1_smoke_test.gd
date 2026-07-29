@@ -274,6 +274,25 @@ func _test_type_scale() -> void:
 	_check("snap() rounds onto it", TypeScale.snap(21) == 16 and TypeScale.snap(25) == 32
 		and TypeScale.snap(1) == TypeScale.STEP)
 
+	# ...and nothing anywhere gets a bold or an italic invented for it.
+	#
+	# The fonts ship one weight each. Asked for bold, Godot emboldens — it smears
+	# every glyph sideways by a fraction of a pixel; asked for italic, it shears
+	# them off the grid. Both are fine on a vector typeface and both turn a pixel
+	# font to mush, and it is the item description pane where it showed up.
+	# `art/fonts/ui_theme.tres` points all three at the normal face.
+	var rich := RichTextLabel.new()
+	add_child(rich)
+	var normal := rich.get_theme_font(&"normal_font")
+	var faked: Array[String] = []
+	for slot in [&"bold_font", &"italics_font", &"bold_italics_font", &"mono_font"]:
+		if rich.get_theme_font(slot) != normal:
+			faked.append(String(slot))
+	_check("rich text has a font at all", normal != null)
+	_check("and bold and italic are the same face, not synthesised", faked.is_empty(),
+		", ".join(faked))
+	rich.queue_free()
+
 
 func _test_movement() -> void:
 	print("\nMovement (328 px/s at 1280x720, full speed in 0.08s)")

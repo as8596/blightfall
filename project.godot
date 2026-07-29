@@ -45,6 +45,7 @@ window/stretch/mode="disabled"
 
 [gui]
 
+theme/custom="res://art/fonts/ui_theme.tres"
 theme/custom_font="res://art/fonts/ui_font.tres"
 
 [importer_defaults]

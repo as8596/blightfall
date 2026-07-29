@@ -53,6 +53,10 @@ var _talk_advance: int = 0
 ## every fresh scene.
 var _grant_xp: int = 0
 
+## `--menu=character|inventory|map` opens the Tab menu on that page, which is
+## otherwise unreachable without a keyboard.
+var _menu: String = ""
+
 ## `--ui-scale=N` sets the interface scale, which is what most players will not
 ## be running at 1x. Text crispness is a different question at 2x.
 var _ui_scale: float = 0.0
@@ -94,6 +98,8 @@ func _capture() -> void:
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
+		elif arg.begins_with("--menu="):
+			_menu = arg.trim_prefix("--menu=")
 		elif arg.begins_with("--ui-scale="):
 			_ui_scale = arg.trim_prefix("--ui-scale=").to_float()
 		elif arg.begins_with("--talk-advance="):
@@ -211,6 +217,12 @@ func _capture() -> void:
 	if _grant_xp > 0 and player != null:
 		player.experience.grant(_grant_xp)
 		await _wait_ticks(2)
+
+	if _menu != "":
+		const PAGES := {"character": 0, "inventory": 1, "map": 2}
+		GameMenu.show_page(int(PAGES.get(_menu, 1)))
+		for i in 8:
+			await get_tree().process_frame
 
 	if _pointer != Vector2.INF:
 		Input.warp_mouse(_pointer)

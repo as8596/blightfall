@@ -77,7 +77,7 @@ All three keep the same vertical landmarks — collar 45, belt 69, knee 84, sole
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 227 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 229 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -168,6 +168,18 @@ game's name. The grid leaves nothing in between, so there is no "slightly
 bigger" — a label and the body text are the same size and are told apart by
 colour, spacing and position. That is how pixel-font interfaces are built, and
 fighting it is how you get 21px text that looks subtly broken.
+
+**And nothing may be emboldened or skewed.** The fonts ship one weight each.
+Asked for bold, Godot *emboldens* — it smears every glyph sideways by a fraction
+of a pixel; asked for italic, it *shears* them off the grid. Both are sensible
+approximations for a vector typeface and both turn a pixel font to mush, and the
+item description pane is where it showed up. `art/fonts/ui_theme.tres` is the
+project theme and points bold, italic and bold-italic at the same face, so `[b]`
+and `[i]` still parse and render as plain text.
+
+Emphasis is carried by colour instead, which is the only axis a single-weight
+pixel font has and is a perfectly good one: a warm gold for labels and item
+names, a dim grey for asides and flavour, body copy in between.
 
 `m1_smoke_test` checks the scale against the font that actually shipped rather
 than against that paragraph: on a clean grid, doubling the size doubles the

@@ -31,6 +31,17 @@ var _tabs: TabContainer
 var _slot_panels: Array[Panel] = []
 var _slot_icons: Array[TextureRect] = []
 var _slot_counts: Array[Label] = []
+## Emphasis, for a font with one weight.
+##
+## `[b]` and `[i]` are dead here — `art/fonts/ui_theme.tres` points bold and
+## italic at the same face, because Godot's synthetic versions smear and shear a
+## pixel font into mush. So a heading is warmer and brighter than body copy, and
+## an aside is dimmer. Colour is the only axis a single-weight pixel font has,
+## and it is a perfectly good one.
+const KEY := "b79a63"     ## labels and item names — warm, a step up from body
+const ASIDE := "8a8378"   ## flavour text, parentheticals, "nothing here"
+const BODY := "ebe3d2"
+
 var _detail: RichTextLabel
 var _satchel: Label
 var _hovered: int = -1
@@ -146,27 +157,41 @@ func _character_text() -> String:
 		return "\n  No one is being carried by this menu yet."
 	var lines := [
 		"",
-		"  [b]Health[/b]        %d / %d" % [stats.get("health", 0), stats.get("max_health", 0)],
-		"  [b]Stamina[/b]       %.0f    [i]back in %.1fs after %.1fs[/i]" % [
-			stats.get("max_stamina", 0.0), stats.get("regen_time", 0.0),
-			stats.get("regen_delay", 0.0)],
-		"  [b]Carry[/b]         %d units" % stats.get("capacity", 0),
+		_row("Health", "%d / %d" % [stats.get("health", 0), stats.get("max_health", 0)]),
+		_row("Stamina", "%.0f    %s" % [stats.get("max_stamina", 0.0),
+			_aside("back in %.1fs after %.1fs" % [stats.get("regen_time", 0.0),
+				stats.get("regen_delay", 0.0)])]),
+		_row("Carry", "%d units" % stats.get("capacity", 0)),
 		"",
-		"  [b]Move[/b]          %d px/s" % int(stats.get("move_speed", 0.0)),
-		"  [b]Strike[/b]        %s" % stats.get("damage", "-"),
-		"  [b]Dash[/b]          %d px" % int(stats.get("dodge_distance", 0.0)),
+		_row("Move", "%d px/s" % int(stats.get("move_speed", 0.0))),
+		_row("Strike", "%s" % stats.get("damage", "-")),
+		_row("Dash", "%d px" % int(stats.get("dodge_distance", 0.0))),
 		"",
 	]
 	var granted: Array = stats.get("granted_by", [])
 	if granted.is_empty():
-		lines.append("  [i]Nothing in Ambry is standing that was not standing when you")
-		lines.append("  arrived. Every one of these numbers moves when that changes,")
-		lines.append("  and nothing else moves them.[/i]")
+		lines.append("  " + _aside("Nothing in Ambry is standing that was not standing when you"))
+		lines.append("  " + _aside("arrived. Every one of these numbers moves when that changes,"))
+		lines.append("  " + _aside("and nothing else moves them."))
 	else:
-		lines.append("  [b]Granted by[/b]")
+		lines.append("  " + _key("Granted by"))
 		for source in granted:
 			lines.append("    %s" % String(source).capitalize())
 	return "\n".join(lines)
+
+
+## A label and its value, on one line. The label is warmer than the value rather
+## than heavier, because there is no heavier — see `KEY`.
+func _row(label: String, value: String) -> String:
+	return "  %s%s%s" % [_key(label), " ".repeat(maxi(14 - label.length(), 1)), value]
+
+
+func _key(text: String) -> String:
+	return "[color=%s]%s[/color]" % [KEY, text]
+
+
+func _aside(text: String) -> String:
+	return "[color=%s]%s[/color]" % [ASIDE, text]
 
 
 ## The grid is the inventory; the pane underneath is what it is for. Hovering is
@@ -204,13 +229,13 @@ func _detail_text() -> String:
 	var slot: int = _hovered if _hovered >= 0 else Hud.selected
 	var item := _item_in(slot)
 	if item == null:
-		return "\n  [i]Nothing in that slot.[/i]"
+		return "\n  " + _aside("Nothing in that slot.")
 
 	var kinds := ["Consumable", "Tool", "Key"]
 	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
 	var lines := [
 		"",
-		"  [b]%s[/b]    [i]%s[/i]" % [item.display_name, kind],
+		"  %s    %s" % [_key(item.display_name), _aside(kind)],
 	]
 	if item.heals > 0:
 		lines.append("  Restores %d health." % item.heals)
@@ -222,7 +247,7 @@ func _detail_text() -> String:
 		lines.append("  Stacks to %d." % item.stack_size)
 	if not item.description.is_empty():
 		lines.append("")
-		lines.append("  [i]%s[/i]" % item.description)
+		lines.append("  " + _aside(item.description))
 	return "\n".join(lines)
 
 
@@ -240,7 +265,7 @@ func _map_text() -> String:
 	# the blight (docs/AMBRY.md, rebuild project 6), and it is a ruin. The map
 	# being unavailable is the design, not a gap in it.
 	return """
-  [i]You have no map.[/i]
+  [color=8a8378]You have no map.[/color]
 
   The archive kept them — every holding in the valley, and what the blight
   had taken of it. It is a ruin on the far side of the wall, and the wall
