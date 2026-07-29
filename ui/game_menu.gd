@@ -345,6 +345,7 @@ func _build_equipment() -> Control:
 
 	var heading := Label.new()
 	heading.text = "Worn"
+	heading.tooltip_text = "Drag gear here, or right-click it"
 	heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
 	column.add_child(heading)
@@ -384,6 +385,8 @@ func _build_equipment() -> Control:
 
 		var index := _gear_panels.size()
 		panel.gui_input.connect(_on_gear_click.bind(index))
+		panel.set_drag_forwarding(_drag_from_gear.bind(panel, index), _can_drop_on_gear.bind(index),
+			_drop_on_gear.bind(index))
 		_gear_panels.append(panel)
 		_gear_icons.append(icon)
 		_gear_labels.append(label)
@@ -410,17 +413,92 @@ func _player() -> Player:
 	return scene.get("player") as Player if scene != null else null
 
 
+## Dragging, and a right-click shortcut for people who would rather not.
+##
+## The drag payload is {where, slot}: `where` is "pack" or "gear" so a drop
+## target can tell a hotbar slot from a worn one without inspecting the item,
+## and `slot` is the pack index or the `ItemData.Slot` respectively.
+##
+## Left-drag moves; **right-click** equips or unequips in one action. Both,
+## because dragging is discoverable and clicking is faster, and the fast path is
+## the one you use on the fortieth loaf of bread.
+## `from` is the panel being dragged, because `set_drag_preview` belongs to the
+## Control that started the drag and this menu is a CanvasLayer.
+func _drag_from_pack(_at: Vector2, from: Control, slot: int) -> Variant:
+	var item := _item_in(slot)
+	if item == null:
+		return null
+	from.set_drag_preview(_drag_preview(item))
+	return {"where": "pack", "slot": slot}
+
+
+func _drag_from_gear(_at: Vector2, from: Control, index: int) -> Variant:
+	var item: ItemData = worn.get(_gear_slots[index])
+	if item == null:
+		return null
+	from.set_drag_preview(_drag_preview(item))
+	return {"where": "gear", "slot": _gear_slots[index]}
+
+
+static func _drag_preview(item: ItemData) -> Control:
+	var ghost := TextureRect.new()
+	ghost.texture = item.icon
+	ghost.custom_minimum_size = Vector2(52, 52)
+	ghost.size = Vector2(52, 52)
+	ghost.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ghost.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ghost.modulate = Color(1, 1, 1, 0.85)
+	return ghost
+
+
+func _can_drop_on_pack(_at: Vector2, data: Variant, _slot: int) -> bool:
+	return data is Dictionary and (data as Dictionary).has("where")
+
+
+## A worn slot only takes what belongs in it. Refusing here rather than
+## accepting and silently doing nothing is the difference between a rule and a
+## bug: the cursor says no while you are still holding the thing.
+func _can_drop_on_gear(_at: Vector2, data: Variant, index: int) -> bool:
+	if not (data is Dictionary):
+		return false
+	var payload: Dictionary = data
+	if String(payload.get("where", "")) != "pack":
+		return false
+	var item := _item_in(int(payload.get("slot", -1)))
+	return item != null and item.slot == _gear_slots[index]
+
+
+func _drop_on_pack(_at: Vector2, data: Variant, slot: int) -> void:
+	var player := _player()
+	var payload: Dictionary = data
+	if player == null:
+		return
+	if String(payload.get("where", "")) == "gear":
+		var removed := player.equipment.unequip(int(payload.get("slot", 0)))
+		if removed != null:
+			@warning_ignore("return_value_discarded")
+			player.items.add(removed)
+	else:
+		player.items.swap(int(payload.get("slot", -1)), slot)
+	_refresh()
+
+
+func _drop_on_gear(_at: Vector2, data: Variant, index: int) -> void:
+	var payload: Dictionary = data
+	_equip_from(int(payload.get("slot", -1)))
+
+
+## Right-click: straight to the slot the item names, and back to the pack from
+## a worn slot. No target to choose, because the item already knows.
 func _on_gear_click(event: InputEvent, index: int) -> void:
 	var click := event as InputEventMouseButton
-	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_RIGHT:
 		return
 	var player := _player()
 	if player == null:
 		return
 	var removed := player.equipment.unequip(_gear_slots[index])
 	if removed != null:
-		# Back into the pack rather than gone. A slot that eats what it takes off
-		# is a slot nobody experiments with.
 		@warning_ignore("return_value_discarded")
 		player.items.add(removed)
 	_refresh()
@@ -428,8 +506,12 @@ func _on_gear_click(event: InputEvent, index: int) -> void:
 
 func _on_slot_click(event: InputEvent, slot: int) -> void:
 	var click := event as InputEventMouseButton
-	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_RIGHT:
 		return
+	_equip_from(slot)
+
+
+func _equip_from(slot: int) -> void:
 	var player := _player()
 	var item := _item_in(slot)
 	if player == null or item == null or not item.is_equippable():
@@ -539,6 +621,8 @@ func _build_inventory_page() -> Control:
 		slot.mouse_entered.connect(_on_slot_hover.bind(i, true))
 		slot.mouse_exited.connect(_on_slot_hover.bind(i, false))
 		slot.gui_input.connect(_on_slot_click.bind(i))
+		slot.set_drag_forwarding(_drag_from_pack.bind(slot, i), _can_drop_on_pack.bind(i),
+			_drop_on_pack.bind(i))
 
 		grid.add_child(slot)
 		_slot_panels.append(slot)

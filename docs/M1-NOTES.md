@@ -77,7 +77,7 @@ All three keep the same vertical landmarks — collar 45, belt 69, knee 84, sole
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 237 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 238 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and

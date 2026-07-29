@@ -66,13 +66,13 @@ const MARGIN: float = 28.0
 const PAD: Vector2 = Vector2(22.0, 16.0)
 
 ## The portrait frame, and the gap between it and the words.
-const PORTRAIT: float = 112.0
+const PORTRAIT: float = 96.0
 const PORTRAIT_GAP: float = 16.0
 
 ## Where a villager's face is in the placeholder body strip — head and
 ## shoulders out of the 128x128 first frame. Real portraits, when they exist,
 ## come from the conversation file and are drawn whole.
-const BUST := Rect2(32, 14, 64, 64)
+const BUST := Rect2(32, 14, 64, 62)
 const BACK := Color(0.09, 0.08, 0.07, 0.95)
 const EDGE := Color(0.42, 0.35, 0.26)
 const TEXT := Color(0.95, 0.92, 0.85)
@@ -87,16 +87,19 @@ const PICKED := Color(0.95, 0.88, 0.70)
 ## The name and the replies are the same size as each other and are told apart
 ## by colour and position: the name is the panel's border colour above the line,
 ## the replies are dim below it with a cursor on the chosen one.
-## The spoken line and the replies are the same size, because they are the same
-## kind of thing: what is being said, and what you can say back. Having the
-## replies a step down made them read as a footnote to a conversation the player
-## is supposed to be in.
+## **One size for the whole box.**
 ##
-## The name is the one caption here, and captions are allowed to be small — it
-## is a label on the box rather than part of the exchange.
+## The font's grid gives 16 and 32 and nothing between (`ui/type_scale.gd`), so
+## every attempt at hierarchy here is a 2x jump. 32 for the line made the
+## replies at 16 read as a footnote; 32 for both made the box shout. There is no
+## third option in the type, so the type stops trying.
+##
+## The hierarchy comes from the frames instead: the spoken line sits on the
+## panel, the replies sit in boxes of their own, and the name is dimmer than
+## either. That reads at a glance and costs nothing in legibility.
 const NAME_SIZE: int = TypeScale.SMALL
-const LINE_SIZE: int = TypeScale.HEADING
-const REPLY_SIZE: int = TypeScale.HEADING
+const LINE_SIZE: int = TypeScale.SMALL
+const REPLY_SIZE: int = TypeScale.SMALL
 
 ## A reply's own box, so the choice you are about to make has an edge round it.
 const REPLY_PAD := Vector2(12.0, 4.0)
@@ -205,7 +208,9 @@ func start(id: StringName, portrait: Dictionary = {}) -> bool:
 		return false
 	_data = data
 	_id = id
-	_voice_pitch = float(data.get("voice_pitch", 1.0))
+	# Clamped, because a speaker offset multiplies the sample's fundamental and
+	# the deep voices were being pushed below what a laptop speaker reproduces.
+	_voice_pitch = clampf(float(data.get("voice_pitch", 1.0)), 0.82, 1.45)
 	_speaker.text = String(data.get("name", String(id)))
 	_set_portrait(data, portrait)
 	_open = true
@@ -391,7 +396,7 @@ func _process(delta: float) -> void:
 			_blips += 1
 			if _blips % BLIP_EVERY == 0:
 				Sfx.play_at(Sfx.VOICES[(_blips / BLIP_EVERY) % Sfx.VOICES.size()],
-					_voice_pitch, -10.0, 0.08)
+					_voice_pitch, -3.0, 0.08)
 	_body.visible_characters = want
 	if not _typing():
 		_finish_line()
@@ -486,12 +491,35 @@ func _paint_replies() -> void:
 		row.add_theme_font_size_override("font_size", REPLY_SIZE)
 		row.add_theme_color_override("font_color", PICKED if chosen else TEXT)
 		frame.add_child(row)
+		# Pointable as well as keyable. A list of boxes that highlights one and
+		# refuses to be clicked is a list that looks broken to anyone holding a
+		# mouse, and the mouse is already how the hotbar is skimmed.
+		frame.mouse_filter = Control.MOUSE_FILTER_STOP
+		frame.mouse_entered.connect(_point_at.bind(i))
+		frame.gui_input.connect(_on_reply_input.bind(i))
 		_replies.add_child(frame)
 	_fit_box()
 
 
+## Move the cursor without choosing. Hovering is the read; clicking is the write.
+func _point_at(index: int) -> void:
+	if not _replies.visible or index == _choice:
+		return
+	_choice = index
+	Sfx.play(&"ui_move", -14.0)
+	_paint_replies()
+
+
+func _on_reply_input(event: InputEvent, index: int) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	_choice = index
+	_pick()
+
+
 static func _reply_height() -> float:
-	return float(REPLY_SIZE) + REPLY_PAD.y * 2.0 + 8.0
+	return float(REPLY_SIZE) + REPLY_PAD.y * 2.0 + 10.0
 
 
 func _build() -> void:

@@ -590,14 +590,37 @@ func _test_damage_and_death() -> void:
 
 	_player.facing = Vector2.RIGHT
 	var before := enemy.health.current
+
+	# Measured with nothing equipped, so this stays a check on GDD §5's frame
+	# data rather than on whatever sword the player happens to start with. The
+	# weapon's contribution is asserted immediately below, and in
+	# `_test_equipment`.
+	var sword := _player.equipment.unequip(ItemData.Slot.WEAPON)
+	await _ticks(2)
 	await _press(&"attack")
 	await _await_state(&"Attack")
 	await _ticks(30)
-	_check("hit 1 deals 4 damage", enemy.health.current == before - 4,
-		"%d → %d" % [before, enemy.health.current])
+	var bare := before - enemy.health.current
+	_check("hit 1 deals 4 damage", bare == 4, "%d → %d" % [before, enemy.health.current])
 
 	# One activation must not tick twice over its 0.10s active window.
-	_check("no double-hit within one swing", enemy.health.current == 8)
+	_check("no double-hit within one swing", enemy.health.current == before - 4)
+
+	# ...and the weapon reaches the hitbox. Damage and reach were both being
+	# computed, shown on the character sheet, and then thrown away — so a forge
+	# and a sword were decoration: the numbers moved and nothing died faster.
+	if sword != null:
+		@warning_ignore("return_value_discarded")
+		_player.equipment.equip(sword)
+		await _ticks(2)
+		var armed := enemy.health.current
+		await _press(&"attack")
+		await _await_state(&"Attack")
+		await _ticks(30)
+		var with_sword := armed - enemy.health.current
+		_check("and an equipped weapon adds its damage to the swing",
+			with_sword == bare + int(sword.modifiers.get(&"damage", 0)),
+			"%d bare vs %d armed" % [bare, with_sword])
 
 	# Kill it. The combo does 16 across three hits against 12 HP.
 	var guard := 0

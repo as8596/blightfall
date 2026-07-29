@@ -13,5 +13,5 @@ kind = 3
 stack_size = 1
 slot = 1
 modifiers = {
-&"damage": 0
+&"damage": 1
 }

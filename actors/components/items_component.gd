@@ -88,6 +88,22 @@ func use_selected(actor: Node) -> bool:
 	return use(selected, actor)
 
 
+## Exchange two slots. The one operation drag-and-drop needs and the only one
+## that can reorder the bar, so it lives here rather than in the menu doing it
+## with two removes and two adds — which would stack, renumber, and occasionally
+## drop something on the floor.
+func swap(a: int, b: int) -> void:
+	if a == b or a < 0 or b < 0 or a >= items.size() or b >= items.size():
+		return
+	var item := items[a]
+	var count := counts[a]
+	items[a] = items[b]
+	counts[a] = counts[b]
+	items[b] = item
+	counts[b] = count
+	changed.emit()
+
+
 func item_at(slot: int) -> ItemData:
 	return items[slot] if slot >= 0 and slot < items.size() else null
 

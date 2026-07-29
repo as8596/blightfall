@@ -73,7 +73,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 237 assertions over the M1 systems and Ambry
+# headless self-check — 238 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -124,7 +124,9 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 `interact` opens doors and talks to people. It is the general verb —
 `world/interactable.gd` is the base class building, resting and the chest will
 also use. In a conversation it advances the line, completes a line that is still
-arriving, and picks a reply; **W/S** move between replies.
+arriving, and picks a reply; **W/S** move between replies, and they can be
+clicked. In the inventory, **drag** an item to move or equip it, or
+**right-click** to equip and unequip in one action.
 
 `tool` is what uses the selected hotbar slot. GDD §5 calls it
 "context-dependent", and the hotbar is the context. Numbers and the wheel only

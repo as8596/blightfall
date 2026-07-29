@@ -300,16 +300,29 @@ func face(direction: Vector2) -> void:
 ## Point the combo hitbox along `facing` and load one hit's numbers into it.
 func configure_hitbox(step: ComboStepData) -> void:
 	hitbox.rotation = facing.angle()
-	hitbox.damage = step.damage
+	# The combo's frame data plus what you are carrying and what the town has
+	# rebuilt. Both bonuses were being *computed* and shown on the character
+	# sheet and neither reached the hitbox, so a forge and a sword were both
+	# decoration — the numbers moved and nothing died faster.
+	hitbox.damage = maxi(step.damage + stats.bonus(StatsComponent.DAMAGE), 1)
 	hitbox.knockback_distance = step.knockback_distance
 	hitbox.hitstop = step.hitstop
 	hitbox.screen_shake = step.screen_shake
 	hitbox.impact_sfx = step.impact_sfx
 	if _hitbox_shape != null:
 		var rect := _hitbox_shape.shape as RectangleShape2D
+		# Reach scales the box the same way it scales the drawn arc, or the
+		# picture and the thing that can hurt you stop agreeing — which is the
+		# one promise `WeaponArc` exists to keep.
+		var reach := reach_scale()
 		if rect != null:
-			rect.size = step.hitbox_size
-		_hitbox_shape.position = Vector2(step.hitbox_offset, 0.0)
+			rect.size = step.hitbox_size * reach
+		_hitbox_shape.position = Vector2(step.hitbox_offset * reach, 0.0)
+
+
+## How much further than shipped the swing goes, as a multiplier.
+func reach_scale() -> float:
+	return 1.0 + float(stats.bonus(StatsComponent.REACH)) / 100.0
 
 
 ## True while the dash key is held, there is fuel, and the player is moving.

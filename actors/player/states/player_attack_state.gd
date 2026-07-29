@@ -120,7 +120,7 @@ func _start_step() -> void:
 			player.facing.angle(),
 			_step.windup + _step.active,
 			_index % 2 == 0,
-			1.0 + float(player.stats.bonus(StatsComponent.REACH)) / 100.0
+			player.reach_scale()
 		)
 	if _step.swing_sfx != &"":
 		Sfx.play(_step.swing_sfx)

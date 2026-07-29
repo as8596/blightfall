@@ -117,29 +117,30 @@ SOUNDS = {
     # ---- voice blips, one per few revealed characters (ui/dialogue_box.gd)
     #
     # The Animal Crossing trick: no words, just a short pitched blip per
-    # syllable, so text has a voice without anybody recording one. Deeper than
-    # Animal Crossing on purpose — theirs sits around 600Hz and reads as
-    # cheerful chirping, which is exactly wrong for a town that has been losing.
-    # These sit at 190-260Hz with a falling sweep, so they read as speech in a
-    # low register.
+    # syllable, so text has a voice without anybody recording one.
     #
-    # Three of them, cycled, because one blip repeated forty times is a machine
-    # and three is a mouth. Playback pitch-varies them a further +/-8% and each
-    # speaker carries their own pitch offset, so nobody sounds like anybody else.
+    # **Deeper than Animal Crossing, but not by as much as the first attempt.**
+    # Theirs sits around 600Hz and reads as cheerful chirping, which is wrong for
+    # a town that has been losing. The first version went to 190-260Hz and was
+    # inaudible: 60% of its energy sat below 300Hz, playback pitched it *down*
+    # again by each speaker's offset — the guard is 0.78, so his fundamental
+    # landed near 150Hz — and small speakers roll off hard down there. Measured,
+    # they were 10dB quieter than every other sound in the game.
+    #
+    # These sit at 330-430Hz with a strong second harmonic, which is the part
+    # that actually carries on a laptop. Still unmistakably low, and audible.
     "voice_a.wav": lambda: mix(
-        tone(0.055, 236, 198, attack=0.12, decay=17.0, gain=0.42),
-        tone(0.045, 472, 396, attack=0.12, decay=22.0, gain=0.12),
+        tone(0.055, 372, 318, attack=0.12, decay=15.0, gain=0.55),
+        tone(0.05, 744, 636, attack=0.12, decay=18.0, gain=0.3),
     ),
     "voice_b.wav": lambda: mix(
-        tone(0.06, 205, 179, attack=0.14, decay=16.0, gain=0.42),
-        tone(0.05, 410, 358, attack=0.14, decay=21.0, gain=0.1),
+        tone(0.06, 336, 292, attack=0.14, decay=14.0, gain=0.55),
+        tone(0.052, 672, 584, attack=0.14, decay=17.0, gain=0.28),
     ),
     "voice_c.wav": lambda: mix(
-        tone(0.05, 262, 214, attack=0.1, decay=19.0, gain=0.4),
-        tone(0.042, 524, 428, attack=0.1, decay=24.0, gain=0.13),
+        tone(0.05, 424, 352, attack=0.1, decay=17.0, gain=0.52),
+        tone(0.044, 848, 704, attack=0.1, decay=20.0, gain=0.3),
     ),
-    # Moving between replies, and choosing one. Quiet and short: this is a
-    # sound the player will hear thousands of times.
     "ui_move.wav": lambda: tone(0.035, 520, 460, attack=0.1, decay=26.0, gain=0.22),
     "ui_select.wav": lambda: mix(
         tone(0.09, 380, 620, attack=0.08, decay=14.0, gain=0.3),
