@@ -1,1463 +1,4486 @@
 [gd_scene format=4]
 
-[ext_resource type="TileSet" path="res://resources/tilesets/greybox.tres" id="1_38h51"]
-[ext_resource type="PackedScene" path="res://world/prop.tscn" id="2_mc681"]
-[ext_resource type="Script" path="res://world/prop.gd" id="3_17jf3"]
-[ext_resource type="Texture2D" path="res://art/sprites/props/pine_tree.png" id="4_rdk04"]
-[ext_resource type="Texture2D" path="res://art/sprites/props/thorn_bush.png" id="5_78qme"]
-[ext_resource type="Texture2D" path="res://art/sprites/props/cypress_shrub.png" id="6_kp726"]
+[ext_resource type="TileSet" path="res://resources/tilesets/greybox.tres" id="1_mc681"]
+[ext_resource type="PackedScene" path="res://world/prop.tscn" id="2_17jf3"]
+[ext_resource type="Script" path="res://world/prop.gd" id="3_rdk04"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/pine_tree.png" id="4_78qme"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/round_hedge.png" id="5_kp726"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/sage_bush.png" id="6_v6drq"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/thorn_bush.png" id="7_f0t30"]
 
-[node name="CiderYard" type="Node2D" unique_id=1222388569]
+[node name="CiderYard" type="Node2D" unique_id=1514071982]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=984183016]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=2066672071]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAARAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAEAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAEAAAAAAAAAAAAFAAEAAAAAAAAAAAAGAAEAAAAAAAAAAAAHAAEAAAAAAAAAAAAIAAEAAAAAAAAAAAAJAAEAAAAAAAAAAAAKAAEAAAAAAAAAAAALAAEAAAAAAAAAAAAMAAEAAAAAAAAAAAANAAEAAAAAAAAAAAAOAAEAAAAAAAAAAAAPAAEAAAAAAAAAAAAQAAEAAAAAAAAAAAARAAEAAAAAAAAAAAASAAEAAAAAAAAAAAATAAEAAAAAAAAAAAAUAAEAAAAAAAAAAAAVAAEAAAAAAAAAAAAWAAEAAAAAAAAAAAAXAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAAAAAAAAAACAAIAAAAAAAAAAAADAAIAAAAAAAAAAAAEAAIAAAAAAAAAAAAFAAIAAAAAAAAAAAAGAAIAAAAAAAAAAAAHAAIAAAAAAAAAAAAIAAIAAAAAAAAAAAAJAAIAAAAAAAAAAAAKAAIAAAAAAAAAAAALAAIAAAAAAAAAAAAMAAIAAAAAAAAAAAANAAIAAAAAAAAAAAAOAAIAAAAAAAAAAAAPAAIAAAAAAAAAAAAQAAIAAAAAAAAAAAARAAIAAAAAAAAAAAASAAIAAAAAAAAAAAATAAIAAAAAAAAAAAAUAAIAAAAAAAAAAAAVAAIAAAAAAAAAAAAWAAIAAAAAAAAAAAAXAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAJAAMAAAADAAAAAAAKAAMAAAADAAAAAAALAAMAAAAAAAAAAAAMAAMAAAAAAAAAAAANAAMAAAAAAAAAAAAOAAMAAAAAAAAAAAAPAAMAAAAAAAAAAAAQAAMAAAAAAAAAAAARAAMAAAAAAAAAAAASAAMAAAAAAAAAAAATAAMAAAAAAAAAAAAUAAMAAAAAAAAAAAAVAAMAAAAAAAAAAAAWAAMAAAAAAAAAAAAXAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAABAAQAAAAAAAAAAAACAAQAAAAAAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAJAAQAAAADAAAAAAAKAAQAAAADAAAAAAALAAQAAAAAAAAAAAAMAAQAAAAAAAAAAAANAAQAAAAAAAAAAAAOAAQAAAAAAAAAAAAPAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAARAAQAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAAAAAAAAAAUAAQAAAAAAAAAAAAVAAQAAAAAAAAAAAAWAAQAAAAAAAAAAAAXAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAABAAUAAAAAAAAAAAACAAUAAAAAAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAJAAUAAAADAAAAAAAKAAUAAAADAAAAAAALAAUAAAAAAAAAAAAMAAUAAAAAAAAAAAANAAUAAAAAAAAAAAAOAAUAAAAAAAAAAAAPAAUAAAAAAAAAAAAQAAUAAAAAAAAAAAARAAUAAAAAAAAAAAASAAUAAAAAAAAAAAATAAUAAAAAAAAAAAAUAAUAAAAAAAAAAAAVAAUAAAAAAAAAAAAWAAUAAAAAAAAAAAAXAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAABAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAAJAAYAAAADAAAAAAAKAAYAAAADAAAAAAALAAYAAAAAAAAAAAAMAAYAAAAAAAAAAAANAAYAAAAAAAAAAAAOAAYAAAAAAAAAAAAPAAYAAAAAAAAAAAAQAAYAAAAAAAAAAAARAAYAAAAAAAAAAAASAAYAAAAAAAAAAAATAAYAAAAAAAAAAAAUAAYAAAAAAAAAAAAVAAYAAAAAAAAAAAAWAAYAAAAAAAAAAAAXAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAABAAcAAAAAAAAAAAACAAcAAAAAAAAAAAADAAcAAAADAAAAAAAEAAcAAAADAAAAAAAFAAcAAAADAAAAAAAGAAcAAAADAAAAAAAHAAcAAAADAAAAAAAIAAcAAAADAAAAAAAJAAcAAAADAAAAAAAKAAcAAAADAAAAAAALAAcAAAAAAAAAAAAMAAcAAAAAAAAAAAANAAcAAAAAAAAAAAAOAAcAAAAAAAAAAAAPAAcAAAAAAAAAAAAQAAcAAAAAAAAAAAARAAcAAAAAAAAAAAASAAcAAAAAAAAAAAATAAcAAAAAAAAAAAAUAAcAAAAAAAAAAAAVAAcAAAAAAAAAAAAWAAcAAAAAAAAAAAAXAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAgAAAAAAAAAAAACAAgAAAAAAAAAAAADAAgAAAADAAAAAAAEAAgAAAADAAAAAAAFAAgAAAADAAAAAAAGAAgAAAADAAAAAAAHAAgAAAADAAAAAAAIAAgAAAADAAAAAAAJAAgAAAADAAAAAAAKAAgAAAADAAAAAAALAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAANAAgAAAAAAAAAAAAOAAgAAAAAAAAAAAAPAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAARAAgAAAAAAAAAAAASAAgAAAAAAAAAAAATAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAVAAgAAAAAAAAAAAAWAAgAAAAAAAAAAAAXAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAASAAkAAAAAAAAAAAATAAkAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAAAAAAAAAAGAAoAAAAAAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAAAAAAAAAAJAAoAAAAAAAAAAAAKAAoAAAAAAAAAAAALAAoAAAAAAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAAAAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAAAAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAAAAAAAAAAUAAoAAAAAAAAAAAAVAAoAAAAAAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAABAAsAAAAAAAAAAAACAAsAAAAAAAAAAAADAAsAAAAAAAAAAAAEAAsAAAAAAAAAAAAFAAsAAAAAAAAAAAAGAAsAAAAAAAAAAAAHAAsAAAAAAAAAAAAIAAsAAAAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAAAAAAAAANAAsAAAAAAAAAAAAOAAsAAAAAAAAAAAAPAAsAAAAAAAAAAAAQAAsAAAAAAAAAAAARAAsAAAAAAAAAAAASAAsAAAAAAAAAAAATAAsAAAAAAAAAAAAUAAsAAAAAAAAAAAAVAAsAAAAAAAAAAAAWAAsAAAAAAAAAAAAXAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAABAAwAAAAAAAAAAAACAAwAAAAAAAAAAAADAAwAAAAAAAAAAAAEAAwAAAAAAAAAAAAFAAwAAAAAAAAAAAAGAAwAAAAAAAAAAAAHAAwAAAAAAAAAAAAIAAwAAAAAAAAAAAAJAAwAAAAAAAAAAAAKAAwAAAAAAAAAAAALAAwAAAAAAAAAAAAMAAwAAAAAAAAAAAANAAwAAAAAAAAAAAAOAAwAAAAAAAAAAAAPAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAARAAwAAAAAAAAAAAASAAwAAAAAAAAAAAATAAwAAAAAAAAAAAAUAAwAAAAAAAAAAAAVAAwAAAAAAAAAAAAWAAwAAAAAAAAAAAAXAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAABAA0AAAAAAAAAAAACAA0AAAAAAAcAAAADAA0AAAAAAAcAAAAEAA0AAAAAAAcAAAAFAA0AAAAAAAcAAAAGAA0AAAAAAAcAAAAHAA0AAAAAAAcAAAAIAA0AAAAAAAcAAAAJAA0AAAAAAAcAAAAKAA0AAAAAAAcAAAALAA0AAAAAAAcAAAAMAA0AAAAAAAcAAAANAA0AAAAAAAcAAAAOAA0AAAAAAAcAAAAPAA0AAAAAAAcAAAAQAA0AAAAAAAcAAAARAA0AAAAAAAcAAAASAA0AAAAAAAcAAAATAA0AAAAAAAcAAAAUAA0AAAAAAAcAAAAVAA0AAAAAAAcAAAAWAA0AAAAAAAAAAAAXAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAcAAAADAA4AAAAAAAcAAAAEAA4AAAAAAAcAAAAFAA4AAAAAAAcAAAAGAA4AAAAAAAcAAAAHAA4AAAAAAAcAAAAIAA4AAAAAAAcAAAAJAA4AAAAAAAcAAAAKAA4AAAAAAAcAAAALAA4AAAAAAAcAAAAMAA4AAAAAAAcAAAANAA4AAAAAAAcAAAAOAA4AAAAAAAcAAAAPAA4AAAAAAAcAAAAQAA4AAAAAAAcAAAARAA4AAAAAAAcAAAASAA4AAAAAAAcAAAATAA4AAAAAAAcAAAAUAA4AAAAAAAcAAAAVAA4AAAAAAAcAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAAAA8AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAcAAAADAA8AAAAAAAcAAAAEAA8AAAAAAAcAAAAFAA8AAAAAAAcAAAAGAA8AAAAAAAcAAAAHAA8AAAAAAAcAAAAIAA8AAAAAAAcAAAAJAA8AAAAAAAcAAAAKAA8AAAAAAAcAAAALAA8AAAAAAAcAAAAMAA8AAAAAAAcAAAANAA8AAAAAAAcAAAAOAA8AAAAAAAcAAAAPAA8AAAAAAAcAAAAQAA8AAAAAAAcAAAARAA8AAAAAAAcAAAASAA8AAAAAAAcAAAATAA8AAAAAAAcAAAAUAA8AAAAAAAcAAAAVAA8AAAAAAAcAAAAWAA8AAAAAAAAAAAAXAA8AAAAAAAAAAAAAABAAAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAcAAAADABAAAAAAAAcAAAAEABAAAAAAAAcAAAAFABAAAAAAAAcAAAAGABAAAAAAAAcAAAAHABAAAAAAAAcAAAAIABAAAAAAAAcAAAAJABAAAAAAAAcAAAAKABAAAAAAAAcAAAALABAAAAAAAAcAAAAMABAAAAAAAAcAAAANABAAAAAAAAcAAAAOABAAAAAAAAcAAAAPABAAAAAAAAcAAAAQABAAAAAAAAcAAAARABAAAAAAAAcAAAASABAAAAAAAAcAAAATABAAAAAAAAcAAAAUABAAAAAAAAcAAAAVABAAAAAAAAcAAAAWABAAAAAAAAAAAAAXABAAAAAAAAAAAAAAABEAAAAAAAAAAAABABEAAAAAAAAAAAACABEAAAAAAAcAAAADABEAAAAAAAcAAAAEABEAAAAAAAcAAAAFABEAAAAAAAcAAAAGABEAAAAAAAcAAAAHABEAAAAAAAcAAAAIABEAAAAAAAcAAAAJABEAAAAAAAcAAAAKABEAAAAAAAcAAAALABEAAAAAAAcAAAAMABEAAAAAAAcAAAANABEAAAAAAAcAAAAOABEAAAAAAAcAAAAPABEAAAAAAAcAAAAQABEAAAAAAAcAAAARABEAAAAAAAcAAAASABEAAAAAAAcAAAATABEAAAAAAAcAAAAUABEAAAAAAAcAAAAVABEAAAAAAAcAAAAWABEAAAAAAAAAAAAXABEAAAAAAAAAAAAAABIAAAAAAAAAAAABABIAAAAAAAAAAAACABIAAAAAAAAAAAADABIAAAAAAAAAAAAEABIAAAAAAAAAAAAFABIAAAAAAAAAAAAGABIAAAAAAAAAAAAHABIAAAAAAAAAAAAIABIAAAAAAAAAAAAJABIAAAAAAAAAAAAKABIAAAAAAAAAAAALABIAAAAAAAAAAAAMABIAAAAAAAAAAAANABIAAAAAAAAAAAAOABIAAAAAAAAAAAAPABIAAAAAAAAAAAAQABIAAAAAAAAAAAARABIAAAAAAAAAAAASABIAAAAAAAAAAAATABIAAAAAAAAAAAAUABIAAAAAAAAAAAAVABIAAAAAAAAAAAAWABIAAAAAAAAAAAAXABIAAAAAAAAAAAAAABMAAAAAAAAAAAABABMAAAAAAAAAAAACABMAAAAAAAAAAAADABMAAAAAAAAAAAAEABMAAAAAAAAAAAAFABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABMAAAAAAAAAAAAQABMAAAAAAAAAAAARABMAAAAAAAAAAAASABMAAAAAAAAAAAATABMAAAAAAAAAAAAUABMAAAAAAAAAAAAVABMAAAAAAAAAAAAWABMAAAAAAAAAAAAXABMAAAAAAAAAAAA=")
-tile_set = ExtResource("1_38h51")
+tile_set = ExtResource("1_mc681")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=1252615629]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=2051152501]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAIAA0AAAACAAMAAAAJAA0AAAACAAMAAAAKAA4AAAACAAMAAAAUAA4AAAACAAMAAAAIABAAAAACAAMAAAAMABAAAAACAAMAAAAOABAAAAACAAMAAAADAAMAAAAAAAEAAAADAAgAAAAAAAEAAAAEAAMAAAAAAAEAAAAEAAgAAAAAAAEAAAAFAAMAAAAAAAEAAAAFAAgAAAAAAAEAAAAGAAMAAAAAAAEAAAAGAAgAAAAAAAEAAAAHAAMAAAAAAAEAAAAHAAgAAAAAAAIAAAAIAAMAAAAAAAEAAAAIAAgAAAAAAAEAAAAJAAMAAAAAAAEAAAAJAAgAAAAAAAEAAAAKAAMAAAAAAAEAAAAKAAgAAAAAAAEAAAADAAQAAAAAAAEAAAAKAAQAAAAAAAEAAAADAAUAAAAAAAEAAAAKAAUAAAAAAAEAAAADAAYAAAAAAAEAAAAKAAYAAAAAAAEAAAADAAcAAAAAAAEAAAAKAAcAAAAAAAEAAAA=")
-tile_set = ExtResource("1_38h51")
+tile_set = ExtResource("1_mc681")
 
-[node name="Canopy" type="TileMapLayer" parent="." unique_id=394554705]
+[node name="Canopy" type="TileMapLayer" parent="." unique_id=1108783797]
 modulate = Color(1, 1, 1, 0)
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAARAAIAAAACAAYAAAATAAIAAAACAAYAAAAVAAIAAAACAAYAAAAVAAMAAAACAAYAAAAVAAQAAAACAAYAAAAQAAYAAAACAAYAAAAAAAAAAAACAAYAAAAAABMAAAACAAYAAAAAAAEAAAACAAYAAAAAABIAAAACAAYAAAABAAAAAAACAAYAAAABABMAAAACAAYAAAABAAEAAAACAAYAAAABABIAAAACAAYAAAACAAAAAAACAAYAAAACABMAAAACAAYAAAACAAEAAAACAAYAAAACABIAAAACAAYAAAADAAAAAAACAAYAAAADABMAAAACAAYAAAADAAEAAAACAAYAAAADABIAAAACAAYAAAAEAAAAAAACAAYAAAAEABMAAAACAAYAAAAEAAEAAAACAAYAAAAEABIAAAACAAYAAAAFAAAAAAACAAYAAAAFABMAAAACAAYAAAAFAAEAAAACAAYAAAAFABIAAAACAAYAAAAGAAAAAAACAAYAAAAGABMAAAACAAYAAAAGAAEAAAACAAYAAAAGABIAAAACAAYAAAAHAAAAAAACAAYAAAAHABMAAAACAAYAAAAHAAEAAAACAAYAAAAHABIAAAACAAYAAAAIAAAAAAACAAYAAAAIABMAAAACAAYAAAAIAAEAAAACAAYAAAAIABIAAAACAAYAAAAJAAAAAAACAAYAAAAJABMAAAACAAYAAAAJAAEAAAACAAYAAAAJABIAAAACAAYAAAAKAAAAAAACAAYAAAAKABMAAAACAAYAAAAKAAEAAAACAAYAAAAKABIAAAACAAYAAAALABMAAAACAAYAAAALABIAAAACAAYAAAAMABMAAAACAAYAAAAMABIAAAACAAYAAAANAAAAAAACAAYAAAANABMAAAACAAYAAAANAAEAAAACAAYAAAANABIAAAACAAYAAAAOAAAAAAACAAYAAAAOABMAAAACAAYAAAAOAAEAAAACAAYAAAAOABIAAAACAAYAAAAPAAAAAAACAAYAAAAPABMAAAACAAYAAAAPAAEAAAACAAYAAAAPABIAAAACAAYAAAAQAAAAAAACAAYAAAAQABMAAAACAAYAAAAQAAEAAAACAAYAAAAQABIAAAACAAYAAAARAAAAAAACAAYAAAARABMAAAACAAYAAAARAAEAAAACAAYAAAARABIAAAACAAYAAAASAAAAAAACAAYAAAASABMAAAACAAYAAAASAAEAAAACAAYAAAASABIAAAACAAYAAAATAAAAAAACAAYAAAATABMAAAACAAYAAAATAAEAAAACAAYAAAATABIAAAACAAYAAAAUAAAAAAACAAYAAAAUABMAAAACAAYAAAAUAAEAAAACAAYAAAAUABIAAAACAAYAAAAVAAAAAAACAAYAAAAVABMAAAACAAYAAAAVAAEAAAACAAYAAAAVABIAAAACAAYAAAAWAAAAAAACAAYAAAAWABMAAAACAAYAAAAWAAEAAAACAAYAAAAWABIAAAACAAYAAAAXAAAAAAACAAYAAAAXABMAAAACAAYAAAAXAAEAAAACAAYAAAAXABIAAAACAAYAAAAAAAIAAAACAAYAAAAXAAIAAAACAAYAAAABAAIAAAACAAYAAAAWAAIAAAACAAYAAAAAAAMAAAACAAYAAAAXAAMAAAACAAYAAAABAAMAAAACAAYAAAAWAAMAAAACAAYAAAAAAAQAAAACAAYAAAAXAAQAAAACAAYAAAABAAQAAAACAAYAAAAWAAQAAAACAAYAAAAAAAUAAAACAAYAAAAXAAUAAAACAAYAAAABAAUAAAACAAYAAAAWAAUAAAACAAYAAAAAAAYAAAACAAYAAAAXAAYAAAACAAYAAAABAAYAAAACAAYAAAAWAAYAAAACAAYAAAAAAAcAAAACAAYAAAAXAAcAAAACAAYAAAABAAcAAAACAAYAAAAWAAcAAAACAAYAAAAAAAgAAAACAAYAAAAXAAgAAAACAAYAAAABAAgAAAACAAYAAAAWAAgAAAACAAYAAAAAAAkAAAACAAYAAAAXAAkAAAACAAYAAAABAAkAAAACAAYAAAAWAAkAAAACAAYAAAAAAAoAAAACAAYAAAABAAoAAAACAAYAAAAAAAsAAAACAAYAAAABAAsAAAACAAYAAAAAAAwAAAACAAYAAAAXAAwAAAACAAYAAAABAAwAAAACAAYAAAAWAAwAAAACAAYAAAAAAA0AAAACAAYAAAAXAA0AAAACAAYAAAABAA0AAAACAAYAAAAWAA0AAAACAAYAAAAAAA4AAAACAAYAAAAXAA4AAAACAAYAAAABAA4AAAACAAYAAAAWAA4AAAACAAYAAAAAAA8AAAACAAYAAAAXAA8AAAACAAYAAAABAA8AAAACAAYAAAAWAA8AAAACAAYAAAAAABAAAAACAAYAAAAXABAAAAACAAYAAAABABAAAAACAAYAAAAWABAAAAACAAYAAAAAABEAAAACAAYAAAAXABEAAAACAAYAAAABABEAAAACAAYAAAAWABEAAAACAAYAAAA=")
-tile_set = ExtResource("1_38h51")
+tile_set = ExtResource("1_mc681")
 
-[node name="Overhead" type="TileMapLayer" parent="." unique_id=1644798221]
+[node name="Overhead" type="TileMapLayer" parent="." unique_id=2053379388]
 z_index = 1
 tile_map_data = PackedByteArray("AAADAAMAAAACAAEAAAAEAAMAAAACAAEAAAAFAAMAAAACAAEAAAAGAAMAAAACAAEAAAAHAAMAAAACAAEAAAAIAAMAAAACAAEAAAAJAAMAAAACAAEAAAAKAAMAAAACAAEAAAADAAQAAAACAAEAAAAEAAQAAAACAAEAAAAFAAQAAAACAAEAAAAGAAQAAAACAAEAAAAHAAQAAAACAAEAAAAIAAQAAAACAAEAAAAJAAQAAAACAAEAAAAKAAQAAAACAAEAAAADAAUAAAACAAEAAAAEAAUAAAACAAEAAAAFAAUAAAACAAEAAAAGAAUAAAACAAEAAAAHAAUAAAACAAEAAAAIAAUAAAACAAEAAAAJAAUAAAACAAEAAAAKAAUAAAACAAEAAAADAAYAAAACAAEAAAAEAAYAAAACAAEAAAAFAAYAAAACAAEAAAAGAAYAAAACAAEAAAAHAAYAAAACAAEAAAAIAAYAAAACAAEAAAAJAAYAAAACAAEAAAAKAAYAAAACAAEAAAADAAcAAAACAAEAAAAEAAcAAAACAAEAAAAFAAcAAAACAAEAAAAGAAcAAAACAAEAAAAHAAcAAAACAAEAAAAIAAcAAAACAAEAAAAJAAcAAAACAAEAAAAKAAcAAAACAAEAAAA=")
-tile_set = ExtResource("1_38h51")
+tile_set = ExtResource("1_mc681")
 
-[node name="Gateways" type="Node2D" parent="." unique_id=604474660]
+[node name="Gateways" type="Node2D" parent="." unique_id=1271743327]
 
-[node name="Gateway_north" type="Marker2D" parent="Gateways" unique_id=1487201234]
+[node name="Gateway_north" type="Marker2D" parent="Gateways" unique_id=13811089]
 position = Vector2(768, 32)
 metadata/target_scene = "res://levels/orchardfall/orchard_rows_level.tscn"
 metadata/target_spawn = "Edge_south"
 metadata/facing = "north"
 metadata/span = 2
 
-[node name="Gateway_east" type="Marker2D" parent="Gateways" unique_id=1779548490]
+[node name="Gateway_east" type="Marker2D" parent="Gateways" unique_id=603927175]
 position = Vector2(1504, 704)
 metadata/target_scene = "res://levels/orchardfall/deep_rows_level.tscn"
 metadata/target_spawn = "Edge_west"
 metadata/facing = "east"
 metadata/span = 2
 
-[node name="Doorways" type="Node2D" parent="." unique_id=231505319]
+[node name="Doorways" type="Node2D" parent="." unique_id=828822869]
 
-[node name="Doorway_cider_house" type="Marker2D" parent="Doorways" unique_id=1328662230]
+[node name="Doorway_cider_house" type="Marker2D" parent="Doorways" unique_id=1171752045]
 position = Vector2(480, 544)
 metadata/target_scene = "res://levels/orchardfall/interiors/cider_house_level.tscn"
 metadata/target_spawn = "PlayerSpawn"
 metadata/prompt = "Enter"
 
-[node name="Edge_north" type="Marker2D" parent="." unique_id=1234921374]
+[node name="Edge_north" type="Marker2D" parent="." unique_id=1503767999]
 position = Vector2(768, 160)
 
-[node name="Edge_east" type="Marker2D" parent="." unique_id=596246919]
+[node name="Edge_east" type="Marker2D" parent="." unique_id=1301134154]
 position = Vector2(1376, 704)
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1793826162]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=241548113]
 
-[node name="Poi_cider_house" type="Marker2D" parent="PointsOfInterest" unique_id=1450779993]
+[node name="Poi_cider_house" type="Marker2D" parent="PointsOfInterest" unique_id=111417605]
 position = Vector2(480, 608)
 metadata/poi_id = "cider_house"
 metadata/note = "the press, and whatever is left of it"
 metadata/district = "orchardfall"
 
-[node name="Door_cider_house" type="Marker2D" parent="." unique_id=1797114526]
+[node name="Door_cider_house" type="Marker2D" parent="." unique_id=1236506411]
 position = Vector2(480, 608)
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1364005205]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=769462226]
 position = Vector2(768, 160)
 
-[node name="Props" type="Node2D" parent="." unique_id=18662567]
+[node name="Props" type="Node2D" parent="." unique_id=1187221965]
 y_sort_enabled = true
 
-[node name="Tree_0_0" type="Node2D" parent="Props" unique_id=789655372 instance=ExtResource("2_mc681")]
+[node name="Tree_0_0" type="Node2D" parent="Props" unique_id=1119379591 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_0_1" type="Node2D" parent="Props" unique_id=530291398 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_0" type="Node2D" parent="Props" unique_id=2088353986 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(29.826052, 27.478489)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_0" type="Node2D" parent="Props" unique_id=185184048 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(51.270584, 40.45045)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_1" type="Node2D" parent="Props" unique_id=365353978 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_0_1" type="Node2D" parent="Props" unique_id=1351576951 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(33.532555, 98.90609)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_1" type="Node2D" parent="Props" unique_id=1187906256 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(44.341255, 83.44299)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_0_2" type="Node2D" parent="Props" unique_id=65242103 instance=ExtResource("2_mc681")]
+[node name="Tree_0_2" type="Node2D" parent="Props" unique_id=626413176 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_0_2" type="Node2D" parent="Props" unique_id=1099416373 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(9.101013, 150.29036)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_0_3" type="Node2D" parent="Props" unique_id=859951953 instance=ExtResource("2_mc681")]
+[node name="Thicket1_0_2" type="Node2D" parent="Props" unique_id=1415886365 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(35.21042, 164.68495)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_3" type="Node2D" parent="Props" unique_id=1612027865 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 224)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_0_4" type="Node2D" parent="Props" unique_id=102018811 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_3" type="Node2D" parent="Props" unique_id=1412029319 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(38.380394, 232.93777)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_3" type="Node2D" parent="Props" unique_id=585156741 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(26.259172, 233.12784)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_4" type="Node2D" parent="Props" unique_id=1678026330 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 288)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_0_5" type="Node2D" parent="Props" unique_id=776764580 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_4" type="Node2D" parent="Props" unique_id=658001622 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(22.981031, 294.72113)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_4" type="Node2D" parent="Props" unique_id=1966214321 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(57.526478, 299.67233)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_5" type="Node2D" parent="Props" unique_id=2046462173 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 352)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_6" type="Node2D" parent="Props" unique_id=1468465740 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_5" type="Node2D" parent="Props" unique_id=1958500313 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(9.934977, 364.56232)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_5" type="Node2D" parent="Props" unique_id=1433375968 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(56.58459, 342.30234)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_6" type="Node2D" parent="Props" unique_id=1179758330 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 416)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_0_7" type="Node2D" parent="Props" unique_id=511992959 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_6" type="Node2D" parent="Props" unique_id=615495752 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(12.284739, 410.6042)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_6" type="Node2D" parent="Props" unique_id=644641940 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(27.581034, 421.81805)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_7" type="Node2D" parent="Props" unique_id=90903800 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 480)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_8" type="Node2D" parent="Props" unique_id=960644281 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_7" type="Node2D" parent="Props" unique_id=716481096 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(13.192543, 468.34857)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_7" type="Node2D" parent="Props" unique_id=122197251 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(13.063591, 474.9827)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_8" type="Node2D" parent="Props" unique_id=1311721045 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 544)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_0_9" type="Node2D" parent="Props" unique_id=803882400 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_8" type="Node2D" parent="Props" unique_id=849945565 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(52.1916, 550.3736)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_8" type="Node2D" parent="Props" unique_id=465308158 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(50.16413, 537.76465)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_9" type="Node2D" parent="Props" unique_id=1451791629 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 608)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_10" type="Node2D" parent="Props" unique_id=296294990 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_9" type="Node2D" parent="Props" unique_id=1325640659 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(48.316074, 616.874)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_9" type="Node2D" parent="Props" unique_id=747223401 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(50.233387, 612.3387)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_10" type="Node2D" parent="Props" unique_id=857485078 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 672)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_11" type="Node2D" parent="Props" unique_id=239686289 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_10" type="Node2D" parent="Props" unique_id=337181735 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(26.683123, 673.63806)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_10" type="Node2D" parent="Props" unique_id=876229942 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(35.34742, 673.114)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_11" type="Node2D" parent="Props" unique_id=1628549677 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 736)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_0_12" type="Node2D" parent="Props" unique_id=1881876996 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_11" type="Node2D" parent="Props" unique_id=37513445 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(56.880512, 744.93567)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_11" type="Node2D" parent="Props" unique_id=1901738864 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(42.80501, 748.7117)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_0_12" type="Node2D" parent="Props" unique_id=890292396 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 800)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_0_12" type="Node2D" parent="Props" unique_id=549606026 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(45.227703, 790.2591)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_12" type="Node2D" parent="Props" unique_id=911806914 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(55.48668, 803.2035)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_0_13" type="Node2D" parent="Props" unique_id=690790246 instance=ExtResource("2_mc681")]
+[node name="Tree_0_13" type="Node2D" parent="Props" unique_id=2126528850 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 864)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_0_14" type="Node2D" parent="Props" unique_id=58067875 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_13" type="Node2D" parent="Props" unique_id=1900890563 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(14.686916, 876.56537)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_13" type="Node2D" parent="Props" unique_id=1091063086 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(11.467438, 873.02814)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_14" type="Node2D" parent="Props" unique_id=817150505 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 928)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_15" type="Node2D" parent="Props" unique_id=544957792 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_14" type="Node2D" parent="Props" unique_id=677209407 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(50.234783, 934.6244)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_14" type="Node2D" parent="Props" unique_id=95419677 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(21.753769, 915.0993)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_15" type="Node2D" parent="Props" unique_id=733623541 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 992)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_0_15" type="Node2D" parent="Props" unique_id=1156504393 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(21.201912, 987.58685)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_15" type="Node2D" parent="Props" unique_id=1705173366 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(15.456715, 988.8675)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_0_16" type="Node2D" parent="Props" unique_id=224558909 instance=ExtResource("2_mc681")]
+[node name="Tree_0_16" type="Node2D" parent="Props" unique_id=731947157 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_0_17" type="Node2D" parent="Props" unique_id=1963708528 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_16" type="Node2D" parent="Props" unique_id=1295826214 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(39.56045, 1060.6444)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_16" type="Node2D" parent="Props" unique_id=626585170 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(25.064747, 1067.2985)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_17" type="Node2D" parent="Props" unique_id=593055734 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 1120)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_0_18" type="Node2D" parent="Props" unique_id=92303416 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_17" type="Node2D" parent="Props" unique_id=2057664849 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(28.80705, 1111.3331)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_0_17" type="Node2D" parent="Props" unique_id=393559900 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(46.94244, 1119.5325)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_18" type="Node2D" parent="Props" unique_id=1755838798 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_0_19" type="Node2D" parent="Props" unique_id=1912201826 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_18" type="Node2D" parent="Props" unique_id=789184964 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(56.356968, 1179.36)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_18" type="Node2D" parent="Props" unique_id=1076383228 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(23.040401, 1194.7295)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_0_19" type="Node2D" parent="Props" unique_id=78556170 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(32, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_0" type="Node2D" parent="Props" unique_id=1201841270 instance=ExtResource("2_mc681")]
+[node name="Thicket0_0_19" type="Node2D" parent="Props" unique_id=1422396068 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(42.767822, 1241.9502)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_0_19" type="Node2D" parent="Props" unique_id=238325177 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(56.814434, 1255.4669)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_0" type="Node2D" parent="Props" unique_id=1176728230 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_1" type="Node2D" parent="Props" unique_id=1933216556 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_0" type="Node2D" parent="Props" unique_id=448745359 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(76.914276, 21.22443)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_0" type="Node2D" parent="Props" unique_id=1696689029 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(116.58182, 24.660538)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_1" type="Node2D" parent="Props" unique_id=1039819261 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_2" type="Node2D" parent="Props" unique_id=861698038 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_1" type="Node2D" parent="Props" unique_id=1508858826 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(116.251945, 91.55648)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_1" type="Node2D" parent="Props" unique_id=1872863506 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(103.0694, 102.93744)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_2" type="Node2D" parent="Props" unique_id=312699785 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_3" type="Node2D" parent="Props" unique_id=1771985732 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_2" type="Node2D" parent="Props" unique_id=910866441 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(72.92348, 161.1094)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_2" type="Node2D" parent="Props" unique_id=1745212746 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(107.63695, 151.61728)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_3" type="Node2D" parent="Props" unique_id=561170696 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 224)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_4" type="Node2D" parent="Props" unique_id=1902346931 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_3" type="Node2D" parent="Props" unique_id=1865576207 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(88.27826, 235.15349)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_3" type="Node2D" parent="Props" unique_id=1531283128 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(75.28767, 213.74472)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_4" type="Node2D" parent="Props" unique_id=1844211921 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 288)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_5" type="Node2D" parent="Props" unique_id=533288287 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_4" type="Node2D" parent="Props" unique_id=842279408 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(79.228485, 293.89157)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_4" type="Node2D" parent="Props" unique_id=282910565 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(78.46926, 287.2474)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_5" type="Node2D" parent="Props" unique_id=2060650033 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 352)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_6" type="Node2D" parent="Props" unique_id=94786882 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_5" type="Node2D" parent="Props" unique_id=1492085224 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(112.48478, 357.98956)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_5" type="Node2D" parent="Props" unique_id=424752809 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(80.78356, 363.16907)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_6" type="Node2D" parent="Props" unique_id=2063806140 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 416)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_7" type="Node2D" parent="Props" unique_id=475560033 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_6" type="Node2D" parent="Props" unique_id=924851132 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(95.15051, 425.18494)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_6" type="Node2D" parent="Props" unique_id=1779602758 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(93.33747, 421.54166)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_7" type="Node2D" parent="Props" unique_id=1318649542 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 480)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_1_8" type="Node2D" parent="Props" unique_id=1875312694 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_7" type="Node2D" parent="Props" unique_id=1983111763 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(77.072235, 469.4391)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_7" type="Node2D" parent="Props" unique_id=1675858684 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(114.45925, 469.9035)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_8" type="Node2D" parent="Props" unique_id=1817020705 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 544)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_9" type="Node2D" parent="Props" unique_id=179202891 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_8" type="Node2D" parent="Props" unique_id=2101772520 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(100.47271, 536.73706)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_8" type="Node2D" parent="Props" unique_id=689049553 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(91.515755, 554.7235)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_9" type="Node2D" parent="Props" unique_id=1739781931 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 608)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_1_9" type="Node2D" parent="Props" unique_id=602852405 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(86.0595, 600.6166)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_10" type="Node2D" parent="Props" unique_id=1135675108 instance=ExtResource("2_mc681")]
+[node name="Thicket1_1_9" type="Node2D" parent="Props" unique_id=2099999897 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(102.72819, 604.05774)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_10" type="Node2D" parent="Props" unique_id=1637681771 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 672)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_11" type="Node2D" parent="Props" unique_id=2112298618 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_10" type="Node2D" parent="Props" unique_id=661259126 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(72.21604, 684.7926)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_10" type="Node2D" parent="Props" unique_id=1569827407 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(82.49537, 681.3715)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_11" type="Node2D" parent="Props" unique_id=752927673 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 736)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_1_12" type="Node2D" parent="Props" unique_id=525373656 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_11" type="Node2D" parent="Props" unique_id=2094044850 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(79.73549, 726.5218)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_11" type="Node2D" parent="Props" unique_id=934802982 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(105.66133, 724.9113)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_12" type="Node2D" parent="Props" unique_id=1758466247 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 800)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_1_13" type="Node2D" parent="Props" unique_id=575720899 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_12" type="Node2D" parent="Props" unique_id=1831028867 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(72.11644, 798.2229)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_12" type="Node2D" parent="Props" unique_id=1118119105 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(82.49918, 798.7339)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_13" type="Node2D" parent="Props" unique_id=1589117517 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 864)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_1_14" type="Node2D" parent="Props" unique_id=701128635 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_13" type="Node2D" parent="Props" unique_id=1009633739 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(120.04924, 853.0966)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_13" type="Node2D" parent="Props" unique_id=570866478 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(87.24057, 873.93243)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_1_14" type="Node2D" parent="Props" unique_id=439410007 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 928)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_1_14" type="Node2D" parent="Props" unique_id=1122649209 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(93.30652, 938.82153)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_14" type="Node2D" parent="Props" unique_id=1449327099 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(93.33277, 920.99097)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_15" type="Node2D" parent="Props" unique_id=202879670 instance=ExtResource("2_mc681")]
+[node name="Tree_1_15" type="Node2D" parent="Props" unique_id=1861398741 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 992)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_16" type="Node2D" parent="Props" unique_id=149294867 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_15" type="Node2D" parent="Props" unique_id=554128060 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(84.496025, 997.445)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_15" type="Node2D" parent="Props" unique_id=336486097 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(114.39103, 998.34985)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_16" type="Node2D" parent="Props" unique_id=176681173 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_17" type="Node2D" parent="Props" unique_id=592846656 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_16" type="Node2D" parent="Props" unique_id=750244981 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(89.33664, 1057.112)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_16" type="Node2D" parent="Props" unique_id=180190583 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(76.94755, 1046.5717)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_17" type="Node2D" parent="Props" unique_id=1846125089 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 1120)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_1_18" type="Node2D" parent="Props" unique_id=1410914101 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_17" type="Node2D" parent="Props" unique_id=275149241 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(112.5464, 1110.9551)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_1_17" type="Node2D" parent="Props" unique_id=809469980 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(95.56029, 1113.874)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_18" type="Node2D" parent="Props" unique_id=1804468007 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_1_18" type="Node2D" parent="Props" unique_id=1541261384 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(72.758934, 1183.7156)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_1_19" type="Node2D" parent="Props" unique_id=1952676998 instance=ExtResource("2_mc681")]
+[node name="Thicket1_1_18" type="Node2D" parent="Props" unique_id=1551515675 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(103.568085, 1179.3553)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_1_19" type="Node2D" parent="Props" unique_id=1079454739 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(96, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_2_0" type="Node2D" parent="Props" unique_id=1919628545 instance=ExtResource("2_mc681")]
+[node name="Thicket0_1_19" type="Node2D" parent="Props" unique_id=1231494608 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(79.24946, 1237.5122)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_1_19" type="Node2D" parent="Props" unique_id=1328439278 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(90.71788, 1236.9517)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_2_0" type="Node2D" parent="Props" unique_id=1462466739 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(160, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_2_1" type="Node2D" parent="Props" unique_id=1070374035 instance=ExtResource("2_mc681")]
+[node name="Thicket0_2_0" type="Node2D" parent="Props" unique_id=1733815939 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(169.35983, 32.462215)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_2_0" type="Node2D" parent="Props" unique_id=762119552 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(171.95035, 22.393656)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_2_1" type="Node2D" parent="Props" unique_id=915902769 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(160, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_2_18" type="Node2D" parent="Props" unique_id=1234889000 instance=ExtResource("2_mc681")]
+[node name="Thicket0_2_1" type="Node2D" parent="Props" unique_id=308470004 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(157.1577, 85.08099)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_2_1" type="Node2D" parent="Props" unique_id=340151940 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(182.42389, 87.34132)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_2_18" type="Node2D" parent="Props" unique_id=1219860936 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(160, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_2_19" type="Node2D" parent="Props" unique_id=1206329249 instance=ExtResource("2_mc681")]
+[node name="Thicket0_2_18" type="Node2D" parent="Props" unique_id=640394025 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(134.0088, 1192.0543)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_2_18" type="Node2D" parent="Props" unique_id=511947569 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(140.99922, 1171.2197)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_2_19" type="Node2D" parent="Props" unique_id=760442750 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(160, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_3_0" type="Node2D" parent="Props" unique_id=503549479 instance=ExtResource("2_mc681")]
+[node name="Thicket0_2_19" type="Node2D" parent="Props" unique_id=1491748217 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(160.15381, 1244.3945)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_2_19" type="Node2D" parent="Props" unique_id=464054026 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(150.20857, 1244.705)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_3_0" type="Node2D" parent="Props" unique_id=1124058803 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(224, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_3_1" type="Node2D" parent="Props" unique_id=240844091 instance=ExtResource("2_mc681")]
+[node name="Thicket0_3_0" type="Node2D" parent="Props" unique_id=1525955896 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(206.12436, 33.94209)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_3_0" type="Node2D" parent="Props" unique_id=1598422209 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(223.66704, 39.0776)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_3_1" type="Node2D" parent="Props" unique_id=2036527914 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(224, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_3_18" type="Node2D" parent="Props" unique_id=866228147 instance=ExtResource("2_mc681")]
+[node name="Thicket0_3_1" type="Node2D" parent="Props" unique_id=670289885 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(233.38815, 102.944176)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_3_1" type="Node2D" parent="Props" unique_id=1903321346 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(240.20535, 96.46384)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_3_18" type="Node2D" parent="Props" unique_id=570819134 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(224, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_3_19" type="Node2D" parent="Props" unique_id=431497073 instance=ExtResource("2_mc681")]
+[node name="Thicket0_3_18" type="Node2D" parent="Props" unique_id=590131544 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(203.31471, 1195.395)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_3_18" type="Node2D" parent="Props" unique_id=1971827041 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(220.31422, 1178.0751)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_3_19" type="Node2D" parent="Props" unique_id=1317378749 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(224, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_4_0" type="Node2D" parent="Props" unique_id=196866022 instance=ExtResource("2_mc681")]
+[node name="Thicket0_3_19" type="Node2D" parent="Props" unique_id=1013086254 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(244.80774, 1251.9764)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_3_19" type="Node2D" parent="Props" unique_id=989186775 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(224.83931, 1259.6702)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_4_0" type="Node2D" parent="Props" unique_id=1783100839 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(288, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_4_1" type="Node2D" parent="Props" unique_id=611845373 instance=ExtResource("2_mc681")]
+[node name="Thicket0_4_0" type="Node2D" parent="Props" unique_id=1588597784 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(304.29144, 23.163555)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_4_0" type="Node2D" parent="Props" unique_id=392033307 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(271.23654, 40.062515)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_4_1" type="Node2D" parent="Props" unique_id=371492560 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(288, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_4_18" type="Node2D" parent="Props" unique_id=861825067 instance=ExtResource("2_mc681")]
+[node name="Thicket0_4_1" type="Node2D" parent="Props" unique_id=1073788034 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(264.1938, 83.661575)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_4_1" type="Node2D" parent="Props" unique_id=1975590062 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(279.07416, 88.45741)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_4_18" type="Node2D" parent="Props" unique_id=1734601876 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(288, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_4_19" type="Node2D" parent="Props" unique_id=1548260962 instance=ExtResource("2_mc681")]
+[node name="Thicket0_4_18" type="Node2D" parent="Props" unique_id=779950196 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(300.08798, 1194.4496)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_4_18" type="Node2D" parent="Props" unique_id=465348016 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(303.355, 1189.0951)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_4_19" type="Node2D" parent="Props" unique_id=444278026 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(288, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_5_0" type="Node2D" parent="Props" unique_id=110364599 instance=ExtResource("2_mc681")]
+[node name="Thicket0_4_19" type="Node2D" parent="Props" unique_id=656100339 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(302.23798, 1239.9896)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_4_19" type="Node2D" parent="Props" unique_id=1816037153 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(301.11038, 1237.7362)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_5_0" type="Node2D" parent="Props" unique_id=1739338399 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(352, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_5_1" type="Node2D" parent="Props" unique_id=525697317 instance=ExtResource("2_mc681")]
+[node name="Thicket0_5_0" type="Node2D" parent="Props" unique_id=1383760309 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(359.8816, 39.556625)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_5_0" type="Node2D" parent="Props" unique_id=1343044985 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(372.22415, 40.98728)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_5_1" type="Node2D" parent="Props" unique_id=1868883960 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(352, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_5_18" type="Node2D" parent="Props" unique_id=2016402332 instance=ExtResource("2_mc681")]
+[node name="Thicket0_5_1" type="Node2D" parent="Props" unique_id=1524426501 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(365.73532, 92.78643)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_5_1" type="Node2D" parent="Props" unique_id=176436809 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(355.225, 101.34512)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_5_18" type="Node2D" parent="Props" unique_id=2104845519 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(352, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_5_19" type="Node2D" parent="Props" unique_id=1274093362 instance=ExtResource("2_mc681")]
+[node name="Thicket0_5_18" type="Node2D" parent="Props" unique_id=2088847672 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(365.86343, 1180.1038)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_5_18" type="Node2D" parent="Props" unique_id=379321303 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(344.44296, 1194.3259)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_5_19" type="Node2D" parent="Props" unique_id=2107774196 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(352, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_5_19" type="Node2D" parent="Props" unique_id=251468199 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(346.66333, 1247.231)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_5_19" type="Node2D" parent="Props" unique_id=1799100292 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(373.34875, 1237.4469)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_6_0" type="Node2D" parent="Props" unique_id=670856539 instance=ExtResource("2_mc681")]
+[node name="Tree_6_0" type="Node2D" parent="Props" unique_id=1515172419 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(416, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_6_1" type="Node2D" parent="Props" unique_id=1967845685 instance=ExtResource("2_mc681")]
+[node name="Thicket0_6_0" type="Node2D" parent="Props" unique_id=449072924 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(438.5583, 38.65851)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_6_0" type="Node2D" parent="Props" unique_id=1373532101 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(440.64798, 21.145428)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_6_1" type="Node2D" parent="Props" unique_id=764508642 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(416, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_6_18" type="Node2D" parent="Props" unique_id=2014001840 instance=ExtResource("2_mc681")]
+[node name="Thicket0_6_1" type="Node2D" parent="Props" unique_id=22786034 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(397.6177, 91.93207)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_6_1" type="Node2D" parent="Props" unique_id=1469381324 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(392.94116, 87.510735)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_6_18" type="Node2D" parent="Props" unique_id=1278286362 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(416, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_6_19" type="Node2D" parent="Props" unique_id=681104953 instance=ExtResource("2_mc681")]
+[node name="Thicket0_6_18" type="Node2D" parent="Props" unique_id=215493423 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(403.327, 1183.7041)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_6_18" type="Node2D" parent="Props" unique_id=1512631104 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(412.42502, 1185.8439)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_6_19" type="Node2D" parent="Props" unique_id=15603987 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(416, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_7_0" type="Node2D" parent="Props" unique_id=282443227 instance=ExtResource("2_mc681")]
+[node name="Thicket0_6_19" type="Node2D" parent="Props" unique_id=1482908450 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(428.53302, 1248.6194)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_6_19" type="Node2D" parent="Props" unique_id=1699358852 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(427.0667, 1243.31)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_7_0" type="Node2D" parent="Props" unique_id=1148261933 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(480, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_7_1" type="Node2D" parent="Props" unique_id=20835326 instance=ExtResource("2_mc681")]
+[node name="Thicket0_7_0" type="Node2D" parent="Props" unique_id=769912118 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(491.9284, 32.894867)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_7_0" type="Node2D" parent="Props" unique_id=1125618335 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(474.5601, 23.860596)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_7_1" type="Node2D" parent="Props" unique_id=1663447290 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(480, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_7_18" type="Node2D" parent="Props" unique_id=1032259057 instance=ExtResource("2_mc681")]
+[node name="Thicket0_7_1" type="Node2D" parent="Props" unique_id=1247491426 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(469.68134, 103.01472)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_7_1" type="Node2D" parent="Props" unique_id=1471727624 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(467.71265, 97.711426)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_7_18" type="Node2D" parent="Props" unique_id=1682460160 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(480, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_7_18" type="Node2D" parent="Props" unique_id=1753720628 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(497.95358, 1174.0356)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_7_19" type="Node2D" parent="Props" unique_id=1248203887 instance=ExtResource("2_mc681")]
+[node name="Thicket1_7_18" type="Node2D" parent="Props" unique_id=1108958004 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(481.00354, 1180.0989)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_7_19" type="Node2D" parent="Props" unique_id=525737547 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(480, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_8_0" type="Node2D" parent="Props" unique_id=1020356181 instance=ExtResource("2_mc681")]
+[node name="Thicket0_7_19" type="Node2D" parent="Props" unique_id=1444166060 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(455.7711, 1251.7408)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_7_19" type="Node2D" parent="Props" unique_id=2017320577 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(459.68845, 1247.6542)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_8_0" type="Node2D" parent="Props" unique_id=1449432268 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(544, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_8_1" type="Node2D" parent="Props" unique_id=526575238 instance=ExtResource("2_mc681")]
+[node name="Thicket0_8_0" type="Node2D" parent="Props" unique_id=626613094 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(552.0218, 29.677498)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_8_0" type="Node2D" parent="Props" unique_id=1981382956 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(522.7563, 22.746925)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_8_1" type="Node2D" parent="Props" unique_id=99166451 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(544, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_8_18" type="Node2D" parent="Props" unique_id=848961719 instance=ExtResource("2_mc681")]
+[node name="Thicket0_8_1" type="Node2D" parent="Props" unique_id=273651582 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(568.0247, 90.198524)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_8_1" type="Node2D" parent="Props" unique_id=1080021589 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(552.2528, 90.616776)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_8_18" type="Node2D" parent="Props" unique_id=198490468 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(544, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_8_19" type="Node2D" parent="Props" unique_id=423759482 instance=ExtResource("2_mc681")]
+[node name="Thicket0_8_18" type="Node2D" parent="Props" unique_id=1861573614 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(533.5374, 1178.8153)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_8_18" type="Node2D" parent="Props" unique_id=1941388984 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(564.5208, 1189.3019)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_8_19" type="Node2D" parent="Props" unique_id=1130217780 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(544, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_9_0" type="Node2D" parent="Props" unique_id=942399151 instance=ExtResource("2_mc681")]
+[node name="Thicket0_8_19" type="Node2D" parent="Props" unique_id=1309445088 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(539.4216, 1246.2035)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_8_19" type="Node2D" parent="Props" unique_id=625081079 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(552.3428, 1242.1006)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_9_0" type="Node2D" parent="Props" unique_id=1717523050 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(608, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_9_1" type="Node2D" parent="Props" unique_id=1366530435 instance=ExtResource("2_mc681")]
+[node name="Thicket0_9_0" type="Node2D" parent="Props" unique_id=1015483300 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(601.4119, 21.447298)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_9_0" type="Node2D" parent="Props" unique_id=1717794105 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(595.3932, 33.99299)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_9_1" type="Node2D" parent="Props" unique_id=1053803419 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(608, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_9_18" type="Node2D" parent="Props" unique_id=744311207 instance=ExtResource("2_mc681")]
+[node name="Thicket0_9_1" type="Node2D" parent="Props" unique_id=1026294969 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(623.8799, 105.73004)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_9_1" type="Node2D" parent="Props" unique_id=2138220813 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(606.5163, 84.8716)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_9_18" type="Node2D" parent="Props" unique_id=29793562 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(608, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_9_19" type="Node2D" parent="Props" unique_id=1987198511 instance=ExtResource("2_mc681")]
+[node name="Thicket0_9_18" type="Node2D" parent="Props" unique_id=24930819 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(621.60315, 1194.8917)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_9_18" type="Node2D" parent="Props" unique_id=1916578681 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(630.8652, 1180.6903)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_9_19" type="Node2D" parent="Props" unique_id=1138866421 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(608, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_9_19" type="Node2D" parent="Props" unique_id=939012190 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(622.52356, 1237.2886)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_10_0" type="Node2D" parent="Props" unique_id=21748324 instance=ExtResource("2_mc681")]
+[node name="Thicket1_9_19" type="Node2D" parent="Props" unique_id=1809549252 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(625.961, 1256.9517)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_10_0" type="Node2D" parent="Props" unique_id=703257546 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(672, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_10_1" type="Node2D" parent="Props" unique_id=436928541 instance=ExtResource("2_mc681")]
+[node name="Thicket0_10_0" type="Node2D" parent="Props" unique_id=8979362 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(693.68677, 20.351913)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_10_0" type="Node2D" parent="Props" unique_id=228207479 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(694.0123, 24.98821)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_10_1" type="Node2D" parent="Props" unique_id=2013212289 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(672, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_10_1" type="Node2D" parent="Props" unique_id=639814837 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(646.37225, 97.258736)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_10_18" type="Node2D" parent="Props" unique_id=1618681840 instance=ExtResource("2_mc681")]
+[node name="Thicket1_10_1" type="Node2D" parent="Props" unique_id=1914196154 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(663.1234, 108.770996)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_10_18" type="Node2D" parent="Props" unique_id=712152069 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(672, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_10_19" type="Node2D" parent="Props" unique_id=2096388551 instance=ExtResource("2_mc681")]
+[node name="Thicket0_10_18" type="Node2D" parent="Props" unique_id=1794657391 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(654.1045, 1182.5724)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_10_18" type="Node2D" parent="Props" unique_id=833499163 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(678.3387, 1190.9185)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_10_19" type="Node2D" parent="Props" unique_id=133970374 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(672, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_11_18" type="Node2D" parent="Props" unique_id=743122168 instance=ExtResource("2_mc681")]
+[node name="Thicket0_10_19" type="Node2D" parent="Props" unique_id=1914535793 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(679.3995, 1248.0056)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_10_19" type="Node2D" parent="Props" unique_id=961931790 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(646.153, 1244.3452)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_11_18" type="Node2D" parent="Props" unique_id=794033795 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(736, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_11_19" type="Node2D" parent="Props" unique_id=923485979 instance=ExtResource("2_mc681")]
+[node name="Thicket0_11_18" type="Node2D" parent="Props" unique_id=131854874 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(758.3506, 1172.7919)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_11_18" type="Node2D" parent="Props" unique_id=817712274 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(723.14435, 1172.229)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_11_19" type="Node2D" parent="Props" unique_id=761288216 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(736, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_12_18" type="Node2D" parent="Props" unique_id=1327458016 instance=ExtResource("2_mc681")]
+[node name="Thicket0_11_19" type="Node2D" parent="Props" unique_id=409794017 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(754.93005, 1254.5225)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_11_19" type="Node2D" parent="Props" unique_id=1127294549 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(720.7605, 1247.3862)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_12_18" type="Node2D" parent="Props" unique_id=1030882959 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(800, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_12_19" type="Node2D" parent="Props" unique_id=1024421693 instance=ExtResource("2_mc681")]
+[node name="Thicket0_12_18" type="Node2D" parent="Props" unique_id=330192736 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(798.53973, 1190.5631)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_12_18" type="Node2D" parent="Props" unique_id=1012671911 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(774.66406, 1173.2181)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_12_19" type="Node2D" parent="Props" unique_id=1215676671 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(800, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_13_0" type="Node2D" parent="Props" unique_id=261312902 instance=ExtResource("2_mc681")]
+[node name="Thicket0_12_19" type="Node2D" parent="Props" unique_id=472528768 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(781.1021, 1246.9637)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_12_19" type="Node2D" parent="Props" unique_id=1342869130 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(817.1843, 1257.3668)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_13_0" type="Node2D" parent="Props" unique_id=718456820 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(864, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_13_0" type="Node2D" parent="Props" unique_id=471902515 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(867.6594, 37.232746)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_13_1" type="Node2D" parent="Props" unique_id=2134367242 instance=ExtResource("2_mc681")]
+[node name="Thicket1_13_0" type="Node2D" parent="Props" unique_id=479613758 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(847.7192, 29.373623)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_13_1" type="Node2D" parent="Props" unique_id=2044773985 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(864, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_13_18" type="Node2D" parent="Props" unique_id=2009619962 instance=ExtResource("2_mc681")]
+[node name="Thicket0_13_1" type="Node2D" parent="Props" unique_id=1312284614 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(846.9783, 97.96084)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_13_1" type="Node2D" parent="Props" unique_id=2086990167 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(884.33185, 104.642)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_13_18" type="Node2D" parent="Props" unique_id=1193248789 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(864, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_13_19" type="Node2D" parent="Props" unique_id=1684003390 instance=ExtResource("2_mc681")]
+[node name="Thicket0_13_18" type="Node2D" parent="Props" unique_id=1947690296 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(847.4384, 1178.3433)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_13_18" type="Node2D" parent="Props" unique_id=922452391 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(849.91925, 1186.1537)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_13_19" type="Node2D" parent="Props" unique_id=724574277 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(864, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_13_19" type="Node2D" parent="Props" unique_id=322743339 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(885.89044, 1257.2147)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_13_19" type="Node2D" parent="Props" unique_id=1712688179 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(858.51404, 1259.0453)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_14_0" type="Node2D" parent="Props" unique_id=742575516 instance=ExtResource("2_mc681")]
+[node name="Tree_14_0" type="Node2D" parent="Props" unique_id=2120903901 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(928, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_14_1" type="Node2D" parent="Props" unique_id=2083263384 instance=ExtResource("2_mc681")]
+[node name="Thicket0_14_0" type="Node2D" parent="Props" unique_id=1162404796 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(908.7533, 35.167023)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_14_0" type="Node2D" parent="Props" unique_id=2119641636 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(912.5927, 21.470573)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_14_1" type="Node2D" parent="Props" unique_id=1392584173 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(928, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_14_18" type="Node2D" parent="Props" unique_id=439251278 instance=ExtResource("2_mc681")]
+[node name="Thicket0_14_1" type="Node2D" parent="Props" unique_id=1640226398 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(933.3764, 107.50018)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_14_1" type="Node2D" parent="Props" unique_id=944379673 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(918.196, 87.24107)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_14_18" type="Node2D" parent="Props" unique_id=742497897 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(928, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_14_18" type="Node2D" parent="Props" unique_id=1768457103 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(930.8794, 1179.2145)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_14_19" type="Node2D" parent="Props" unique_id=772507266 instance=ExtResource("2_mc681")]
+[node name="Thicket1_14_18" type="Node2D" parent="Props" unique_id=2092498417 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(906.4852, 1187.5294)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_14_19" type="Node2D" parent="Props" unique_id=1450668906 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(928, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_15_0" type="Node2D" parent="Props" unique_id=2045378477 instance=ExtResource("2_mc681")]
+[node name="Thicket0_14_19" type="Node2D" parent="Props" unique_id=1294468356 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(906.4166, 1245.4926)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_14_19" type="Node2D" parent="Props" unique_id=439700284 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(931.8732, 1244.6526)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_15_0" type="Node2D" parent="Props" unique_id=1002486530 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(992, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_15_1" type="Node2D" parent="Props" unique_id=1782946968 instance=ExtResource("2_mc681")]
+[node name="Thicket0_15_0" type="Node2D" parent="Props" unique_id=613856131 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1010.0006, 43.26043)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_15_0" type="Node2D" parent="Props" unique_id=2015357438 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(966.0568, 22.137096)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_15_1" type="Node2D" parent="Props" unique_id=2048635665 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(992, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_15_18" type="Node2D" parent="Props" unique_id=1746637825 instance=ExtResource("2_mc681")]
+[node name="Thicket0_15_1" type="Node2D" parent="Props" unique_id=928575318 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(971.719, 108.729034)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_15_1" type="Node2D" parent="Props" unique_id=1672363687 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(985.96136, 90.23014)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_15_18" type="Node2D" parent="Props" unique_id=683915644 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(992, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_15_18" type="Node2D" parent="Props" unique_id=1976731039 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1005.0874, 1178.0314)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_15_19" type="Node2D" parent="Props" unique_id=1053503821 instance=ExtResource("2_mc681")]
+[node name="Thicket1_15_18" type="Node2D" parent="Props" unique_id=512657559 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(992.80164, 1196.7462)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_15_19" type="Node2D" parent="Props" unique_id=1770903682 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(992, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_16_0" type="Node2D" parent="Props" unique_id=526758674 instance=ExtResource("2_mc681")]
+[node name="Thicket0_15_19" type="Node2D" parent="Props" unique_id=608985961 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(967.59064, 1259.6884)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_15_19" type="Node2D" parent="Props" unique_id=792727921 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(983.0252, 1259.4257)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_16_0" type="Node2D" parent="Props" unique_id=1264838490 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1056, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_16_0" type="Node2D" parent="Props" unique_id=1485440064 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1054.1265, 20.217457)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_16_1" type="Node2D" parent="Props" unique_id=1525366071 instance=ExtResource("2_mc681")]
+[node name="Thicket1_16_0" type="Node2D" parent="Props" unique_id=771157479 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1047.222, 26.387192)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_16_1" type="Node2D" parent="Props" unique_id=1764735265 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1056, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_16_6" type="Node2D" parent="Props" unique_id=962090322 instance=ExtResource("2_mc681")]
+[node name="Thicket0_16_1" type="Node2D" parent="Props" unique_id=1132154829 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1030.0596, 104.546005)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_16_1" type="Node2D" parent="Props" unique_id=936881800 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1058.3014, 101.12071)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_16_6" type="Node2D" parent="Props" unique_id=2131258019 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1056, 416)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_16_18" type="Node2D" parent="Props" unique_id=1991254860 instance=ExtResource("2_mc681")]
+[node name="Thicket0_16_6" type="Node2D" parent="Props" unique_id=1453402059 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1053.8662, 418.13367)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_16_18" type="Node2D" parent="Props" unique_id=215966865 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1056, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_16_18" type="Node2D" parent="Props" unique_id=381064663 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1033.2671, 1174.5001)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_16_19" type="Node2D" parent="Props" unique_id=12009728 instance=ExtResource("2_mc681")]
+[node name="Thicket1_16_18" type="Node2D" parent="Props" unique_id=1903488256 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1078.7078, 1185.5833)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_16_19" type="Node2D" parent="Props" unique_id=709786935 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1056, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_17_0" type="Node2D" parent="Props" unique_id=394999100 instance=ExtResource("2_mc681")]
+[node name="Thicket0_16_19" type="Node2D" parent="Props" unique_id=1226217674 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1039.121, 1257.8964)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_16_19" type="Node2D" parent="Props" unique_id=1233922910 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1073.9896, 1257.4531)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_17_0" type="Node2D" parent="Props" unique_id=1745217010 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1120, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_17_1" type="Node2D" parent="Props" unique_id=1866481297 instance=ExtResource("2_mc681")]
+[node name="Thicket0_17_0" type="Node2D" parent="Props" unique_id=1992606610 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1111.0293, 26.055553)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_17_0" type="Node2D" parent="Props" unique_id=893955436 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1140.248, 27.41896)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_17_1" type="Node2D" parent="Props" unique_id=892651847 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1120, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_17_2" type="Node2D" parent="Props" unique_id=930118775 instance=ExtResource("2_mc681")]
+[node name="Thicket0_17_1" type="Node2D" parent="Props" unique_id=370975309 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1099.2058, 104.33023)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_17_1" type="Node2D" parent="Props" unique_id=391507885 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1134.8105, 83.2619)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_17_2" type="Node2D" parent="Props" unique_id=358887036 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1120, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_17_18" type="Node2D" parent="Props" unique_id=1653356900 instance=ExtResource("2_mc681")]
+[node name="Thicket0_17_2" type="Node2D" parent="Props" unique_id=1146814278 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1128.5873, 170.83208)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_17_2" type="Node2D" parent="Props" unique_id=668459683 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1106.1641, 148.18764)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_17_18" type="Node2D" parent="Props" unique_id=1043009217 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1120, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_17_19" type="Node2D" parent="Props" unique_id=666307831 instance=ExtResource("2_mc681")]
+[node name="Thicket0_17_18" type="Node2D" parent="Props" unique_id=1335196286 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1137.502, 1184.9525)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_17_18" type="Node2D" parent="Props" unique_id=987614027 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1125.6415, 1189.936)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_17_19" type="Node2D" parent="Props" unique_id=1049505056 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1120, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_18_0" type="Node2D" parent="Props" unique_id=1838404392 instance=ExtResource("2_mc681")]
+[node name="Thicket0_17_19" type="Node2D" parent="Props" unique_id=1811595351 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1145.3705, 1255.0449)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_17_19" type="Node2D" parent="Props" unique_id=2116088559 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1097.7935, 1257.1311)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_18_0" type="Node2D" parent="Props" unique_id=1003388286 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1184, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_18_1" type="Node2D" parent="Props" unique_id=1536679484 instance=ExtResource("2_mc681")]
+[node name="Thicket0_18_0" type="Node2D" parent="Props" unique_id=24206826 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1201.9209, 31.569832)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_18_0" type="Node2D" parent="Props" unique_id=1445041716 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1192.2676, 39.13658)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_18_1" type="Node2D" parent="Props" unique_id=350285686 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1184, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_18_18" type="Node2D" parent="Props" unique_id=1325259853 instance=ExtResource("2_mc681")]
+[node name="Thicket0_18_1" type="Node2D" parent="Props" unique_id=940342930 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1172.3558, 91.45834)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_18_1" type="Node2D" parent="Props" unique_id=507111649 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1193.587, 107.899605)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_18_18" type="Node2D" parent="Props" unique_id=1883826033 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1184, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_18_19" type="Node2D" parent="Props" unique_id=710913070 instance=ExtResource("2_mc681")]
+[node name="Thicket0_18_18" type="Node2D" parent="Props" unique_id=1165276603 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1202.1877, 1187.44)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_18_18" type="Node2D" parent="Props" unique_id=523813488 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1185.305, 1184.0695)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_18_19" type="Node2D" parent="Props" unique_id=351115707 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1184, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_19_0" type="Node2D" parent="Props" unique_id=559115283 instance=ExtResource("2_mc681")]
+[node name="Thicket0_18_19" type="Node2D" parent="Props" unique_id=363975543 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1173.9811, 1241.957)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_18_19" type="Node2D" parent="Props" unique_id=1830317953 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1162.676, 1240.2163)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_19_0" type="Node2D" parent="Props" unique_id=746289806 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1248, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_19_0" type="Node2D" parent="Props" unique_id=1322391706 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1264.0425, 29.908184)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_19_1" type="Node2D" parent="Props" unique_id=707473834 instance=ExtResource("2_mc681")]
+[node name="Thicket1_19_0" type="Node2D" parent="Props" unique_id=281343828 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1244.1389, 20.023598)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_19_1" type="Node2D" parent="Props" unique_id=1871682600 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1248, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_19_2" type="Node2D" parent="Props" unique_id=1751794299 instance=ExtResource("2_mc681")]
+[node name="Thicket0_19_1" type="Node2D" parent="Props" unique_id=1800534891 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1228.2908, 93.12284)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_19_1" type="Node2D" parent="Props" unique_id=1617023866 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1271.716, 90.51345)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_19_2" type="Node2D" parent="Props" unique_id=1371397835 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1248, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_19_18" type="Node2D" parent="Props" unique_id=193656769 instance=ExtResource("2_mc681")]
+[node name="Thicket0_19_2" type="Node2D" parent="Props" unique_id=1131928602 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1241.4529, 154.28314)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_19_2" type="Node2D" parent="Props" unique_id=923670170 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1265.572, 150.03868)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_19_18" type="Node2D" parent="Props" unique_id=742873261 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1248, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_19_19" type="Node2D" parent="Props" unique_id=1529309184 instance=ExtResource("2_mc681")]
+[node name="Thicket0_19_18" type="Node2D" parent="Props" unique_id=1780813073 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1259.1205, 1188.9265)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_19_18" type="Node2D" parent="Props" unique_id=883719850 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1229.5608, 1180.522)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_19_19" type="Node2D" parent="Props" unique_id=287928710 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1248, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_20_0" type="Node2D" parent="Props" unique_id=949964070 instance=ExtResource("2_mc681")]
+[node name="Thicket0_19_19" type="Node2D" parent="Props" unique_id=1468291540 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1222.1768, 1254.6364)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_19_19" type="Node2D" parent="Props" unique_id=1380005339 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1249.9673, 1254.1414)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_20_0" type="Node2D" parent="Props" unique_id=1433619967 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1312, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_20_1" type="Node2D" parent="Props" unique_id=1606207736 instance=ExtResource("2_mc681")]
+[node name="Thicket0_20_0" type="Node2D" parent="Props" unique_id=1287322256 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1333.7529, 38.597446)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_20_0" type="Node2D" parent="Props" unique_id=279778805 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1326.3279, 20.286224)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_20_1" type="Node2D" parent="Props" unique_id=252012833 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1312, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_20_18" type="Node2D" parent="Props" unique_id=1497895667 instance=ExtResource("2_mc681")]
+[node name="Thicket0_20_1" type="Node2D" parent="Props" unique_id=2066580818 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1310.0366, 93.16499)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_20_1" type="Node2D" parent="Props" unique_id=58714866 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1336.6992, 99.71213)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_20_18" type="Node2D" parent="Props" unique_id=1761307598 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1312, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_20_19" type="Node2D" parent="Props" unique_id=1516458020 instance=ExtResource("2_mc681")]
+[node name="Thicket0_20_18" type="Node2D" parent="Props" unique_id=921396212 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1289.607, 1193.9528)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_20_18" type="Node2D" parent="Props" unique_id=1869383630 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1294.7357, 1174.202)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_20_19" type="Node2D" parent="Props" unique_id=1293532918 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1312, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_21_0" type="Node2D" parent="Props" unique_id=1583908612 instance=ExtResource("2_mc681")]
+[node name="Thicket0_20_19" type="Node2D" parent="Props" unique_id=861227482 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1327.7983, 1256.4214)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_20_19" type="Node2D" parent="Props" unique_id=1232861939 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1294.835, 1252.3955)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_21_0" type="Node2D" parent="Props" unique_id=266656475 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_21_1" type="Node2D" parent="Props" unique_id=1982731234 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_0" type="Node2D" parent="Props" unique_id=1176721700 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1371.0948, 44.32248)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_21_0" type="Node2D" parent="Props" unique_id=2122748554 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1358.6537, 20.170452)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_21_1" type="Node2D" parent="Props" unique_id=1303427209 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_21_2" type="Node2D" parent="Props" unique_id=650114034 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_1" type="Node2D" parent="Props" unique_id=1472246903 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1365.2429, 106.81495)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_21_1" type="Node2D" parent="Props" unique_id=1989227082 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1393.8802, 98.01582)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_21_2" type="Node2D" parent="Props" unique_id=1553058874 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_21_3" type="Node2D" parent="Props" unique_id=1460159255 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_2" type="Node2D" parent="Props" unique_id=1964367108 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1387.2421, 149.3196)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_21_2" type="Node2D" parent="Props" unique_id=1704725841 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1371.001, 172.96542)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_21_3" type="Node2D" parent="Props" unique_id=1063816712 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 224)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_21_4" type="Node2D" parent="Props" unique_id=510076774 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_3" type="Node2D" parent="Props" unique_id=811505213 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1361.5973, 227.50963)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_21_3" type="Node2D" parent="Props" unique_id=115630495 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1391.3534, 227.38855)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_21_4" type="Node2D" parent="Props" unique_id=389355950 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 288)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_21_18" type="Node2D" parent="Props" unique_id=198071155 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_4" type="Node2D" parent="Props" unique_id=1744882440 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1386.1997, 291.57632)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_21_4" type="Node2D" parent="Props" unique_id=914492661 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1387.2192, 292.2471)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_21_18" type="Node2D" parent="Props" unique_id=1233619451 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_21_19" type="Node2D" parent="Props" unique_id=753895425 instance=ExtResource("2_mc681")]
+[node name="Thicket0_21_18" type="Node2D" parent="Props" unique_id=1659389497 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1391.3856, 1175.2139)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_21_18" type="Node2D" parent="Props" unique_id=444047765 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1351.0135, 1191.833)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_21_19" type="Node2D" parent="Props" unique_id=1581077407 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1376, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_21_19" type="Node2D" parent="Props" unique_id=1144493125 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1369.5201, 1256.3745)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_21_19" type="Node2D" parent="Props" unique_id=1525879046 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1367.4562, 1245.7885)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_0" type="Node2D" parent="Props" unique_id=2025505646 instance=ExtResource("2_mc681")]
+[node name="Tree_22_0" type="Node2D" parent="Props" unique_id=958955595 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_22_1" type="Node2D" parent="Props" unique_id=1074918 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_0" type="Node2D" parent="Props" unique_id=462638089 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1424.0105, 22.159664)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_0" type="Node2D" parent="Props" unique_id=2107379961 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1423.8157, 42.45121)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_1" type="Node2D" parent="Props" unique_id=721547104 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_22_2" type="Node2D" parent="Props" unique_id=1382389565 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_1" type="Node2D" parent="Props" unique_id=419500311 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1414.178, 91.17468)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_1" type="Node2D" parent="Props" unique_id=2055273369 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1457.7666, 101.35443)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_2" type="Node2D" parent="Props" unique_id=1572911357 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_3" type="Node2D" parent="Props" unique_id=1500537930 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_2" type="Node2D" parent="Props" unique_id=1099963998 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1418.0602, 149.029)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_2" type="Node2D" parent="Props" unique_id=1768212306 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1447.2739, 157.00879)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_3" type="Node2D" parent="Props" unique_id=1852431338 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 224)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_22_4" type="Node2D" parent="Props" unique_id=1221863838 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_3" type="Node2D" parent="Props" unique_id=684216821 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1439.6663, 217.20164)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_3" type="Node2D" parent="Props" unique_id=427120735 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1433.1978, 217.3486)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_4" type="Node2D" parent="Props" unique_id=63613081 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 288)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_22_4" type="Node2D" parent="Props" unique_id=2055978370 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1434.8295, 283.73535)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_5" type="Node2D" parent="Props" unique_id=1554138123 instance=ExtResource("2_mc681")]
+[node name="Thicket1_22_4" type="Node2D" parent="Props" unique_id=1187114547 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1429.0598, 276.24786)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_5" type="Node2D" parent="Props" unique_id=2049562818 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 352)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_22_6" type="Node2D" parent="Props" unique_id=649165759 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_5" type="Node2D" parent="Props" unique_id=55895303 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1446.5858, 343.96225)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_5" type="Node2D" parent="Props" unique_id=1362359280 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1464.6589, 345.04428)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_6" type="Node2D" parent="Props" unique_id=291130875 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 416)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_7" type="Node2D" parent="Props" unique_id=1738412263 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_6" type="Node2D" parent="Props" unique_id=797660725 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1457.5735, 403.5745)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_6" type="Node2D" parent="Props" unique_id=1432115495 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1447.1812, 413.96884)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_7" type="Node2D" parent="Props" unique_id=228561370 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 480)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_8" type="Node2D" parent="Props" unique_id=1861689395 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_7" type="Node2D" parent="Props" unique_id=161059216 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1434.6948, 488.02936)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_7" type="Node2D" parent="Props" unique_id=644414764 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1427.1768, 492.97443)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_8" type="Node2D" parent="Props" unique_id=204333256 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 544)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_9" type="Node2D" parent="Props" unique_id=307609714 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_8" type="Node2D" parent="Props" unique_id=979182960 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1456.8438, 539.53656)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_8" type="Node2D" parent="Props" unique_id=106198215 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1464.4061, 548.24786)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_9" type="Node2D" parent="Props" unique_id=237903291 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 608)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_22_12" type="Node2D" parent="Props" unique_id=1514650509 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_9" type="Node2D" parent="Props" unique_id=1519644176 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1449.5449, 612.8069)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_9" type="Node2D" parent="Props" unique_id=244157694 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1450.9677, 598.53894)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_12" type="Node2D" parent="Props" unique_id=55794306 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 800)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_22_13" type="Node2D" parent="Props" unique_id=50528360 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_12" type="Node2D" parent="Props" unique_id=1840286249 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1442.3015, 791.0768)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_12" type="Node2D" parent="Props" unique_id=2115779717 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1464.7919, 801.5835)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_13" type="Node2D" parent="Props" unique_id=589728924 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 864)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_22_14" type="Node2D" parent="Props" unique_id=1312372491 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_13" type="Node2D" parent="Props" unique_id=1419811730 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1453.9313, 876.31964)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_13" type="Node2D" parent="Props" unique_id=124826701 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1443.5039, 867.8876)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_14" type="Node2D" parent="Props" unique_id=1814812804 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 928)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_22_15" type="Node2D" parent="Props" unique_id=655884727 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_14" type="Node2D" parent="Props" unique_id=100376967 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1440.0769, 933.398)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_14" type="Node2D" parent="Props" unique_id=1555664363 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1439.0364, 932.51746)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_15" type="Node2D" parent="Props" unique_id=822844133 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 992)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_22_16" type="Node2D" parent="Props" unique_id=2079001042 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_15" type="Node2D" parent="Props" unique_id=573032516 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1418.6184, 996.9752)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_15" type="Node2D" parent="Props" unique_id=1027448875 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1465.3328, 987.19446)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_16" type="Node2D" parent="Props" unique_id=1774769364 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_22_16" type="Node2D" parent="Props" unique_id=1983579596 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1465.8025, 1066.6383)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_22_17" type="Node2D" parent="Props" unique_id=2116009084 instance=ExtResource("2_mc681")]
+[node name="Thicket1_22_16" type="Node2D" parent="Props" unique_id=828918758 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1463.5864, 1059.1115)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_17" type="Node2D" parent="Props" unique_id=1978478571 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 1120)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_22_18" type="Node2D" parent="Props" unique_id=1119608841 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_17" type="Node2D" parent="Props" unique_id=902337127 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1417.6652, 1128.4127)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_17" type="Node2D" parent="Props" unique_id=1149783290 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1437.5681, 1124.5818)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_22_18" type="Node2D" parent="Props" unique_id=975056862 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_22_19" type="Node2D" parent="Props" unique_id=760319363 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_18" type="Node2D" parent="Props" unique_id=364149444 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1430.2548, 1195.7885)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_22_18" type="Node2D" parent="Props" unique_id=741788817 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1436.8909, 1179.3728)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_22_19" type="Node2D" parent="Props" unique_id=1110497854 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1440, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_0" type="Node2D" parent="Props" unique_id=1268028106 instance=ExtResource("2_mc681")]
+[node name="Thicket0_22_19" type="Node2D" parent="Props" unique_id=759594747 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1423.207, 1256.8906)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_22_19" type="Node2D" parent="Props" unique_id=207119627 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1422.6555, 1254.6514)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_0" type="Node2D" parent="Props" unique_id=1030038438 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 32)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_1" type="Node2D" parent="Props" unique_id=2044682464 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_0" type="Node2D" parent="Props" unique_id=1176335215 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1487.8739, 31.993526)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_0" type="Node2D" parent="Props" unique_id=773334357 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1480.0294, 33.223324)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_1" type="Node2D" parent="Props" unique_id=270672125 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 96)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_2" type="Node2D" parent="Props" unique_id=476213205 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_1" type="Node2D" parent="Props" unique_id=1164919737 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1510.9672, 92.376724)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_1" type="Node2D" parent="Props" unique_id=795655568 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1520.205, 83.032074)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_2" type="Node2D" parent="Props" unique_id=1241260138 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 160)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_23_2" type="Node2D" parent="Props" unique_id=623568629 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1502.6814, 155.5695)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_2" type="Node2D" parent="Props" unique_id=1087423887 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1483.3636, 148.23894)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_3" type="Node2D" parent="Props" unique_id=1352259127 instance=ExtResource("2_mc681")]
+[node name="Tree_23_3" type="Node2D" parent="Props" unique_id=2094581192 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 224)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_23_3" type="Node2D" parent="Props" unique_id=263052000 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1495.4628, 227.9984)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_4" type="Node2D" parent="Props" unique_id=860300799 instance=ExtResource("2_mc681")]
+[node name="Thicket1_23_3" type="Node2D" parent="Props" unique_id=1334402941 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1500.1979, 215.74971)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_4" type="Node2D" parent="Props" unique_id=1972294783 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 288)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_23_5" type="Node2D" parent="Props" unique_id=2074985502 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_4" type="Node2D" parent="Props" unique_id=1098078886 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1504.4133, 293.89893)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_4" type="Node2D" parent="Props" unique_id=1340622401 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1491.263, 279.14362)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_5" type="Node2D" parent="Props" unique_id=780934459 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 352)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_6" type="Node2D" parent="Props" unique_id=2070348587 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_5" type="Node2D" parent="Props" unique_id=1275156226 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1529.1841, 353.91974)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_5" type="Node2D" parent="Props" unique_id=81318704 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1498.1454, 357.22678)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_6" type="Node2D" parent="Props" unique_id=503748923 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 416)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_23_7" type="Node2D" parent="Props" unique_id=57914228 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_6" type="Node2D" parent="Props" unique_id=1094546365 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1518.915, 414.05566)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_6" type="Node2D" parent="Props" unique_id=476412740 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1501.8267, 403.5135)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_7" type="Node2D" parent="Props" unique_id=2026175001 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 480)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_8" type="Node2D" parent="Props" unique_id=538419932 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_7" type="Node2D" parent="Props" unique_id=187942532 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1497.2076, 488.62372)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_7" type="Node2D" parent="Props" unique_id=299599491 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1529.0903, 467.87308)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_8" type="Node2D" parent="Props" unique_id=2137603554 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 544)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_23_9" type="Node2D" parent="Props" unique_id=1550288898 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_8" type="Node2D" parent="Props" unique_id=1991354136 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1514.2975, 531.6303)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_8" type="Node2D" parent="Props" unique_id=1442997199 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1493.4674, 548.0455)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_9" type="Node2D" parent="Props" unique_id=1130977717 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 608)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_23_9" type="Node2D" parent="Props" unique_id=1841483164 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1528.3059, 609.4051)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_9" type="Node2D" parent="Props" unique_id=679841979 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1504.6682, 620.8362)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_12" type="Node2D" parent="Props" unique_id=185254158 instance=ExtResource("2_mc681")]
+[node name="Tree_23_12" type="Node2D" parent="Props" unique_id=1321367123 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 800)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_23_13" type="Node2D" parent="Props" unique_id=1752168252 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_12" type="Node2D" parent="Props" unique_id=388575088 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1506.5378, 795.70087)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_12" type="Node2D" parent="Props" unique_id=2122416435 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1511.9124, 800.6786)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_13" type="Node2D" parent="Props" unique_id=1908918950 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 864)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_23_14" type="Node2D" parent="Props" unique_id=892436201 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_13" type="Node2D" parent="Props" unique_id=790185012 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1504.6073, 863.1923)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_13" type="Node2D" parent="Props" unique_id=258566998 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1509.3099, 869.0151)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_14" type="Node2D" parent="Props" unique_id=55118145 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 928)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Tree_23_15" type="Node2D" parent="Props" unique_id=1567624785 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_14" type="Node2D" parent="Props" unique_id=1661621856 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1493.665, 928.795)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Thicket1_23_14" type="Node2D" parent="Props" unique_id=542304044 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1516.5673, 920.8046)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_15" type="Node2D" parent="Props" unique_id=1202048956 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 992)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_23_15" type="Node2D" parent="Props" unique_id=284320337 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1522.3861, 991.80884)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_16" type="Node2D" parent="Props" unique_id=1685540030 instance=ExtResource("2_mc681")]
+[node name="Thicket1_23_15" type="Node2D" parent="Props" unique_id=2094059801 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1521.6812, 991.4452)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_16" type="Node2D" parent="Props" unique_id=1986093846 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
+art_scale = 2.0
+
+[node name="Thicket0_23_16" type="Node2D" parent="Props" unique_id=1113939482 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1489.9797, 1068.1844)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
 art_scale = 2.0
 flip = true
 
-[node name="Tree_23_17" type="Node2D" parent="Props" unique_id=2029489038 instance=ExtResource("2_mc681")]
+[node name="Thicket1_23_16" type="Node2D" parent="Props" unique_id=1167262035 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1495.8463, 1068.8708)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
+
+[node name="Tree_23_17" type="Node2D" parent="Props" unique_id=1078779976 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 1120)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
-flip = true
 
-[node name="Tree_23_18" type="Node2D" parent="Props" unique_id=1274413207 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_17" type="Node2D" parent="Props" unique_id=1999522843 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1529.5397, 1112.597)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_17" type="Node2D" parent="Props" unique_id=1707077573 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1516.7354, 1131.5544)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_18" type="Node2D" parent="Props" unique_id=848828217 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 1184)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
+flip = true
 
-[node name="Tree_23_19" type="Node2D" parent="Props" unique_id=11195180 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_18" type="Node2D" parent="Props" unique_id=1227495249 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1490.777, 1185.3129)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Thicket1_23_18" type="Node2D" parent="Props" unique_id=820546523 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(1488.793, 1174.6525)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
+solid = false
+footprint = Vector2(2, 2)
+art_scale = 2.0
+
+[node name="Tree_23_19" type="Node2D" parent="Props" unique_id=1921294766 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
 position = Vector2(1504, 1248)
-script = ExtResource("3_17jf3")
-texture = ExtResource("4_rdk04")
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 footprint = Vector2(30, 18)
 art_scale = 2.0
 
-[node name="Bush_12_14" type="Node2D" parent="Props" unique_id=140321501 instance=ExtResource("2_mc681")]
+[node name="Thicket0_23_19" type="Node2D" parent="Props" unique_id=451844461 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
-position = Vector2(800, 928)
-script = ExtResource("3_17jf3")
-texture = ExtResource("5_78qme")
+position = Vector2(1495.0709, 1246.2054)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 solid = false
 footprint = Vector2(2, 2)
+art_scale = 2.0
 
-[node name="Bush_6_16" type="Node2D" parent="Props" unique_id=457178216 instance=ExtResource("2_mc681")]
+[node name="Thicket1_23_19" type="Node2D" parent="Props" unique_id=535713894 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
-position = Vector2(416, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("6_kp726")
+position = Vector2(1479.5612, 1241.8246)
+script = ExtResource("3_rdk04")
+texture = ExtResource("4_78qme")
 solid = false
 footprint = Vector2(2, 2)
+art_scale = 2.0
+flip = true
 
-[node name="Bush_11_16" type="Node2D" parent="Props" unique_id=1167842993 instance=ExtResource("2_mc681")]
+[node name="Bush_13_13" type="Node2D" parent="Props" unique_id=1383437097 instance=ExtResource("2_17jf3")]
 y_sort_enabled = true
-position = Vector2(736, 1056)
-script = ExtResource("3_17jf3")
-texture = ExtResource("6_kp726")
-solid = false
-footprint = Vector2(2, 2)
-
-[node name="Bush_21_17" type="Node2D" parent="Props" unique_id=75011523 instance=ExtResource("2_mc681")]
-y_sort_enabled = true
-position = Vector2(1376, 1120)
-script = ExtResource("3_17jf3")
-texture = ExtResource("5_78qme")
+position = Vector2(864, 864)
+script = ExtResource("3_rdk04")
+texture = ExtResource("5_kp726")
 solid = false
 footprint = Vector2(2, 2)
 flip = true
 
-[node name="EnemyMarkers" type="Node2D" parent="." unique_id=1632832158]
+[node name="Bush_7_14" type="Node2D" parent="Props" unique_id=2030470892 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(480, 928)
+script = ExtResource("3_rdk04")
+texture = ExtResource("6_v6drq")
+solid = false
+footprint = Vector2(2, 2)
 
-[node name="Wolf_1_0" type="Marker2D" parent="EnemyMarkers" unique_id=1683653610]
-position = Vector2(352, 992)
+[node name="Bush_8_14" type="Node2D" parent="Props" unique_id=391469550 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(544, 928)
+script = ExtResource("3_rdk04")
+texture = ExtResource("6_v6drq")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_7_15" type="Node2D" parent="Props" unique_id=191238995 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(480, 992)
+script = ExtResource("3_rdk04")
+texture = ExtResource("7_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_11_15" type="Node2D" parent="Props" unique_id=2081176493 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(736, 992)
+script = ExtResource("3_rdk04")
+texture = ExtResource("7_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_6_16" type="Node2D" parent="Props" unique_id=258773440 instance=ExtResource("2_17jf3")]
+y_sort_enabled = true
+position = Vector2(416, 1056)
+script = ExtResource("3_rdk04")
+texture = ExtResource("5_kp726")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="EnemyMarkers" type="Node2D" parent="." unique_id=245571244]
+
+[node name="Wolf_1_0" type="Marker2D" parent="EnemyMarkers" unique_id=2094863829]
+position = Vector2(224, 1056)
 metadata/enemy_id = "forest_wolf"
 
-[node name="Wolf_2_0" type="Marker2D" parent="EnemyMarkers" unique_id=2005147424]
-position = Vector2(864, 736)
+[node name="Wolf_1_1" type="Marker2D" parent="EnemyMarkers" unique_id=537823513]
+position = Vector2(224, 992)
 metadata/enemy_id = "forest_wolf"
 
-[node name="Wolf_2_1" type="Marker2D" parent="EnemyMarkers" unique_id=1976670333]
-position = Vector2(864, 672)
+[node name="Wolf_2_0" type="Marker2D" parent="EnemyMarkers" unique_id=1181815940]
+position = Vector2(1184, 224)
+metadata/enemy_id = "forest_wolf"
+
+[node name="Wolf_2_1" type="Marker2D" parent="EnemyMarkers" unique_id=990214363]
+position = Vector2(1184, 160)
+metadata/enemy_id = "forest_wolf"
+
+[node name="Wolf_3_0" type="Marker2D" parent="EnemyMarkers" unique_id=189164580]
+position = Vector2(864, 1120)
+metadata/enemy_id = "forest_wolf"
+
+[node name="Wolf_3_1" type="Marker2D" parent="EnemyMarkers" unique_id=1940944702]
+position = Vector2(928, 1120)
 metadata/enemy_id = "forest_wolf"

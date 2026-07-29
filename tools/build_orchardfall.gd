@@ -88,6 +88,23 @@ const TRUNK := Vector2(30, 18)
 ## version that works with the art that exists.
 const TREE_SCALE := 2.0
 
+## Extra trees stood on top of the ones the map already has, to thicken the
+## treeline.
+##
+## A border two tiles deep drawn as one tree per tile reads as a fence made of
+## trees: you can see the gaps, and through them the void beyond the map. Layering
+## a second and third trunk at a sub-tile offset closes the gaps without touching
+## the tiles underneath — the wall is still exactly the ring the assertions
+## measure, and the picture in front of it is a wood.
+##
+## Deeper at the edge than inside, so density falls off toward the middle rather
+## than the whole zone turning into a thicket.
+const THICKET_EDGE := 2          # extra trees per border cell
+const THICKET_INLAND := 0.35     # ...and the chance of one anywhere else
+## How far a stacked tree is nudged off its cell, in pixels. Under a tile, or the
+## extras drift onto ground the player walks and the wall looks wrong.
+const THICKET_JITTER := 26.0
+
 ## Ground the undergrowth stays off. Paths first — a road with bushes growing
 ## down the middle of it is not a road, and the paths are the one thing in the
 ## zone that has to read as deliberate from across the screen. Water and floors
@@ -550,6 +567,20 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 		_stand(root, grove, "Tree", cell,
 			String(choices[_rng.randi_range(0, choices.size() - 1)]), TRUNK, TREE_SCALE)
 
+		# ...and again, offset, for the ones on the rim.
+		var edge: bool = cell.x < 3 or cell.y < 3 \
+			or cell.x >= size.x - 3 or cell.y >= size.y - 3
+		var extras := THICKET_EDGE if edge else (1 if _rng.randf() < THICKET_INLAND else 0)
+		for i in range(extras):
+			var nudge := Vector2(_rng.randf_range(-THICKET_JITTER, THICKET_JITTER),
+				_rng.randf_range(-THICKET_JITTER * 0.5, THICKET_JITTER * 0.5))
+			var extra := _stand(root, grove, "Thicket%d" % i, cell,
+				String(choices[_rng.randi_range(0, choices.size() - 1)]),
+				Vector2.ZERO, TREE_SCALE)
+			# Non-solid: the cell already blocks, and a second collider on the
+			# same tile is one more thing to get caught on for no gain.
+			extra.position += nudge
+
 	# Undergrowth goes only where the player can already walk, and blocks
 	# nothing. It is there so a clearing reads as a clearing; a bush that stopped
 	# you would be a wall you can see over, which is the most annoying kind.
@@ -569,7 +600,7 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 
 
 func _stand(root: Node2D, parent: Node2D, prefix: String, cell: Vector2i,
-		texture: String, footprint: Vector2, zoom: float = 1.0) -> void:
+		texture: String, footprint: Vector2, zoom: float = 1.0) -> Prop:
 	var prop: Prop = PROP_SCENE.instantiate()
 	prop.name = "%s_%d_%d" % [prefix, cell.x, cell.y]
 	prop.texture = load("res://art/sprites/props/%s.png" % texture)
@@ -582,6 +613,7 @@ func _stand(root: Node2D, parent: Node2D, prefix: String, cell: Vector2i,
 	parent.add_child(prop)
 	prop.owner = root
 	prop.position = GreyboxMap.centre(cell)
+	return prop
 
 
 ## Orchard planting: a tree every `step` columns, in bands `gap` rows apart, so
