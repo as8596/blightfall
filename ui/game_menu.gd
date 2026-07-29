@@ -49,7 +49,27 @@ const KEY := "b79a63"     ## labels and item names — warm, a step up from body
 const ASIDE := "8a8378"   ## flavour text, parentheticals, "nothing here"
 const BODY := "ebe3d2"
 
+const PORTRAIT: Texture2D = preload("res://art/sprites/player/player_portrait.png")
+
+## Inventory metrics, in one place because they are a budget rather than a
+## preference: the window is 1280 wide, the hotbar is twelve slots across, and a
+## column either side of it has to fit in what is left. At 62px — the size before
+## the character and detail columns arrived — twelve slots plus two columns came
+## to 1354 and the right-hand pane fell off the screen.
+##
+##     12 * 50 + 11 * 5 + 24  =  679   the grid
+##     200 + 12 + 679 + 12 + 250 = 1153   the row
+##     1153 + 2 * 40 = 1233 < 1280        with the page margins
+const SLOT := 50
+const GAP := 5
+const COLUMN_LEFT := 200
+const COLUMN_RIGHT := 250
+const PAGE_MARGIN := 40.0
+
 var _detail: RichTextLabel
+var _detail_icon: TextureRect
+var _who: Label
+var _vitals: RichTextLabel
 var _gear_panels: Array[Panel] = []
 var _gear_icons: Array[TextureRect] = []
 var _gear_labels: Array[Label] = []
@@ -222,7 +242,8 @@ func _refresh_inventory() -> void:
 		_slot_counts[i].text = str(held) if item != null and held > 1 else ""
 		_slot_panels[i].modulate = Color.WHITE if item != null else Color(1, 1, 1, 0.45)
 
-	_detail.text = _detail_text()
+	_refresh_detail()
+	_refresh_vitals()
 
 	var line := "  Satchel   %d / %d" % [Hud.carried, Hud.capacity]
 	if materials.is_empty():
@@ -247,7 +268,7 @@ func _detail_text() -> String:
 	if item == null:
 		return "\n  " + _aside("Nothing in that slot.")
 
-	var kinds := ["Consumable", "Tool", "Key"]
+	var kinds := ["Consumable", "Tool", "Key", "Gear"]
 	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
 	var lines := [
 		"",
@@ -261,10 +282,48 @@ func _detail_text() -> String:
 		lines.append("  Not something you use. It opens something.")
 	if item.stack_size > 1:
 		lines.append("  Stacks to %d." % item.stack_size)
+	if item.is_equippable():
+		lines.append("  Worn in the %s slot." % ItemData.slot_name(item.slot).to_lower())
+	for stat in item.modifiers:
+		var delta: int = int(item.modifiers[stat])
+		lines.append("  %s %s%d" % [String(stat).capitalize().replace("_", " "),
+			"+" if delta >= 0 else "", delta])
 	if not item.description.is_empty():
 		lines.append("")
 		lines.append("  " + _aside(item.description))
 	return "\n".join(lines)
+
+
+## Name, picture and prose all come from the same slot, so they can never
+## describe two different items — which is the failure the old single-label pane
+## could not have, and the new one could.
+func _refresh_detail() -> void:
+	var slot: int = _hovered if _hovered >= 0 else Hud.selected
+	var item := _item_in(slot)
+	_detail_icon.texture = item.icon if item != null else null
+	_detail.text = _detail_text()
+
+
+## The left column. Bars as text rather than as ProgressBars: at this size a
+## 4px-tall bar is a smear, and "4 / 6" is both smaller and exact.
+func _refresh_vitals() -> void:
+	if _who == null:
+		return
+	_who.text = "The Condemned"
+	if stats.is_empty():
+		_vitals.text = "\n  " + _aside("No player.")
+		return
+	var lines := [
+		"",
+		_row("Health", "%d / %d" % [stats.get("health", 0), stats.get("max_health", 0)]),
+		_row("Stamina", "%.0f" % stats.get("max_stamina", 0.0)),
+		_row("Carry", "%d" % stats.get("capacity", 0)),
+		"",
+		_row("Move", "%d px/s" % int(stats.get("move_speed", 0.0))),
+		_row("Strike", "%s" % stats.get("damage", "-")),
+		_row("Reach", "%s" % stats.get("reach", "-")),
+	]
+	_vitals.text = "\n".join(lines)
 
 
 func _on_slot_hover(slot: int, entered: bool) -> void:
@@ -273,7 +332,7 @@ func _on_slot_hover(slot: int, entered: bool) -> void:
 	elif _hovered == slot:
 		_hovered = -1
 	if _open:
-		_detail.text = _detail_text()
+		_refresh_detail()
 
 
 func _map_text() -> String:
@@ -307,10 +366,10 @@ func _build() -> void:
 
 	_tabs = TabContainer.new()
 	_tabs.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_tabs.offset_left = 120.0
-	_tabs.offset_top = 70.0
-	_tabs.offset_right = -120.0
-	_tabs.offset_bottom = -70.0
+	_tabs.offset_left = PAGE_MARGIN
+	_tabs.offset_top = 56.0
+	_tabs.offset_right = -PAGE_MARGIN
+	_tabs.offset_bottom = -56.0
 	_tabs.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	# Opaque, not translucent. The default panel lets the debug overlay show
 	# straight through the page you are trying to read.
@@ -339,24 +398,58 @@ func _build() -> void:
 ## this loop never needs editing to gain or lose one.
 ##
 ## Drag gear here, or right-click it. Clicking a worn slot takes it off.
-func _build_equipment() -> Control:
+## A bordered box with a heading, the way the reference lays out every region of
+## its inventory. One helper rather than four copies of eleven lines, and it is
+## what makes the page read as regions instead of as a wall of boxes: the frames
+## do the grouping that a second font weight would normally do, and this project
+## has one weight (see KEY).
+func _framed(title: String, tip: String = "") -> VBoxContainer:
+	var panel := PanelContainer.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.11, 0.10, 0.09)
+	box.border_color = Color(0.30, 0.25, 0.19)
+	box.set_border_width_all(2)
+	box.set_content_margin_all(12)
+	panel.add_theme_stylebox_override("panel", box)
+
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
+	panel.add_child(column)
 
-	var heading := Label.new()
-	heading.text = "Worn"
-	heading.tooltip_text = "Drag gear here, or right-click it"
-	heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
-	heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
-	column.add_child(heading)
+	if not title.is_empty():
+		var heading := Label.new()
+		heading.text = title.to_upper()
+		heading.tooltip_text = tip
+		heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
+		heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
+		column.add_child(heading)
+
+	# The caller wants the inside; the frame is plumbing. Stash it so the layout
+	# can add the panel rather than the column.
+	column.set_meta(&"frame", panel)
+	return column
+
+
+static func _frame_of(column: Control) -> Control:
+	return column.get_meta(&"frame", column)
+
+
+func _build_equipment() -> Control:
+	var column := _framed("Worn", "Drag gear here, or right-click it")
+	var strip := HBoxContainer.new()
+	strip.add_theme_constant_override("separation", 10)
+	column.add_child(strip)
 
 	for slot in ItemData.EQUIP_SLOTS:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
-		column.add_child(row)
+		# One column per slot: the box, and its name under it. Under rather than
+		# beside, because four names beside four boxes is a table, and a table
+		# reads as data you are meant to compare rather than as a paper doll.
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		strip.add_child(row)
 
 		var panel := Panel.new()
-		panel.custom_minimum_size = Vector2(62, 62)
+		panel.custom_minimum_size = Vector2(SLOT, SLOT)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color(0.13, 0.11, 0.10)
@@ -367,18 +460,19 @@ func _build_equipment() -> Control:
 
 		var icon := TextureRect.new()
 		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
-		icon.offset_left = 8.0
-		icon.offset_top = 8.0
-		icon.offset_right = -8.0
-		icon.offset_bottom = -8.0
+		icon.offset_left = 6.0
+		icon.offset_top = 6.0
+		icon.offset_right = -6.0
+		icon.offset_bottom = -6.0
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		panel.add_child(icon)
 
 		var label := Label.new()
-		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.custom_minimum_size = Vector2(190, 62)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(88, 0)
+		label.clip_text = true
 		label.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		label.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
 		row.add_child(label)
@@ -541,16 +635,41 @@ func _text_page(page_name: String) -> RichTextLabel:
 ## description. The top row is the same ten slots in the same order with the
 ## same numbers as the bar on screen — a menu that rearranges the bar it
 ## describes teaches the player two layouts for one thing.
+## Three columns and a footer: who you are, what you are carrying, and what the
+## thing you are pointing at actually does.
+##
+## The previous version stacked everything vertically, which meant the detail
+## pane sat below the grid — so reading an item moved your eye off the item. The
+## reference this follows puts the character on the left, the grid in the middle
+## and the description on the right, and the reason it works is that all three
+## are visible at once: hovering a slot changes the right-hand column while your
+## cursor stays where it was.
+##
+## Worn gear moves to the footer for the same reason it is a row and not a
+## column — it is a paper doll, not a table, and it belongs under the pack rather
+## than beside it now that the middle is the pack's.
 func _build_inventory_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Inventory"
-	page.add_theme_constant_override("separation", 14)
+	page.add_theme_constant_override("separation", 12)
+
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 12)
+	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(columns)
+
+	columns.add_child(_frame_of(_build_character_column()))
+
+	var centre := _framed("Carried")
+	centre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_frame_of(centre).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(_frame_of(centre))
 
 	var grid := GridContainer.new()
 	grid.columns = ItemsComponent.HOTBAR_SLOTS
-	grid.add_theme_constant_override("h_separation", 6)
-	grid.add_theme_constant_override("v_separation", 6)
-	page.add_child(grid)
+	grid.add_theme_constant_override("h_separation", GAP)
+	grid.add_theme_constant_override("v_separation", GAP)
+	centre.add_child(grid)
 
 	for i in SLOT_COUNT:
 		if i == ItemsComponent.HOTBAR_SLOTS:
@@ -559,27 +678,17 @@ func _build_inventory_page() -> Control:
 			# below are the pack. Running them together would make forty
 			# identical boxes and hide the only distinction that matters.
 			var gap := Control.new()
-			gap.custom_minimum_size = Vector2(0, 14)
-			page.add_child(gap)
-			page.move_child(gap, 1)
-			# The pack and the worn gear, side by side. The space to the right of
-			# a ten-wide pack was empty and the panel is wide enough for both —
-			# and what you are wearing belongs next to what you are carrying,
-			# not on another tab.
-			var middle := HBoxContainer.new()
-			middle.add_theme_constant_override("separation", 28)
-			page.add_child(middle)
-			page.move_child(middle, 2)
+			gap.custom_minimum_size = Vector2(0, 12)
+			centre.add_child(gap)
 
 			var pack := GridContainer.new()
 			pack.columns = 10
-			pack.add_theme_constant_override("h_separation", 6)
-			pack.add_theme_constant_override("v_separation", 6)
-			middle.add_child(pack)
-			middle.add_child(_build_equipment())
+			pack.add_theme_constant_override("h_separation", GAP)
+			pack.add_theme_constant_override("v_separation", GAP)
+			centre.add_child(pack)
 			grid = pack
 		var slot := Panel.new()
-		slot.custom_minimum_size = Vector2(62, 62)
+		slot.custom_minimum_size = Vector2(SLOT, SLOT)
 		slot.mouse_filter = Control.MOUSE_FILTER_STOP
 		var box := StyleBoxFlat.new()
 		box.bg_color = Color(0.13, 0.11, 0.10)
@@ -589,10 +698,10 @@ func _build_inventory_page() -> Control:
 
 		var icon := TextureRect.new()
 		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
-		icon.offset_left = 8.0
-		icon.offset_top = 8.0
-		icon.offset_right = -8.0
-		icon.offset_bottom = -8.0
+		icon.offset_left = 6.0
+		icon.offset_top = 6.0
+		icon.offset_right = -6.0
+		icon.offset_bottom = -6.0
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -629,12 +738,89 @@ func _build_inventory_page() -> Control:
 		_slot_icons.append(icon)
 		_slot_counts.append(count)
 
-	_detail = _text_page("Detail")
-	_detail.custom_minimum_size = Vector2(0, 150)
-	page.add_child(_detail)
-
 	_satchel = Label.new()
 	_satchel.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_satchel.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
-	page.add_child(_satchel)
+	centre.add_child(_satchel)
+
+	columns.add_child(_frame_of(_build_detail_column()))
+
+	# The footer: what you are wearing, and what the buttons do.
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 12)
+	page.add_child(footer)
+	footer.add_child(_frame_of(_build_equipment()))
+
+	var hints := Label.new()
+	hints.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hints.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	hints.text = "Drag to move    Right-click to equip    Tab to close"
+	hints.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	hints.add_theme_color_override("font_color", Color(0.54, 0.50, 0.45))
+	footer.add_child(hints)
 	return page
+
+
+## Left column: the paper doll's other half — who this is, and the numbers that
+## describe them. Pushed from `Events.player_stats_changed` like everything else
+## here; nothing on this page reaches for a player (GDD §12 rule 1).
+func _build_character_column() -> VBoxContainer:
+	var column := _framed("")
+	_frame_of(column).custom_minimum_size = Vector2(COLUMN_LEFT, 0)
+
+	var frame := Panel.new()
+	frame.custom_minimum_size = Vector2(COLUMN_LEFT - 28, 150)
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.07, 0.06, 0.06)
+	box.border_color = Color(0.30, 0.25, 0.19)
+	box.set_border_width_all(2)
+	frame.add_theme_stylebox_override("panel", box)
+	column.add_child(frame)
+
+	var face := TextureRect.new()
+	face.set_anchors_preset(Control.PRESET_FULL_RECT)
+	face.offset_left = 4.0
+	face.offset_top = 4.0
+	face.offset_right = -4.0
+	face.offset_bottom = -4.0
+	face.texture = PORTRAIT
+	face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	face.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(face)
+
+	_who = Label.new()
+	_who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_who.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	_who.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
+	column.add_child(_who)
+
+	_vitals = _text_page("Vitals")
+	_vitals.custom_minimum_size = Vector2(0, 250)
+	_vitals.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_vitals)
+	return column
+
+
+## Right column: the item. Name, a large picture of it, and what it does.
+##
+## The picture is the reason this is a column rather than a strip of text. An
+## inventory icon is 64px in a 62px box; at that size a bottle and a vial are the
+## same object, and the player learns their inventory by position rather than by
+## sight. Shown large, once, next to its own name, they are different things.
+func _build_detail_column() -> VBoxContainer:
+	var column := _framed("")
+	_frame_of(column).custom_minimum_size = Vector2(COLUMN_RIGHT, 0)
+
+	_detail_icon = TextureRect.new()
+	_detail_icon.custom_minimum_size = Vector2(0, 128)
+	_detail_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_detail_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(_detail_icon)
+
+	_detail = _text_page("Detail")
+	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_detail)
+	return column
