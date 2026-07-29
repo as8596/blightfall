@@ -99,11 +99,21 @@ const TREE_SCALE := 2.0
 ##
 ## Deeper at the edge than inside, so density falls off toward the middle rather
 ## than the whole zone turning into a thicket.
-const THICKET_EDGE := 2          # extra trees per border cell
-const THICKET_INLAND := 0.35     # ...and the chance of one anywhere else
-## How far a stacked tree is nudged off its cell, in pixels. Under a tile, or the
-## extras drift onto ground the player walks and the wall looks wrong.
-const THICKET_JITTER := 26.0
+##
+## The edge is doing a specific job: it has to read as forest that continues past
+## the screen, not as the last row of a field. The camera clamps exactly to the
+## tiles, so there is no off-map margin to fill — everything selling "this goes
+## on for miles" has to happen inside the two-tile ring, which is why the count
+## there is high and the spread is wide enough for canopies to overlap into one
+## another rather than sit as separate trees.
+const THICKET_BAND := 4          # tiles from the edge that count as the rim
+const THICKET_EDGE := 5          # extra trees per cell inside it
+const THICKET_INLAND := 0.25     # ...and the chance of one anywhere else
+## How far a stacked tree is nudged off its cell, in pixels. Under a tile
+## horizontally, or an extra drifts onto ground the player walks and the wall
+## looks wrong from the inside. Vertical spread is looser: a canopy sitting high
+## is a tree further back, which is the whole illusion.
+const THICKET_JITTER := Vector2(30.0, 44.0)
 
 ## Ground the undergrowth stays off. Paths first — a road with bushes growing
 ## down the middle of it is not a road, and the paths are the one thing in the
@@ -568,12 +578,13 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 			String(choices[_rng.randi_range(0, choices.size() - 1)]), TRUNK, TREE_SCALE)
 
 		# ...and again, offset, for the ones on the rim.
-		var edge: bool = cell.x < 3 or cell.y < 3 \
-			or cell.x >= size.x - 3 or cell.y >= size.y - 3
+		var edge: bool = cell.x < THICKET_BAND or cell.y < THICKET_BAND \
+			or cell.x >= size.x - THICKET_BAND or cell.y >= size.y - THICKET_BAND
 		var extras := THICKET_EDGE if edge else (1 if _rng.randf() < THICKET_INLAND else 0)
 		for i in range(extras):
-			var nudge := Vector2(_rng.randf_range(-THICKET_JITTER, THICKET_JITTER),
-				_rng.randf_range(-THICKET_JITTER * 0.5, THICKET_JITTER * 0.5))
+			var nudge := Vector2(
+				_rng.randf_range(-THICKET_JITTER.x, THICKET_JITTER.x),
+				_rng.randf_range(-THICKET_JITTER.y, THICKET_JITTER.y * 0.4))
 			var extra := _stand(root, grove, "Thicket%d" % i, cell,
 				String(choices[_rng.randi_range(0, choices.size() - 1)]),
 				Vector2.ZERO, TREE_SCALE)

@@ -230,6 +230,22 @@ func _aside(text: String) -> String:
 	return "[color=%s]%s[/color]" % [ASIDE, text]
 
 
+## The item's category, set apart from its name.
+##
+## **`[i]` is not available and would do nothing.** `art/fonts/ui_theme.tres`
+## points italics at the regular face on purpose: Godot has no italic to use, so
+## it shears the glyphs, and a sheared pixel font stops having whole-pixel
+## strokes — the one thing the whole font depends on. Asking for italic here
+## renders identically to not asking.
+##
+## So the two axes that do exist carry it: an asterisk to mark it as an aside
+## rather than part of the name, and a dimmer colour than even body flavour text.
+const KIND := "6e695f"
+
+func _kind(text: String) -> String:
+	return "[color=%s]*%s[/color]" % [KIND, text]
+
+
 ## The grid is the inventory; the pane underneath is what it is for. Hovering is
 ## the read and the hotbar number is the write — a slot you can point at but not
 ## identify is a slot the player has to remember, which is what a menu exists to
@@ -272,7 +288,7 @@ func _detail_text() -> String:
 	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
 	var lines := [
 		"",
-		"  %s    %s" % [_key(item.display_name), _aside(kind)],
+		"  %s    %s" % [_key(item.display_name), _kind(kind)],
 	]
 	if item.heals > 0:
 		lines.append("  Restores %d health." % item.heals)
@@ -435,7 +451,7 @@ static func _frame_of(column: Control) -> Control:
 
 
 func _build_equipment() -> Control:
-	var column := _framed("Worn", "Drag gear here, or right-click it")
+	var column := _framed("Equipped", "Drag gear here, or right-click it")
 	var strip := HBoxContainer.new()
 	strip.add_theme_constant_override("separation", 10)
 	column.add_child(strip)
