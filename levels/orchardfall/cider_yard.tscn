@@ -1,79 +1,1453 @@
 [gd_scene format=4]
 
-[ext_resource type="TileSet" path="res://resources/tilesets/greybox.tres" id="1_qnjmk"]
+[ext_resource type="TileSet" path="res://resources/tilesets/greybox.tres" id="1_rdk04"]
+[ext_resource type="PackedScene" path="res://world/prop.tscn" id="2_78qme"]
+[ext_resource type="Script" path="res://world/prop.gd" id="3_kp726"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/pine_tree.png" id="4_v6drq"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/thorn_bush.png" id="5_f0t30"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/cypress_shrub.png" id="6_mcrg2"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/round_hedge.png" id="7_jwbgs"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/sage_bush.png" id="8_6tth8"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/hedge_shrub.png" id="9_ap1ae"]
 
-[node name="CiderYard" type="Node2D" unique_id=1754614790]
+[node name="CiderYard" type="Node2D" unique_id=833792505]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=726338553]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1439412061]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAARAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAEAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAEAAAAAAAAAAAAFAAEAAAAAAAAAAAAGAAEAAAAAAAAAAAAHAAEAAAAAAAAAAAAIAAEAAAAAAAAAAAAJAAEAAAAAAAAAAAAKAAEAAAAAAAAAAAALAAEAAAAAAAAAAAAMAAEAAAAAAAAAAAANAAEAAAAAAAAAAAAOAAEAAAAAAAAAAAAPAAEAAAAAAAAAAAAQAAEAAAAAAAAAAAARAAEAAAAAAAAAAAASAAEAAAAAAAAAAAATAAEAAAAAAAAAAAAUAAEAAAAAAAAAAAAVAAEAAAAAAAAAAAAWAAEAAAAAAAAAAAAXAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAABAAIAAAAAAAAAAAACAAIAAAAAAAAAAAADAAIAAAAAAAAAAAAEAAIAAAAAAAAAAAAFAAIAAAAAAAAAAAAGAAIAAAAAAAAAAAAHAAIAAAAAAAAAAAAIAAIAAAAAAAAAAAAJAAIAAAAAAAAAAAAKAAIAAAAAAAAAAAALAAIAAAAAAAAAAAAMAAIAAAAAAAAAAAANAAIAAAAAAAAAAAAOAAIAAAAAAAAAAAAPAAIAAAAAAAAAAAAQAAIAAAAAAAAAAAARAAIAAAAAAAAAAAASAAIAAAAAAAAAAAATAAIAAAAAAAAAAAAUAAIAAAAAAAAAAAAVAAIAAAAAAAAAAAAWAAIAAAAAAAAAAAAXAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAJAAMAAAADAAAAAAAKAAMAAAADAAAAAAALAAMAAAAAAAAAAAAMAAMAAAAAAAAAAAANAAMAAAAAAAAAAAAOAAMAAAAAAAAAAAAPAAMAAAAAAAAAAAAQAAMAAAAAAAAAAAARAAMAAAAAAAAAAAASAAMAAAAAAAAAAAATAAMAAAAAAAAAAAAUAAMAAAAAAAAAAAAVAAMAAAAAAAAAAAAWAAMAAAAAAAAAAAAXAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAABAAQAAAAAAAAAAAACAAQAAAAAAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAJAAQAAAADAAAAAAAKAAQAAAADAAAAAAALAAQAAAAAAAAAAAAMAAQAAAAAAAAAAAANAAQAAAAAAAAAAAAOAAQAAAAAAAAAAAAPAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAARAAQAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAAAAAAAAAAUAAQAAAAAAAAAAAAVAAQAAAAAAAAAAAAWAAQAAAAAAAAAAAAXAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAABAAUAAAAAAAAAAAACAAUAAAAAAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAJAAUAAAADAAAAAAAKAAUAAAADAAAAAAALAAUAAAAAAAAAAAAMAAUAAAAAAAAAAAANAAUAAAAAAAAAAAAOAAUAAAAAAAAAAAAPAAUAAAAAAAAAAAAQAAUAAAAAAAAAAAARAAUAAAAAAAAAAAASAAUAAAAAAAAAAAATAAUAAAAAAAAAAAAUAAUAAAAAAAAAAAAVAAUAAAAAAAAAAAAWAAUAAAAAAAAAAAAXAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAABAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAAJAAYAAAADAAAAAAAKAAYAAAADAAAAAAALAAYAAAAAAAAAAAAMAAYAAAAAAAAAAAANAAYAAAAAAAAAAAAOAAYAAAAAAAAAAAAPAAYAAAAAAAAAAAAQAAYAAAAAAAAAAAARAAYAAAAAAAAAAAASAAYAAAAAAAAAAAATAAYAAAAAAAAAAAAUAAYAAAAAAAAAAAAVAAYAAAAAAAAAAAAWAAYAAAAAAAAAAAAXAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAABAAcAAAAAAAAAAAACAAcAAAAAAAAAAAADAAcAAAADAAAAAAAEAAcAAAADAAAAAAAFAAcAAAADAAAAAAAGAAcAAAADAAAAAAAHAAcAAAADAAAAAAAIAAcAAAADAAAAAAAJAAcAAAADAAAAAAAKAAcAAAADAAAAAAALAAcAAAAAAAAAAAAMAAcAAAAAAAAAAAANAAcAAAAAAAAAAAAOAAcAAAAAAAAAAAAPAAcAAAAAAAAAAAAQAAcAAAAAAAAAAAARAAcAAAAAAAAAAAASAAcAAAAAAAAAAAATAAcAAAAAAAAAAAAUAAcAAAAAAAAAAAAVAAcAAAAAAAAAAAAWAAcAAAAAAAAAAAAXAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAgAAAAAAAAAAAACAAgAAAAAAAAAAAADAAgAAAADAAAAAAAEAAgAAAADAAAAAAAFAAgAAAADAAAAAAAGAAgAAAADAAAAAAAHAAgAAAADAAAAAAAIAAgAAAADAAAAAAAJAAgAAAADAAAAAAAKAAgAAAADAAAAAAALAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAANAAgAAAAAAAAAAAAOAAgAAAAAAAAAAAAPAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAARAAgAAAAAAAAAAAASAAgAAAAAAAAAAAATAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAVAAgAAAAAAAAAAAAWAAgAAAAAAAAAAAAXAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAASAAkAAAAAAAAAAAATAAkAAAAAAAAAAAAUAAkAAAAAAAAAAAAVAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAABAAoAAAAAAAAAAAACAAoAAAAAAAAAAAADAAoAAAAAAAAAAAAEAAoAAAAAAAAAAAAFAAoAAAAAAAAAAAAGAAoAAAAAAAAAAAAHAAoAAAAAAAAAAAAIAAoAAAAAAAAAAAAJAAoAAAAAAAAAAAAKAAoAAAAAAAAAAAALAAoAAAAAAAAAAAAMAAoAAAAAAAAAAAANAAoAAAAAAAAAAAAOAAoAAAAAAAAAAAAPAAoAAAAAAAAAAAAQAAoAAAAAAAAAAAARAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAAAAAAAAAAUAAoAAAAAAAAAAAAVAAoAAAAAAAAAAAAWAAoAAAAAAAAAAAAXAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAABAAsAAAAAAAAAAAACAAsAAAAAAAAAAAADAAsAAAAAAAAAAAAEAAsAAAAAAAAAAAAFAAsAAAAAAAAAAAAGAAsAAAAAAAAAAAAHAAsAAAAAAAAAAAAIAAsAAAAAAAAAAAAJAAsAAAAAAAAAAAAKAAsAAAAAAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAAAAAAAAANAAsAAAAAAAAAAAAOAAsAAAAAAAAAAAAPAAsAAAAAAAAAAAAQAAsAAAAAAAAAAAARAAsAAAAAAAAAAAASAAsAAAAAAAAAAAATAAsAAAAAAAAAAAAUAAsAAAAAAAAAAAAVAAsAAAAAAAAAAAAWAAsAAAAAAAAAAAAXAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAABAAwAAAAAAAAAAAACAAwAAAAAAAAAAAADAAwAAAAAAAAAAAAEAAwAAAAAAAAAAAAFAAwAAAAAAAAAAAAGAAwAAAAAAAAAAAAHAAwAAAAAAAAAAAAIAAwAAAAAAAAAAAAJAAwAAAAAAAAAAAAKAAwAAAAAAAAAAAALAAwAAAAAAAAAAAAMAAwAAAAAAAAAAAANAAwAAAAAAAAAAAAOAAwAAAAAAAAAAAAPAAwAAAAAAAAAAAAQAAwAAAAAAAAAAAARAAwAAAAAAAAAAAASAAwAAAAAAAAAAAATAAwAAAAAAAAAAAAUAAwAAAAAAAAAAAAVAAwAAAAAAAAAAAAWAAwAAAAAAAAAAAAXAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAABAA0AAAAAAAAAAAACAA0AAAAAAAcAAAADAA0AAAAAAAcAAAAEAA0AAAAAAAcAAAAFAA0AAAAAAAcAAAAGAA0AAAAAAAcAAAAHAA0AAAAAAAcAAAAIAA0AAAAAAAcAAAAJAA0AAAAAAAcAAAAKAA0AAAAAAAcAAAALAA0AAAAAAAcAAAAMAA0AAAAAAAcAAAANAA0AAAAAAAcAAAAOAA0AAAAAAAcAAAAPAA0AAAAAAAcAAAAQAA0AAAAAAAcAAAARAA0AAAAAAAcAAAASAA0AAAAAAAcAAAATAA0AAAAAAAcAAAAUAA0AAAAAAAcAAAAVAA0AAAAAAAcAAAAWAA0AAAAAAAAAAAAXAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAcAAAADAA4AAAAAAAcAAAAEAA4AAAAAAAcAAAAFAA4AAAAAAAcAAAAGAA4AAAAAAAcAAAAHAA4AAAAAAAcAAAAIAA4AAAAAAAcAAAAJAA4AAAAAAAcAAAAKAA4AAAAAAAcAAAALAA4AAAAAAAcAAAAMAA4AAAAAAAcAAAANAA4AAAAAAAcAAAAOAA4AAAAAAAcAAAAPAA4AAAAAAAcAAAAQAA4AAAAAAAcAAAARAA4AAAAAAAcAAAASAA4AAAAAAAcAAAATAA4AAAAAAAcAAAAUAA4AAAAAAAcAAAAVAA4AAAAAAAcAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAAAA8AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAcAAAADAA8AAAAAAAcAAAAEAA8AAAAAAAcAAAAFAA8AAAAAAAcAAAAGAA8AAAAAAAcAAAAHAA8AAAAAAAcAAAAIAA8AAAAAAAcAAAAJAA8AAAAAAAcAAAAKAA8AAAAAAAcAAAALAA8AAAAAAAcAAAAMAA8AAAAAAAcAAAANAA8AAAAAAAcAAAAOAA8AAAAAAAcAAAAPAA8AAAAAAAcAAAAQAA8AAAAAAAcAAAARAA8AAAAAAAcAAAASAA8AAAAAAAcAAAATAA8AAAAAAAcAAAAUAA8AAAAAAAcAAAAVAA8AAAAAAAcAAAAWAA8AAAAAAAAAAAAXAA8AAAAAAAAAAAAAABAAAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAcAAAADABAAAAAAAAcAAAAEABAAAAAAAAcAAAAFABAAAAAAAAcAAAAGABAAAAAAAAcAAAAHABAAAAAAAAcAAAAIABAAAAAAAAcAAAAJABAAAAAAAAcAAAAKABAAAAAAAAcAAAALABAAAAAAAAcAAAAMABAAAAAAAAcAAAANABAAAAAAAAcAAAAOABAAAAAAAAcAAAAPABAAAAAAAAcAAAAQABAAAAAAAAcAAAARABAAAAAAAAcAAAASABAAAAAAAAcAAAATABAAAAAAAAcAAAAUABAAAAAAAAcAAAAVABAAAAAAAAcAAAAWABAAAAAAAAAAAAAXABAAAAAAAAAAAAAAABEAAAAAAAAAAAABABEAAAAAAAAAAAACABEAAAAAAAcAAAADABEAAAAAAAcAAAAEABEAAAAAAAcAAAAFABEAAAAAAAcAAAAGABEAAAAAAAcAAAAHABEAAAAAAAcAAAAIABEAAAAAAAcAAAAJABEAAAAAAAcAAAAKABEAAAAAAAcAAAALABEAAAAAAAcAAAAMABEAAAAAAAcAAAANABEAAAAAAAcAAAAOABEAAAAAAAcAAAAPABEAAAAAAAcAAAAQABEAAAAAAAcAAAARABEAAAAAAAcAAAASABEAAAAAAAcAAAATABEAAAAAAAcAAAAUABEAAAAAAAcAAAAVABEAAAAAAAcAAAAWABEAAAAAAAAAAAAXABEAAAAAAAAAAAAAABIAAAAAAAAAAAABABIAAAAAAAAAAAACABIAAAAAAAAAAAADABIAAAAAAAAAAAAEABIAAAAAAAAAAAAFABIAAAAAAAAAAAAGABIAAAAAAAAAAAAHABIAAAAAAAAAAAAIABIAAAAAAAAAAAAJABIAAAAAAAAAAAAKABIAAAAAAAAAAAALABIAAAAAAAAAAAAMABIAAAAAAAAAAAANABIAAAAAAAAAAAAOABIAAAAAAAAAAAAPABIAAAAAAAAAAAAQABIAAAAAAAAAAAARABIAAAAAAAAAAAASABIAAAAAAAAAAAATABIAAAAAAAAAAAAUABIAAAAAAAAAAAAVABIAAAAAAAAAAAAWABIAAAAAAAAAAAAXABIAAAAAAAAAAAAAABMAAAAAAAAAAAABABMAAAAAAAAAAAACABMAAAAAAAAAAAADABMAAAAAAAAAAAAEABMAAAAAAAAAAAAFABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABMAAAAAAAAAAAAQABMAAAAAAAAAAAARABMAAAAAAAAAAAASABMAAAAAAAAAAAATABMAAAAAAAAAAAAUABMAAAAAAAAAAAAVABMAAAAAAAAAAAAWABMAAAAAAAAAAAAXABMAAAAAAAAAAAA=")
-tile_set = ExtResource("1_qnjmk")
+tile_set = ExtResource("1_rdk04")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=750518261]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=631963131]
 y_sort_enabled = true
-tile_map_data = PackedByteArray("AAAIAA0AAAACAAMAAAAJAA0AAAACAAMAAAAKAA4AAAACAAMAAAAUAA4AAAACAAMAAAAIABAAAAACAAMAAAAMABAAAAACAAMAAAAOABAAAAACAAMAAAARAAIAAAACAAYAAAATAAIAAAACAAYAAAAVAAIAAAACAAYAAAAVAAMAAAACAAYAAAAVAAQAAAACAAYAAAAQAAYAAAACAAYAAAADAAMAAAAAAAEAAAADAAgAAAAAAAEAAAAEAAMAAAAAAAEAAAAEAAgAAAAAAAEAAAAFAAMAAAAAAAEAAAAFAAgAAAAAAAEAAAAGAAMAAAAAAAEAAAAGAAgAAAAAAAEAAAAHAAMAAAAAAAEAAAAHAAgAAAAAAAIAAAAIAAMAAAAAAAEAAAAIAAgAAAAAAAEAAAAJAAMAAAAAAAEAAAAJAAgAAAAAAAEAAAAKAAMAAAAAAAEAAAAKAAgAAAAAAAEAAAADAAQAAAAAAAEAAAAKAAQAAAAAAAEAAAADAAUAAAAAAAEAAAAKAAUAAAAAAAEAAAADAAYAAAAAAAEAAAAKAAYAAAAAAAEAAAADAAcAAAAAAAEAAAAKAAcAAAAAAAEAAAAAAAAAAAACAAYAAAAAABMAAAACAAYAAAAAAAEAAAACAAYAAAAAABIAAAACAAYAAAABAAAAAAACAAYAAAABABMAAAACAAYAAAABAAEAAAACAAYAAAABABIAAAACAAYAAAACAAAAAAACAAYAAAACABMAAAACAAYAAAACAAEAAAACAAYAAAACABIAAAACAAYAAAADAAAAAAACAAYAAAADABMAAAACAAYAAAADAAEAAAACAAYAAAADABIAAAACAAYAAAAEAAAAAAACAAYAAAAEABMAAAACAAYAAAAEAAEAAAACAAYAAAAEABIAAAACAAYAAAAFAAAAAAACAAYAAAAFABMAAAACAAYAAAAFAAEAAAACAAYAAAAFABIAAAACAAYAAAAGAAAAAAACAAYAAAAGABMAAAACAAYAAAAGAAEAAAACAAYAAAAGABIAAAACAAYAAAAHAAAAAAACAAYAAAAHABMAAAACAAYAAAAHAAEAAAACAAYAAAAHABIAAAACAAYAAAAIAAAAAAACAAYAAAAIABMAAAACAAYAAAAIAAEAAAACAAYAAAAIABIAAAACAAYAAAAJAAAAAAACAAYAAAAJABMAAAACAAYAAAAJAAEAAAACAAYAAAAJABIAAAACAAYAAAAKAAAAAAACAAYAAAAKABMAAAACAAYAAAAKAAEAAAACAAYAAAAKABIAAAACAAYAAAALABMAAAACAAYAAAALABIAAAACAAYAAAAMABMAAAACAAYAAAAMABIAAAACAAYAAAANAAAAAAACAAYAAAANABMAAAACAAYAAAANAAEAAAACAAYAAAANABIAAAACAAYAAAAOAAAAAAACAAYAAAAOABMAAAACAAYAAAAOAAEAAAACAAYAAAAOABIAAAACAAYAAAAPAAAAAAACAAYAAAAPABMAAAACAAYAAAAPAAEAAAACAAYAAAAPABIAAAACAAYAAAAQAAAAAAACAAYAAAAQABMAAAACAAYAAAAQAAEAAAACAAYAAAAQABIAAAACAAYAAAARAAAAAAACAAYAAAARABMAAAACAAYAAAARAAEAAAACAAYAAAARABIAAAACAAYAAAASAAAAAAACAAYAAAASABMAAAACAAYAAAASAAEAAAACAAYAAAASABIAAAACAAYAAAATAAAAAAACAAYAAAATABMAAAACAAYAAAATAAEAAAACAAYAAAATABIAAAACAAYAAAAUAAAAAAACAAYAAAAUABMAAAACAAYAAAAUAAEAAAACAAYAAAAUABIAAAACAAYAAAAVAAAAAAACAAYAAAAVABMAAAACAAYAAAAVAAEAAAACAAYAAAAVABIAAAACAAYAAAAWAAAAAAACAAYAAAAWABMAAAACAAYAAAAWAAEAAAACAAYAAAAWABIAAAACAAYAAAAXAAAAAAACAAYAAAAXABMAAAACAAYAAAAXAAEAAAACAAYAAAAXABIAAAACAAYAAAAAAAIAAAACAAYAAAAXAAIAAAACAAYAAAABAAIAAAACAAYAAAAWAAIAAAACAAYAAAAAAAMAAAACAAYAAAAXAAMAAAACAAYAAAABAAMAAAACAAYAAAAWAAMAAAACAAYAAAAAAAQAAAACAAYAAAAXAAQAAAACAAYAAAABAAQAAAACAAYAAAAWAAQAAAACAAYAAAAAAAUAAAACAAYAAAAXAAUAAAACAAYAAAABAAUAAAACAAYAAAAWAAUAAAACAAYAAAAAAAYAAAACAAYAAAAXAAYAAAACAAYAAAABAAYAAAACAAYAAAAWAAYAAAACAAYAAAAAAAcAAAACAAYAAAAXAAcAAAACAAYAAAABAAcAAAACAAYAAAAWAAcAAAACAAYAAAAAAAgAAAACAAYAAAAXAAgAAAACAAYAAAABAAgAAAACAAYAAAAWAAgAAAACAAYAAAAAAAkAAAACAAYAAAAXAAkAAAACAAYAAAABAAkAAAACAAYAAAAWAAkAAAACAAYAAAAAAAoAAAACAAYAAAABAAoAAAACAAYAAAAAAAsAAAACAAYAAAABAAsAAAACAAYAAAAAAAwAAAACAAYAAAAXAAwAAAACAAYAAAABAAwAAAACAAYAAAAWAAwAAAACAAYAAAAAAA0AAAACAAYAAAAXAA0AAAACAAYAAAABAA0AAAACAAYAAAAWAA0AAAACAAYAAAAAAA4AAAACAAYAAAAXAA4AAAACAAYAAAABAA4AAAACAAYAAAAWAA4AAAACAAYAAAAAAA8AAAACAAYAAAAXAA8AAAACAAYAAAABAA8AAAACAAYAAAAWAA8AAAACAAYAAAAAABAAAAACAAYAAAAXABAAAAACAAYAAAABABAAAAACAAYAAAAWABAAAAACAAYAAAAAABEAAAACAAYAAAAXABEAAAACAAYAAAABABEAAAACAAYAAAAWABEAAAACAAYAAAA=")
-tile_set = ExtResource("1_qnjmk")
+tile_map_data = PackedByteArray("AAAIAA0AAAACAAMAAAAJAA0AAAACAAMAAAAKAA4AAAACAAMAAAAUAA4AAAACAAMAAAAIABAAAAACAAMAAAAMABAAAAACAAMAAAAOABAAAAACAAMAAAADAAMAAAAAAAEAAAADAAgAAAAAAAEAAAAEAAMAAAAAAAEAAAAEAAgAAAAAAAEAAAAFAAMAAAAAAAEAAAAFAAgAAAAAAAEAAAAGAAMAAAAAAAEAAAAGAAgAAAAAAAEAAAAHAAMAAAAAAAEAAAAHAAgAAAAAAAIAAAAIAAMAAAAAAAEAAAAIAAgAAAAAAAEAAAAJAAMAAAAAAAEAAAAJAAgAAAAAAAEAAAAKAAMAAAAAAAEAAAAKAAgAAAAAAAEAAAADAAQAAAAAAAEAAAAKAAQAAAAAAAEAAAADAAUAAAAAAAEAAAAKAAUAAAAAAAEAAAADAAYAAAAAAAEAAAAKAAYAAAAAAAEAAAADAAcAAAAAAAEAAAAKAAcAAAAAAAEAAAA=")
+tile_set = ExtResource("1_rdk04")
 
-[node name="Overhead" type="TileMapLayer" parent="." unique_id=1849562820]
+[node name="Canopy" type="TileMapLayer" parent="." unique_id=2089519952]
+modulate = Color(1, 1, 1, 0)
+y_sort_enabled = true
+tile_map_data = PackedByteArray("AAARAAIAAAACAAYAAAATAAIAAAACAAYAAAAVAAIAAAACAAYAAAAVAAMAAAACAAYAAAAVAAQAAAACAAYAAAAQAAYAAAACAAYAAAAAAAAAAAACAAYAAAAAABMAAAACAAYAAAAAAAEAAAACAAYAAAAAABIAAAACAAYAAAABAAAAAAACAAYAAAABABMAAAACAAYAAAABAAEAAAACAAYAAAABABIAAAACAAYAAAACAAAAAAACAAYAAAACABMAAAACAAYAAAACAAEAAAACAAYAAAACABIAAAACAAYAAAADAAAAAAACAAYAAAADABMAAAACAAYAAAADAAEAAAACAAYAAAADABIAAAACAAYAAAAEAAAAAAACAAYAAAAEABMAAAACAAYAAAAEAAEAAAACAAYAAAAEABIAAAACAAYAAAAFAAAAAAACAAYAAAAFABMAAAACAAYAAAAFAAEAAAACAAYAAAAFABIAAAACAAYAAAAGAAAAAAACAAYAAAAGABMAAAACAAYAAAAGAAEAAAACAAYAAAAGABIAAAACAAYAAAAHAAAAAAACAAYAAAAHABMAAAACAAYAAAAHAAEAAAACAAYAAAAHABIAAAACAAYAAAAIAAAAAAACAAYAAAAIABMAAAACAAYAAAAIAAEAAAACAAYAAAAIABIAAAACAAYAAAAJAAAAAAACAAYAAAAJABMAAAACAAYAAAAJAAEAAAACAAYAAAAJABIAAAACAAYAAAAKAAAAAAACAAYAAAAKABMAAAACAAYAAAAKAAEAAAACAAYAAAAKABIAAAACAAYAAAALABMAAAACAAYAAAALABIAAAACAAYAAAAMABMAAAACAAYAAAAMABIAAAACAAYAAAANAAAAAAACAAYAAAANABMAAAACAAYAAAANAAEAAAACAAYAAAANABIAAAACAAYAAAAOAAAAAAACAAYAAAAOABMAAAACAAYAAAAOAAEAAAACAAYAAAAOABIAAAACAAYAAAAPAAAAAAACAAYAAAAPABMAAAACAAYAAAAPAAEAAAACAAYAAAAPABIAAAACAAYAAAAQAAAAAAACAAYAAAAQABMAAAACAAYAAAAQAAEAAAACAAYAAAAQABIAAAACAAYAAAARAAAAAAACAAYAAAARABMAAAACAAYAAAARAAEAAAACAAYAAAARABIAAAACAAYAAAASAAAAAAACAAYAAAASABMAAAACAAYAAAASAAEAAAACAAYAAAASABIAAAACAAYAAAATAAAAAAACAAYAAAATABMAAAACAAYAAAATAAEAAAACAAYAAAATABIAAAACAAYAAAAUAAAAAAACAAYAAAAUABMAAAACAAYAAAAUAAEAAAACAAYAAAAUABIAAAACAAYAAAAVAAAAAAACAAYAAAAVABMAAAACAAYAAAAVAAEAAAACAAYAAAAVABIAAAACAAYAAAAWAAAAAAACAAYAAAAWABMAAAACAAYAAAAWAAEAAAACAAYAAAAWABIAAAACAAYAAAAXAAAAAAACAAYAAAAXABMAAAACAAYAAAAXAAEAAAACAAYAAAAXABIAAAACAAYAAAAAAAIAAAACAAYAAAAXAAIAAAACAAYAAAABAAIAAAACAAYAAAAWAAIAAAACAAYAAAAAAAMAAAACAAYAAAAXAAMAAAACAAYAAAABAAMAAAACAAYAAAAWAAMAAAACAAYAAAAAAAQAAAACAAYAAAAXAAQAAAACAAYAAAABAAQAAAACAAYAAAAWAAQAAAACAAYAAAAAAAUAAAACAAYAAAAXAAUAAAACAAYAAAABAAUAAAACAAYAAAAWAAUAAAACAAYAAAAAAAYAAAACAAYAAAAXAAYAAAACAAYAAAABAAYAAAACAAYAAAAWAAYAAAACAAYAAAAAAAcAAAACAAYAAAAXAAcAAAACAAYAAAABAAcAAAACAAYAAAAWAAcAAAACAAYAAAAAAAgAAAACAAYAAAAXAAgAAAACAAYAAAABAAgAAAACAAYAAAAWAAgAAAACAAYAAAAAAAkAAAACAAYAAAAXAAkAAAACAAYAAAABAAkAAAACAAYAAAAWAAkAAAACAAYAAAAAAAoAAAACAAYAAAABAAoAAAACAAYAAAAAAAsAAAACAAYAAAABAAsAAAACAAYAAAAAAAwAAAACAAYAAAAXAAwAAAACAAYAAAABAAwAAAACAAYAAAAWAAwAAAACAAYAAAAAAA0AAAACAAYAAAAXAA0AAAACAAYAAAABAA0AAAACAAYAAAAWAA0AAAACAAYAAAAAAA4AAAACAAYAAAAXAA4AAAACAAYAAAABAA4AAAACAAYAAAAWAA4AAAACAAYAAAAAAA8AAAACAAYAAAAXAA8AAAACAAYAAAABAA8AAAACAAYAAAAWAA8AAAACAAYAAAAAABAAAAACAAYAAAAXABAAAAACAAYAAAABABAAAAACAAYAAAAWABAAAAACAAYAAAAAABEAAAACAAYAAAAXABEAAAACAAYAAAABABEAAAACAAYAAAAWABEAAAACAAYAAAA=")
+tile_set = ExtResource("1_rdk04")
+
+[node name="Overhead" type="TileMapLayer" parent="." unique_id=1817493648]
 z_index = 1
 tile_map_data = PackedByteArray("AAADAAMAAAACAAEAAAAEAAMAAAACAAEAAAAFAAMAAAACAAEAAAAGAAMAAAACAAEAAAAHAAMAAAACAAEAAAAIAAMAAAACAAEAAAAJAAMAAAACAAEAAAAKAAMAAAACAAEAAAADAAQAAAACAAEAAAAEAAQAAAACAAEAAAAFAAQAAAACAAEAAAAGAAQAAAACAAEAAAAHAAQAAAACAAEAAAAIAAQAAAACAAEAAAAJAAQAAAACAAEAAAAKAAQAAAACAAEAAAADAAUAAAACAAEAAAAEAAUAAAACAAEAAAAFAAUAAAACAAEAAAAGAAUAAAACAAEAAAAHAAUAAAACAAEAAAAIAAUAAAACAAEAAAAJAAUAAAACAAEAAAAKAAUAAAACAAEAAAADAAYAAAACAAEAAAAEAAYAAAACAAEAAAAFAAYAAAACAAEAAAAGAAYAAAACAAEAAAAHAAYAAAACAAEAAAAIAAYAAAACAAEAAAAJAAYAAAACAAEAAAAKAAYAAAACAAEAAAADAAcAAAACAAEAAAAEAAcAAAACAAEAAAAFAAcAAAACAAEAAAAGAAcAAAACAAEAAAAHAAcAAAACAAEAAAAIAAcAAAACAAEAAAAJAAcAAAACAAEAAAAKAAcAAAACAAEAAAA=")
-tile_set = ExtResource("1_qnjmk")
+tile_set = ExtResource("1_rdk04")
 
-[node name="Gateways" type="Node2D" parent="." unique_id=697485753]
+[node name="Gateways" type="Node2D" parent="." unique_id=962854465]
 
-[node name="Gateway_north" type="Marker2D" parent="Gateways" unique_id=135083141]
+[node name="Gateway_north" type="Marker2D" parent="Gateways" unique_id=466409706]
 position = Vector2(768, 32)
 metadata/target_scene = "res://levels/orchardfall/orchard_rows_level.tscn"
 metadata/target_spawn = "Edge_south"
 metadata/facing = "north"
 metadata/span = 2
 
-[node name="Gateway_east" type="Marker2D" parent="Gateways" unique_id=1672224951]
+[node name="Gateway_east" type="Marker2D" parent="Gateways" unique_id=1060539726]
 position = Vector2(1504, 704)
 metadata/target_scene = "res://levels/orchardfall/deep_rows_level.tscn"
 metadata/target_spawn = "Edge_west"
 metadata/facing = "east"
 metadata/span = 2
 
-[node name="Doorways" type="Node2D" parent="." unique_id=1147695166]
+[node name="Doorways" type="Node2D" parent="." unique_id=1566417519]
 
-[node name="Doorway_cider_house" type="Marker2D" parent="Doorways" unique_id=1080575779]
+[node name="Doorway_cider_house" type="Marker2D" parent="Doorways" unique_id=1935900170]
 position = Vector2(480, 544)
 metadata/target_scene = "res://levels/orchardfall/interiors/cider_house_level.tscn"
 metadata/target_spawn = "PlayerSpawn"
 metadata/prompt = "Enter"
 
-[node name="Edge_north" type="Marker2D" parent="." unique_id=1559214039]
+[node name="Edge_north" type="Marker2D" parent="." unique_id=832473658]
 position = Vector2(768, 160)
 
-[node name="Edge_east" type="Marker2D" parent="." unique_id=1417371125]
+[node name="Edge_east" type="Marker2D" parent="." unique_id=1309934009]
 position = Vector2(1376, 704)
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=186994881]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1571883737]
 
-[node name="Poi_cider_house" type="Marker2D" parent="PointsOfInterest" unique_id=871348431]
+[node name="Poi_cider_house" type="Marker2D" parent="PointsOfInterest" unique_id=622269408]
 position = Vector2(480, 608)
 metadata/poi_id = "cider_house"
 metadata/note = "the press, and whatever is left of it"
 metadata/district = "orchardfall"
 
-[node name="Door_cider_house" type="Marker2D" parent="." unique_id=972802841]
+[node name="Door_cider_house" type="Marker2D" parent="." unique_id=683786208]
 position = Vector2(480, 608)
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=2118506637]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=207310570]
 position = Vector2(768, 160)
 
-[node name="EnemyMarkers" type="Node2D" parent="." unique_id=554928015]
+[node name="Props" type="Node2D" parent="." unique_id=627906108]
+y_sort_enabled = true
 
-[node name="Wolf_1_0" type="Marker2D" parent="EnemyMarkers" unique_id=366927593]
-position = Vector2(608, 992)
+[node name="Tree_0_0" type="Node2D" parent="Props" unique_id=216559078 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_1" type="Node2D" parent="Props" unique_id=1300530379 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_2" type="Node2D" parent="Props" unique_id=1443736125 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_3" type="Node2D" parent="Props" unique_id=2080645662 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_4" type="Node2D" parent="Props" unique_id=910833644 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 288)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_5" type="Node2D" parent="Props" unique_id=1313972595 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 352)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_6" type="Node2D" parent="Props" unique_id=361035148 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_7" type="Node2D" parent="Props" unique_id=1471062591 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 480)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_8" type="Node2D" parent="Props" unique_id=681711056 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 544)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_9" type="Node2D" parent="Props" unique_id=1194103840 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_10" type="Node2D" parent="Props" unique_id=155264282 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 672)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_11" type="Node2D" parent="Props" unique_id=243677984 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 736)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_12" type="Node2D" parent="Props" unique_id=521636472 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 800)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_13" type="Node2D" parent="Props" unique_id=1684817549 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_14" type="Node2D" parent="Props" unique_id=1264104035 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_15" type="Node2D" parent="Props" unique_id=186367809 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 992)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_16" type="Node2D" parent="Props" unique_id=279481450 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 1056)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_17" type="Node2D" parent="Props" unique_id=1516570415 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 1120)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_0_18" type="Node2D" parent="Props" unique_id=2116864652 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_0_19" type="Node2D" parent="Props" unique_id=645779309 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(32, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_0" type="Node2D" parent="Props" unique_id=60456723 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_1" type="Node2D" parent="Props" unique_id=204883009 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_2" type="Node2D" parent="Props" unique_id=923680668 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_3" type="Node2D" parent="Props" unique_id=17213659 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_4" type="Node2D" parent="Props" unique_id=1073496338 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 288)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_5" type="Node2D" parent="Props" unique_id=604628880 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 352)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_6" type="Node2D" parent="Props" unique_id=554598648 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_7" type="Node2D" parent="Props" unique_id=722620383 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 480)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_8" type="Node2D" parent="Props" unique_id=1164413956 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 544)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_9" type="Node2D" parent="Props" unique_id=1560084081 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_10" type="Node2D" parent="Props" unique_id=952826843 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 672)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_11" type="Node2D" parent="Props" unique_id=2056289879 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 736)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_12" type="Node2D" parent="Props" unique_id=1385311018 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 800)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_13" type="Node2D" parent="Props" unique_id=344393958 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_14" type="Node2D" parent="Props" unique_id=488156840 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_15" type="Node2D" parent="Props" unique_id=1677886224 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 992)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_16" type="Node2D" parent="Props" unique_id=1658636371 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 1056)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_17" type="Node2D" parent="Props" unique_id=531269485 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 1120)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_1_18" type="Node2D" parent="Props" unique_id=536472215 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_1_19" type="Node2D" parent="Props" unique_id=1338219583 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(96, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_2_0" type="Node2D" parent="Props" unique_id=748327794 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(160, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_2_1" type="Node2D" parent="Props" unique_id=759776121 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(160, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_2_18" type="Node2D" parent="Props" unique_id=1643222855 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(160, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_2_19" type="Node2D" parent="Props" unique_id=1709109520 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(160, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_3_0" type="Node2D" parent="Props" unique_id=1743326542 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(224, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_3_1" type="Node2D" parent="Props" unique_id=379466138 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(224, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_3_18" type="Node2D" parent="Props" unique_id=1310775465 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(224, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_3_19" type="Node2D" parent="Props" unique_id=864624080 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(224, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_4_0" type="Node2D" parent="Props" unique_id=594626506 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(288, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_4_1" type="Node2D" parent="Props" unique_id=1145634634 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(288, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_4_18" type="Node2D" parent="Props" unique_id=981938335 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(288, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_4_19" type="Node2D" parent="Props" unique_id=1466363614 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(288, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_5_0" type="Node2D" parent="Props" unique_id=870654952 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(352, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_5_1" type="Node2D" parent="Props" unique_id=511128105 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(352, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_5_18" type="Node2D" parent="Props" unique_id=1323869697 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(352, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_5_19" type="Node2D" parent="Props" unique_id=1373250466 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(352, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_6_0" type="Node2D" parent="Props" unique_id=1597624170 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(416, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_6_1" type="Node2D" parent="Props" unique_id=298655521 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(416, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_6_18" type="Node2D" parent="Props" unique_id=1893135916 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(416, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_6_19" type="Node2D" parent="Props" unique_id=1284973280 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(416, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_7_0" type="Node2D" parent="Props" unique_id=823304338 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_7_1" type="Node2D" parent="Props" unique_id=1672326853 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_7_18" type="Node2D" parent="Props" unique_id=1922871916 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_7_19" type="Node2D" parent="Props" unique_id=1054847463 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_8_0" type="Node2D" parent="Props" unique_id=1326147357 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(544, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_8_1" type="Node2D" parent="Props" unique_id=1750708530 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(544, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_8_18" type="Node2D" parent="Props" unique_id=816421753 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(544, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_8_19" type="Node2D" parent="Props" unique_id=1544591163 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(544, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_9_0" type="Node2D" parent="Props" unique_id=177830219 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(608, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_9_1" type="Node2D" parent="Props" unique_id=1765116889 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(608, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_9_18" type="Node2D" parent="Props" unique_id=1048960171 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(608, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_9_19" type="Node2D" parent="Props" unique_id=1032541094 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(608, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_10_0" type="Node2D" parent="Props" unique_id=1991533758 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(672, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_10_1" type="Node2D" parent="Props" unique_id=1628350551 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(672, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_10_18" type="Node2D" parent="Props" unique_id=1014221806 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(672, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_10_19" type="Node2D" parent="Props" unique_id=1969528095 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(672, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_11_18" type="Node2D" parent="Props" unique_id=585734280 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(736, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_11_19" type="Node2D" parent="Props" unique_id=90382027 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(736, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_12_18" type="Node2D" parent="Props" unique_id=11448412 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(800, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_12_19" type="Node2D" parent="Props" unique_id=506087841 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(800, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_13_0" type="Node2D" parent="Props" unique_id=385092688 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(864, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_13_1" type="Node2D" parent="Props" unique_id=109111704 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(864, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_13_18" type="Node2D" parent="Props" unique_id=1910951013 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(864, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_13_19" type="Node2D" parent="Props" unique_id=1872882573 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(864, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_14_0" type="Node2D" parent="Props" unique_id=1317136634 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(928, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_14_1" type="Node2D" parent="Props" unique_id=925441872 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(928, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_14_18" type="Node2D" parent="Props" unique_id=125439989 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(928, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_14_19" type="Node2D" parent="Props" unique_id=1304746657 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(928, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_15_0" type="Node2D" parent="Props" unique_id=1391946320 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(992, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_15_1" type="Node2D" parent="Props" unique_id=1342486653 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(992, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_15_18" type="Node2D" parent="Props" unique_id=639507227 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(992, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_15_19" type="Node2D" parent="Props" unique_id=1276132228 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(992, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_16_0" type="Node2D" parent="Props" unique_id=1204037172 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_16_1" type="Node2D" parent="Props" unique_id=223972574 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_16_6" type="Node2D" parent="Props" unique_id=752215541 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_16_18" type="Node2D" parent="Props" unique_id=1169272984 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_16_19" type="Node2D" parent="Props" unique_id=90314282 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_17_0" type="Node2D" parent="Props" unique_id=1776443435 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1120, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_17_1" type="Node2D" parent="Props" unique_id=427486569 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1120, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_17_2" type="Node2D" parent="Props" unique_id=1903204639 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1120, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_17_18" type="Node2D" parent="Props" unique_id=551693519 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1120, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_17_19" type="Node2D" parent="Props" unique_id=468835687 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1120, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_18_0" type="Node2D" parent="Props" unique_id=974066567 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1184, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_18_1" type="Node2D" parent="Props" unique_id=1202213413 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1184, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_18_18" type="Node2D" parent="Props" unique_id=1338597630 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1184, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_18_19" type="Node2D" parent="Props" unique_id=65018255 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1184, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_19_0" type="Node2D" parent="Props" unique_id=478855728 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_19_1" type="Node2D" parent="Props" unique_id=738484156 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_19_2" type="Node2D" parent="Props" unique_id=332428066 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_19_18" type="Node2D" parent="Props" unique_id=221246603 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_19_19" type="Node2D" parent="Props" unique_id=592203940 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_20_0" type="Node2D" parent="Props" unique_id=914795317 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_20_1" type="Node2D" parent="Props" unique_id=1244673647 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_20_18" type="Node2D" parent="Props" unique_id=1326388586 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_20_19" type="Node2D" parent="Props" unique_id=58231573 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_21_0" type="Node2D" parent="Props" unique_id=1853296319 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_21_1" type="Node2D" parent="Props" unique_id=1243555691 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_21_2" type="Node2D" parent="Props" unique_id=1928627773 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_21_3" type="Node2D" parent="Props" unique_id=853708172 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_21_4" type="Node2D" parent="Props" unique_id=1399492941 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 288)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_21_18" type="Node2D" parent="Props" unique_id=352941192 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_21_19" type="Node2D" parent="Props" unique_id=132229117 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_0" type="Node2D" parent="Props" unique_id=856474098 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_1" type="Node2D" parent="Props" unique_id=271475021 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_2" type="Node2D" parent="Props" unique_id=924401519 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_3" type="Node2D" parent="Props" unique_id=1504274806 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_4" type="Node2D" parent="Props" unique_id=53653441 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 288)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_5" type="Node2D" parent="Props" unique_id=1542002919 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 352)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_6" type="Node2D" parent="Props" unique_id=1591269309 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_7" type="Node2D" parent="Props" unique_id=1368627444 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 480)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_8" type="Node2D" parent="Props" unique_id=1293477387 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 544)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_9" type="Node2D" parent="Props" unique_id=521325568 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_12" type="Node2D" parent="Props" unique_id=2013160943 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 800)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_13" type="Node2D" parent="Props" unique_id=1758086054 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_14" type="Node2D" parent="Props" unique_id=367962230 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_15" type="Node2D" parent="Props" unique_id=1797978991 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 992)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_16" type="Node2D" parent="Props" unique_id=53339993 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 1056)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_22_17" type="Node2D" parent="Props" unique_id=1402829599 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 1120)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_18" type="Node2D" parent="Props" unique_id=2137469296 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_22_19" type="Node2D" parent="Props" unique_id=1516147005 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1440, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_0" type="Node2D" parent="Props" unique_id=222244000 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 32)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_1" type="Node2D" parent="Props" unique_id=364486554 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 96)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_2" type="Node2D" parent="Props" unique_id=74081970 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 160)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_3" type="Node2D" parent="Props" unique_id=731466246 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_4" type="Node2D" parent="Props" unique_id=216262374 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 288)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_5" type="Node2D" parent="Props" unique_id=1049136563 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 352)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_6" type="Node2D" parent="Props" unique_id=1454761193 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_7" type="Node2D" parent="Props" unique_id=2125787055 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 480)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_8" type="Node2D" parent="Props" unique_id=1358824005 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 544)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_9" type="Node2D" parent="Props" unique_id=1761112502 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_12" type="Node2D" parent="Props" unique_id=424823285 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 800)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_13" type="Node2D" parent="Props" unique_id=623105512 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_14" type="Node2D" parent="Props" unique_id=1912133787 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_15" type="Node2D" parent="Props" unique_id=1096800208 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 992)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_16" type="Node2D" parent="Props" unique_id=1372317735 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 1056)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_17" type="Node2D" parent="Props" unique_id=395994412 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 1120)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+flip = true
+
+[node name="Tree_23_18" type="Node2D" parent="Props" unique_id=2119880304 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 1184)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Tree_23_19" type="Node2D" parent="Props" unique_id=290446174 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1504, 1248)
+script = ExtResource("3_kp726")
+texture = ExtResource("4_v6drq")
+footprint = Vector2(30, 18)
+
+[node name="Bush_20_3" type="Node2D" parent="Props" unique_id=435653012 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 224)
+script = ExtResource("3_kp726")
+texture = ExtResource("5_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_19_5" type="Node2D" parent="Props" unique_id=1467436728 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 352)
+script = ExtResource("3_kp726")
+texture = ExtResource("6_mcrg2")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_4_6" type="Node2D" parent="Props" unique_id=422542353 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(288, 416)
+script = ExtResource("3_kp726")
+texture = ExtResource("6_mcrg2")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_16_7" type="Node2D" parent="Props" unique_id=2004791417 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 480)
+script = ExtResource("3_kp726")
+texture = ExtResource("5_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_15_8" type="Node2D" parent="Props" unique_id=1423067244 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(992, 544)
+script = ExtResource("3_kp726")
+texture = ExtResource("5_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_6_9" type="Node2D" parent="Props" unique_id=1609746071 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(416, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("7_jwbgs")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_20_9" type="Node2D" parent="Props" unique_id=640020941 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 608)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_2_10" type="Node2D" parent="Props" unique_id=669806586 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(160, 672)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_3_10" type="Node2D" parent="Props" unique_id=1998569083 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(224, 672)
+script = ExtResource("3_kp726")
+texture = ExtResource("6_mcrg2")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_21_10" type="Node2D" parent="Props" unique_id=264552129 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 672)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_7_11" type="Node2D" parent="Props" unique_id=1630737871 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 736)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_20_11" type="Node2D" parent="Props" unique_id=2001876646 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1312, 736)
+script = ExtResource("3_kp726")
+texture = ExtResource("9_ap1ae")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_21_11" type="Node2D" parent="Props" unique_id=1780634455 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1376, 736)
+script = ExtResource("3_kp726")
+texture = ExtResource("5_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_12_13" type="Node2D" parent="Props" unique_id=1602341885 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(800, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_13_13" type="Node2D" parent="Props" unique_id=293754661 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(864, 864)
+script = ExtResource("3_kp726")
+texture = ExtResource("5_f0t30")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_5_14" type="Node2D" parent="Props" unique_id=1706128239 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(352, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("6_mcrg2")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_7_14" type="Node2D" parent="Props" unique_id=1977410249 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(480, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("6_mcrg2")
+solid = false
+footprint = Vector2(2, 2)
+
+[node name="Bush_19_14" type="Node2D" parent="Props" unique_id=1018351091 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1248, 928)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_16_16" type="Node2D" parent="Props" unique_id=1617685246 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(1056, 1056)
+script = ExtResource("3_kp726")
+texture = ExtResource("8_6tth8")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="Bush_11_17" type="Node2D" parent="Props" unique_id=177741328 instance=ExtResource("2_78qme")]
+y_sort_enabled = true
+position = Vector2(736, 1120)
+script = ExtResource("3_kp726")
+texture = ExtResource("9_ap1ae")
+solid = false
+footprint = Vector2(2, 2)
+flip = true
+
+[node name="EnemyMarkers" type="Node2D" parent="." unique_id=381193547]
+
+[node name="Wolf_1_0" type="Marker2D" parent="EnemyMarkers" unique_id=660509654]
+position = Vector2(928, 800)
 metadata/enemy_id = "forest_wolf"
 
-[node name="Wolf_1_1" type="Marker2D" parent="EnemyMarkers" unique_id=465008549]
-position = Vector2(544, 992)
+[node name="Wolf_1_1" type="Marker2D" parent="EnemyMarkers" unique_id=1291153239]
+position = Vector2(864, 800)
 metadata/enemy_id = "forest_wolf"
 
-[node name="Wolf_2_0" type="Marker2D" parent="EnemyMarkers" unique_id=160104326]
-position = Vector2(1312, 288)
+[node name="Wolf_2_0" type="Marker2D" parent="EnemyMarkers" unique_id=403831594]
+position = Vector2(1312, 160)
+metadata/enemy_id = "forest_wolf"
+
+[node name="Wolf_3_0" type="Marker2D" parent="EnemyMarkers" unique_id=1470611515]
+position = Vector2(352, 1056)
+metadata/enemy_id = "forest_wolf"
+
+[node name="Wolf_3_1" type="Marker2D" parent="EnemyMarkers" unique_id=1319310000]
+position = Vector2(352, 1120)
 metadata/enemy_id = "forest_wolf"

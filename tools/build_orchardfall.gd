@@ -30,6 +30,8 @@ extends SceneTree
 ## the other direction, and being two tiles clear of the trigger is what stops
 ## an arrival from immediately bouncing back.
 
+const PROP_SCENE: PackedScene = preload("res://world/prop.tscn")
+
 const AMBRY_LEVEL := "res://levels/ambry/ambry_level.tscn"
 const ZONE_DIR := "res://levels/orchardfall"
 
@@ -50,6 +52,35 @@ const PACKS_MAX := 3
 const SAFE_TILES := 6
 ## And this far apart, so two packs do not read as one large one.
 const PACK_GAP := 8
+
+## Tiles that are drawn as `world/prop.tscn` instances instead of as squares.
+##
+## **The tile stays.** It keeps its collision and its place in the flood fill;
+## the layer holding it simply stops drawing. That is what lets real art in
+## without touching a single assertion: reachability, the border, and the exits
+## are all still measured against exactly the cells they were measured against
+## before, and the picture on top is free to be any shape it likes.
+##
+## Doing it the other way — deleting the tile and blocking with the prop's own
+## 28px trunk collider — would have been tidier and would have quietly changed
+## what "this area is fully connected" means, since a row of trunks is walkable
+## between and a row of tiles is not.
+const CANOPY: Dictionary = {
+	"orchard_tree": ["pine_tree"],
+	"dead_tree": ["pine_tree"],
+}
+
+## The blocking footprint of a tree, in pixels: the trunk, not the canopy. Only
+## cosmetic here — the tile underneath is what actually stops you — but it keeps
+## the props honest if the tiles are ever dropped.
+const TRUNK := Vector2(30, 18)
+
+## Undergrowth. Pure decoration: no tile, no collision, no effect on anything the
+## assertions measure. Scattered on open ground the player can already walk, so a
+## clearing reads as a clearing rather than as a flat green rectangle.
+const UNDERGROWTH: Array = ["sage_bush", "hedge_shrub", "round_hedge",
+	"thorn_bush", "cypress_shrub"]
+const UNDERGROWTH_DENSITY := 0.055
 
 # --------------------------------------------------------------------------
 # The valley. Each area is: what the ground is, what fences it in, where the
@@ -394,15 +425,25 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 	var overhead := map.new_layer("Overhead", tileset, GreyboxMap.Z_OVERHEAD)
 	objects.y_sort_enabled = true
 
+	# Trees live here: solid, flooded over, and transparent. See CANOPY.
+	# Transparent rather than `visible = false`, because a hidden TileMapLayer is
+	# one refactor away from somebody disabling its collision too, and the whole
+	# point of this layer is that its collision is the real thing.
+	var canopy := map.new_layer("Canopy", tileset, GreyboxMap.Z_OBJECTS)
+	canopy.y_sort_enabled = true
+	canopy.modulate = Color(1.0, 1.0, 1.0, 0.0)
+
 	map.fill(ground, Rect2i(0, 0, size.x, size.y), String(area["ground"]))
 	for patch in area.get("patches", []):
 		var layer: TileMapLayer = ground if String(patch[2]) == "ground" else objects
 		map.fill(layer, patch[0], String(patch[1]))
 
 	for row in area.get("rows", []):
-		_plant_rows(objects, row[0], int(row[1]), int(row[2]), String(row[3]))
+		_plant_rows(_layer_for(String(row[3]), objects, canopy),
+			row[0], int(row[1]), int(row[2]), String(row[3]))
 	for entry in area.get("scatter", []):
-		_scatter(objects, entry[1], float(entry[2]), String(entry[0]))
+		_scatter(_layer_for(String(entry[0]), objects, canopy),
+			entry[1], float(entry[2]), String(entry[0]))
 	for terrace in area.get("terraces", []):
 		_terrace(objects, terrace[0], String(terrace[1]), terrace[2])
 
@@ -414,6 +455,7 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 		for y in range(path.position.y, path.end.y):
 			for x in range(path.position.x, path.end.x):
 				objects.erase_cell(Vector2i(x, y))
+				canopy.erase_cell(Vector2i(x, y))
 
 	for feature in area.get("features", []):
 		map.put(objects, feature[1], String(feature[0]))
@@ -422,23 +464,26 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 		for y in range(bridge.position.y, bridge.end.y):
 			for x in range(bridge.position.x, bridge.end.x):
 				objects.erase_cell(Vector2i(x, y))
+				canopy.erase_cell(Vector2i(x, y))
 
 	var building: Dictionary = area.get("building", {})
 	if not building.is_empty():
 		_place_building(ground, objects, overhead, building)
 
-	_border(objects, ground, size, String(area["border"]), area["exits"])
+	_border(_layer_for(String(area["border"]), objects, canopy), ground, size,
+		String(area["border"]), area["exits"], canopy)
 
 	var root := Node2D.new()
 	root.name = id.to_pascal_case()
 	root.y_sort_enabled = true
-	for layer in [ground, objects, overhead]:
+	for layer in [ground, objects, canopy, overhead]:
 		root.add_child(layer)
 		layer.owner = root
 
 	_add_markers(root, area)
 
-	var layers: Array[TileMapLayer] = [ground, objects]
+	var layers: Array[TileMapLayer] = [ground, objects, canopy]
+	_plant_props(root, canopy, layers, size)
 	_add_wolves(root, area, layers)
 	_assert_area(layers, area, overhead)
 
@@ -450,6 +495,67 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 		id.to_pascal_case() + "Level", "PlayerSpawn", false)
 	print("area %s: %dx%d tiles, %d exits, %d POIs"
 		% [id, size.x, size.y, area["exits"].size(), area["pois"].size()])
+
+
+## Which layer a tile is drawn on: the transparent canopy if a prop will stand in
+## for it, the ordinary Objects layer otherwise.
+static func _layer_for(tile: String, objects: TileMapLayer,
+		canopy: TileMapLayer) -> TileMapLayer:
+	return canopy if CANOPY.has(tile) else objects
+
+
+## Stand a `Prop` on every canopy cell, then sprinkle undergrowth on the ground
+## between them.
+##
+## Read from the finished layer rather than recorded during placement, so a tree
+## carved away by a path cannot leave its picture behind — the path erases the
+## cell, and a cell that is not there grows nothing. Sorted, because `get_used_cells`
+## has no order to speak of and the choice of picture is drawn from the seeded
+## generator: unsorted, the same seed would plant a different wood each run.
+func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer],
+		size: Vector2i) -> void:
+	var grove := map.group(root, "Props")
+	# Load-bearing. Y-sorting only reaches a node if every ancestor between it
+	# and the sorting root also has it: without this the whole grove sorts as one
+	# item at y=0, which puts all 229 trees behind the player at once — including
+	# the ones he is standing behind.
+	grove.y_sort_enabled = true
+	var cells := canopy.get_used_cells()
+	cells.sort()
+	for cell in cells:
+		var tile := map.tile_at(layers, cell)
+		var choices: Array = CANOPY.get(tile, [])
+		if choices.is_empty():
+			continue
+		_stand(root, grove, "Tree", cell,
+			String(choices[_rng.randi_range(0, choices.size() - 1)]), TRUNK)
+
+	# Undergrowth goes only where the player can already walk, and blocks
+	# nothing. It is there so a clearing reads as a clearing; a bush that stopped
+	# you would be a wall you can see over, which is the most annoying kind.
+	for y in range(2, size.y - 2):
+		for x in range(2, size.x - 2):
+			var cell := Vector2i(x, y)
+			if map.solid_at(layers, cell) or _rng.randf() >= UNDERGROWTH_DENSITY:
+				continue
+			_stand(root, grove, "Bush", cell,
+				String(UNDERGROWTH[_rng.randi_range(0, UNDERGROWTH.size() - 1)]),
+				Vector2.ZERO)
+
+
+func _stand(root: Node2D, parent: Node2D, prefix: String, cell: Vector2i,
+		texture: String, footprint: Vector2) -> void:
+	var prop: Prop = PROP_SCENE.instantiate()
+	prop.name = "%s_%d_%d" % [prefix, cell.x, cell.y]
+	prop.texture = load("res://art/sprites/props/%s.png" % texture)
+	prop.solid = footprint != Vector2.ZERO
+	prop.footprint = footprint if prop.solid else Vector2(2, 2)
+	# Half of them mirrored, so a planted row is not the same photograph
+	# thirty times.
+	prop.flip = _rng.randf() < 0.5
+	parent.add_child(prop)
+	prop.owner = root
+	prop.position = GreyboxMap.centre(cell)
 
 
 ## Orchard planting: a tree every `step` columns, in bands `gap` rows apart, so
@@ -513,7 +619,7 @@ static func _door_cell(building: Dictionary) -> Vector2i:
 ## is made of reads as the valley continuing past what you can see. The outer
 ## ring is where the gateway sits.
 func _border(objects: TileMapLayer, ground: TileMapLayer, size: Vector2i,
-		tile: String, exits: Array) -> void:
+		tile: String, exits: Array, canopy: TileMapLayer) -> void:
 	var openings := {}
 	for exit in exits:
 		var facing: String = exit[0]
@@ -538,6 +644,7 @@ func _border(objects: TileMapLayer, ground: TileMapLayer, size: Vector2i,
 	# The road keeps going through the gap rather than stopping at it.
 	for cell in openings:
 		objects.erase_cell(cell)
+		canopy.erase_cell(cell)
 		map.put(ground, cell, "dirt_path")
 
 

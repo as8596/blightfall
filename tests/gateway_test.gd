@@ -155,6 +155,15 @@ func _run() -> void:
 	_check("the valley road has three ways out", valley.gateways().size() == 3,
 		str(valley.gateways().size()))
 
+	# The trees are drawn as props and blocked by a TileMapLayer that is fully
+	# transparent. That is a deliberate split — the picture is free to be any
+	# shape while the collision stays exactly the grid the reachability
+	# assertions were written against — but it rests on an engine behaviour worth
+	# pinning down: a canvas item with zero alpha still has its collision. If
+	# Godot ever stopped building shapes for it, every wood in the zone would
+	# quietly become walkable and nothing else here would notice.
+	_check_canopy_blocks(valley)
+
 	# The wood is not empty. Wolves are scattered by the builder through its
 	# seeded generator, so this is a fixed number rather than a lucky one.
 	var pack := valley.enemies()
@@ -189,6 +198,50 @@ func _run() -> void:
 
 	_check_graph()
 	_finish()
+
+
+## A transparent canopy tile still stops a body.
+func _check_canopy_blocks(level: Level) -> void:
+	var canopy := level.map.find_child("Canopy", true, false) as TileMapLayer
+	_check("the valley road has a canopy layer", canopy != null)
+	if canopy == null:
+		return
+	_check("and it is drawn as nothing", is_zero_approx(canopy.modulate.a),
+		"alpha %.2f" % canopy.modulate.a)
+
+	var cells := canopy.get_used_cells()
+	_check("with trees on it", cells.size() > 10, "%d cells" % cells.size())
+	if cells.is_empty():
+		return
+
+	var space := level.player.get_world_2d().direct_space_state
+	var query := PhysicsPointQueryParameters2D.new()
+	query.collision_mask = 1                       # World
+	query.collide_with_bodies = true
+	var unblocked: Array[String] = []
+	for cell in cells.slice(0, 12):
+		query.position = Vector2(cell) * 64.0 + Vector2(32, 32)
+		if space.intersect_point(query, 1).is_empty():
+			unblocked.append(str(cell))
+	_check("every invisible tree still stops a body", unblocked.is_empty(),
+		", ".join(unblocked))
+
+	# And the props themselves are standing where the tiles are.
+	var grove := level.map.find_child("Props", true, false)
+	_check("the trees are drawn by props, not by tiles",
+		grove != null and grove.get_child_count() >= cells.size(),
+		"%d props for %d cells" % [grove.get_child_count() if grove else 0, cells.size()])
+	# Y-sorting only reaches a node if every ancestor down to the sorting root
+	# has it. Without it on the group, the whole wood sorts as one item at y=0
+	# and the player walks in front of every tree in the zone — including the
+	# ones he is standing behind.
+	_check("and the grove y-sorts its trees individually",
+		grove != null and (grove as Node2D).y_sort_enabled)
+	var flat: Array[String] = []
+	for tree in (grove.get_children() if grove != null else []):
+		if (tree as Node2D).z_index != 0:
+			flat.append(tree.name)
+	_check("every prop shares the player's z_index", flat.is_empty(), ", ".join(flat))
 
 
 ## Every area's edges lead where the map says they lead, and every one of them
