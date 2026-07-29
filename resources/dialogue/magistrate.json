@@ -1,0 +1,31 @@
+{
+  "id": "magistrate",
+  "name": "The Magistrate",
+  "voice_pitch": 0.8,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "The ledger is on the desk. Your name is in it, in the wrong column.",
+        "I have not corrected it. I have not closed it either."
+      ],
+      "choices": [
+        { "text": "The deed was you.", "goto": "deed" },
+        { "text": "Then close it.", "goto": "close" }
+      ]
+    },
+    "deed": {
+      "lines": [
+        "A derelict with the roof off is not a gift. It is a place to start.",
+        "We will not discuss it again."
+      ],
+      "choices": []
+    },
+    "close": {
+      "lines": [
+        "When there is something true to write. Not before."
+      ],
+      "choices": []
+    }
+  }
+}

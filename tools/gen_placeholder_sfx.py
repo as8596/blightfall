@@ -114,6 +114,37 @@ SOUNDS = {
         tone(0.32, 260, 45, decay=8.0, gain=0.55, square=True),
         noise_burst(0.26, decay=9.0, low_pass=3.6, gain=0.4),
     ),
+    # ---- voice blips, one per few revealed characters (ui/dialogue_box.gd)
+    #
+    # The Animal Crossing trick: no words, just a short pitched blip per
+    # syllable, so text has a voice without anybody recording one. Deeper than
+    # Animal Crossing on purpose — theirs sits around 600Hz and reads as
+    # cheerful chirping, which is exactly wrong for a town that has been losing.
+    # These sit at 190-260Hz with a falling sweep, so they read as speech in a
+    # low register.
+    #
+    # Three of them, cycled, because one blip repeated forty times is a machine
+    # and three is a mouth. Playback pitch-varies them a further +/-8% and each
+    # speaker carries their own pitch offset, so nobody sounds like anybody else.
+    "voice_a.wav": lambda: mix(
+        tone(0.055, 236, 198, attack=0.12, decay=17.0, gain=0.42),
+        tone(0.045, 472, 396, attack=0.12, decay=22.0, gain=0.12),
+    ),
+    "voice_b.wav": lambda: mix(
+        tone(0.06, 205, 179, attack=0.14, decay=16.0, gain=0.42),
+        tone(0.05, 410, 358, attack=0.14, decay=21.0, gain=0.1),
+    ),
+    "voice_c.wav": lambda: mix(
+        tone(0.05, 262, 214, attack=0.1, decay=19.0, gain=0.4),
+        tone(0.042, 524, 428, attack=0.1, decay=24.0, gain=0.13),
+    ),
+    # Moving between replies, and choosing one. Quiet and short: this is a
+    # sound the player will hear thousands of times.
+    "ui_move.wav": lambda: tone(0.035, 520, 460, attack=0.1, decay=26.0, gain=0.22),
+    "ui_select.wav": lambda: mix(
+        tone(0.09, 380, 620, attack=0.08, decay=14.0, gain=0.3),
+        noise_burst(0.04, decay=30.0, low_pass=2.0, gain=0.1),
+    ),
 }
 
 

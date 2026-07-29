@@ -217,7 +217,11 @@ const INTERIORS: Array = [
 ## The carpenter stands at whatever you can build next, which makes him the
 ## quest marker without a quest log. He starts at your derelict.
 const NPCS: Array = [
-	["carpenter",       "ambry", Vector2i(7, 31)],
+	# On the ring road, not on your doorstep. He belongs next to whatever you can
+	# build next, and the first of those is your own front door — which is close
+	# enough that he was stealing its prompt. The assertion below is what found
+	# it, after `doorway_test` started failing for no visible reason.
+	["carpenter",       "ambry", Vector2i(12, 31)],
 	["child",           "ambry", Vector2i(18, 28)],
 	["fox",             "ambry", Vector2i(21, 27)],
 	["reluctant_guard", "ambry", Vector2i(22, 40)],
@@ -526,6 +530,23 @@ func _assert_layout(layers: Array[TileMapLayer], overhead: TileMapLayer) -> void
 	else:
 		_fail("overhead tiles cover %d walkable cells, e.g. %s"
 			% [covered.size(), covered.slice(0, 6)])
+
+	# Nobody may stand close enough to a doorstep to take its prompt.
+	# `InteractorComponent` offers the nearest thing it can find, and a villager
+	# parked by a door is a door that cannot be opened — which looks like a
+	# broken door, and is a person standing in the wrong place.
+	var crowding: Array[String] = []
+	for npc in _npcs_in("ambry"):
+		for entry in BUILDINGS:
+			if String(entry[6]) == "":
+				continue
+			var step := _door_cell(entry) + Vector2i(0, 1)
+			if (Vector2(npc[2]) - Vector2(step)).length() < 3.0:
+				crowding.append("%s at %s is on %s's doorstep %s" % [npc[0], npc[2], entry[3], step])
+	if crowding.is_empty():
+		print("doorsteps: clear of the cast")
+	else:
+		_fail("npcs standing in doorways: %s" % [crowding])
 
 	var opened := {}
 	for row in WALL_ROWS:

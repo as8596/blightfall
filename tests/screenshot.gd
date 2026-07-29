@@ -40,6 +40,15 @@ var _stand_at: Vector2 = Vector2.INF
 ## without walking them around.
 var _face: String = ""
 
+## `--talk=<npc_id>` stands the player next to that villager and presses talk,
+## optionally stopping `--talk-ticks=N` into the typewriter so a half-revealed
+## line can be looked at.
+var _talk: String = ""
+var _talk_ticks: int = 0
+## `--talk-advance=N` taps interact N more times, to reach a later line or the
+## reply list without a human at the keyboard.
+var _talk_advance: int = 0
+
 ## `--xp=N` awards experience, for checking a bar that is otherwise empty in
 ## every fresh scene.
 var _grant_xp: int = 0
@@ -81,6 +90,12 @@ func _capture() -> void:
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
+		elif arg.begins_with("--talk-advance="):
+			_talk_advance = arg.trim_prefix("--talk-advance=").to_int()
+		elif arg.begins_with("--talk-ticks="):
+			_talk_ticks = arg.trim_prefix("--talk-ticks=").to_int()
+		elif arg.begins_with("--talk="):
+			_talk = arg.trim_prefix("--talk=")
 		elif arg.begins_with("--face="):
 			_face = arg.trim_prefix("--face=")
 		elif arg.begins_with("--xp="):
@@ -149,6 +164,33 @@ func _capture() -> void:
 	if player == null and (_attack or _use_placeholder_animations or _stand_at != Vector2.INF):
 		push_warning("screenshot: no player in this scene — some flags did nothing.")
 
+	if _talk != "" and player != null and level != null:
+		var who: Npc = null
+		for entry in level.world.get_children():
+			var person := entry as Npc
+			if person != null and String(person.dialogue_id) == _talk:
+				who = person
+		if who == null:
+			push_warning("screenshot: no npc '%s' in this level." % _talk)
+		else:
+			player.global_position = who.global_position + Vector2(0, 72)
+			player.facing = Vector2.UP
+			await _wait_ticks(10)
+			Input.action_press(&"interact")
+			await _wait_ticks(2)
+			Input.action_release(&"interact")
+			# Paused from here on, so the typewriter runs on process frames.
+			for i in _talk_advance:
+				for j in 90:
+					await get_tree().process_frame
+				Input.action_press(&"interact")
+				await get_tree().process_frame
+				await get_tree().process_frame
+				Input.action_release(&"interact")
+				await get_tree().process_frame
+			for i in maxi(_talk_ticks, 1):
+				await get_tree().process_frame
+
 	if _face != "" and player != null:
 		const HEADINGS := {
 			"n": Vector2.UP, "s": Vector2.DOWN, "e": Vector2.RIGHT, "w": Vector2.LEFT,
@@ -183,6 +225,23 @@ func _capture() -> void:
 		push_error("screenshot: save failed (%d)" % error)
 	print("screenshot: %s (%dx%d)" % [output_path, image.get_width(), image.get_height()])
 	get_tree().quit(0 if error == OK else 1)
+
+
+## Synthesise a real input event.
+##
+## `Input.action_press` only sets the polled action state — it never puts an
+## event through the tree, so anything reading `_input` (every menu, and the
+## dialogue box) never hears it. Driving the ones that poll and the ones that
+## listen needs both, and this is the second.
+static func _tap(action: StringName) -> void:
+	var press := InputEventAction.new()
+	press.action = action
+	press.pressed = true
+	Input.parse_input_event(press)
+	var release := InputEventAction.new()
+	release.action = action
+	release.pressed = false
+	Input.parse_input_event(release)
 
 
 static func _find_player(root: Node) -> Player:

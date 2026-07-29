@@ -82,6 +82,9 @@ godot --headless --path . tests/doorway_test.tscn
 # starts a new game from the title screen, walks out of town and back
 godot --headless --path . tests/gateway_test.tscn
 
+# walks up to the carpenter and has a branching conversation with him
+godot --headless --path . tests/dialogue_test.tscn
+
 # dies, with and without a save on disk, and checks the haul is still on the floor
 godot --headless --path . tests/death_test.tscn
 
@@ -115,9 +118,10 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Character / Inventory / Map | C / I / M | — |
 | Hotbar select | 1–9, 0 or mouse wheel | — |
 
-`interact` opens doors. It is the general verb — `world/interactable.gd` is the
-base class talking, building, resting and the chest will all use — but doors are
-its only user so far.
+`interact` opens doors and talks to people. It is the general verb —
+`world/interactable.gd` is the base class building, resting and the chest will
+also use. In a conversation it advances the line, completes a line that is still
+arriving, and picks a reply; **W/S** move between replies.
 
 `tool` is what uses the selected hotbar slot. GDD §5 calls it
 "context-dependent", and the hotbar is the context. Numbers and the wheel only
@@ -168,9 +172,12 @@ levels/
   prototype/       the hand-placed box room (combat test bed)
 camera/            the camera rig, which is not a child of the player
 art/               shaders, fonts, sprites, tilesets, icons
-world/             pickups, the haul cache, interactables, doorways, gateways
-ui/                main menu, world viewport, HUD, stamina wheel, menus,
-                   ui scale, debug overlay
+resources/
+  dialogue/        one JSON conversation per character
+world/             pickups, the haul cache, interactables, doorways, gateways,
+                   npcs
+ui/                main menu, world viewport, HUD, dialogue box, stamina
+                   wheel, menus, ui scale, debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, map builders
 ```

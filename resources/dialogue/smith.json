@@ -1,0 +1,15 @@
+{
+  "id": "smith",
+  "name": "The Smith",
+  "voice_pitch": 0.75,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Leave it on the bench. I'll get to it.",
+        "No. Don't. Put your coin away and get out of my light."
+      ],
+      "choices": []
+    }
+  }
+}

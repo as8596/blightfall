@@ -1,0 +1,25 @@
+{
+  "id": "apothecary",
+  "name": "The Apothecary",
+  "voice_pitch": 1.05,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Working out of a corner of somebody else's inn, before you ask.",
+        "Tell me exactly where it hurts. Not roughly. Exactly."
+      ],
+      "choices": [
+        { "text": "You believe me.", "goto": "believe" },
+        { "text": "I'm fine.", "goto": "" }
+      ]
+    },
+    "believe": {
+      "lines": [
+        "I believe what you tell me about your own body. That is not generosity.",
+        "It's the only way any of this works."
+      ],
+      "choices": []
+    }
+  }
+}

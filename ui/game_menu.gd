@@ -81,7 +81,7 @@ func toggle() -> void:
 
 
 func open() -> void:
-	if _open or Transition.is_busy() or PauseMenu.is_open():
+	if _open or Transition.is_busy() or PauseMenu.is_open() or Dialogue.is_open():
 		return
 	_open = true
 	_refresh()

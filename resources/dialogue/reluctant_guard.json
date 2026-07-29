@@ -1,0 +1,25 @@
+{
+  "id": "reluctant_guard",
+  "name": "The Guard",
+  "voice_pitch": 0.78,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Gate's open. It's always open. That's not the same as it being safe.",
+        "Keep to the road and come back before dark."
+      ],
+      "choices": [
+        { "text": "Were you here that morning?", "goto": "morning" },
+        { "text": "Understood.", "goto": "" }
+      ]
+    },
+    "morning": {
+      "lines": [
+        "I was.",
+        "Ask me something else."
+      ],
+      "choices": []
+    }
+  }
+}

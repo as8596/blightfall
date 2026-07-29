@@ -1,0 +1,57 @@
+{
+  "id": "carpenter",
+  "name": "The Carpenter",
+  "voice_pitch": 0.86,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "There you are. I've had the timber stacked since Tuesday.",
+        "Magistrate said you'd be along. Didn't say when."
+      ],
+      "choices": [
+        { "text": "Timber for what?", "goto": "deed" },
+        { "text": "Who are you?", "goto": "who" },
+        { "text": "I should go.", "goto": "" }
+      ]
+    },
+    "deed": {
+      "lines": [
+        "Your house. That one, with the roof off it.",
+        "Deed's in your name. Has been a while now.",
+        "He never told you, did he."
+      ],
+      "choices": [
+        { "text": "He never told me.", "goto": "never_told" },
+        { "text": "What do you need from me?", "goto": "materials" }
+      ]
+    },
+    "never_told": {
+      "lines": [
+        "That's him. Does a thing for you and lets you find out on your own.",
+        "Reckons saying it out loud would make it a favour you owed."
+      ],
+      "choices": [
+        { "text": "What do you need from me?", "goto": "materials" },
+        { "text": "I'll think about it.", "goto": "" }
+      ]
+    },
+    "who": {
+      "lines": [
+        "Nobody. I put things back up.",
+        "Been busy."
+      ],
+      "choices": [
+        { "text": "Timber for what?", "goto": "deed" },
+        { "text": "Right.", "goto": "" }
+      ]
+    },
+    "materials": {
+      "lines": [
+        "Timber and stone. Valley's full of both if you don't mind the walk.",
+        "Gate's south. Come back with a satchel and we'll start."
+      ],
+      "choices": []
+    }
+  }
+}

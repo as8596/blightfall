@@ -40,6 +40,26 @@ const DOORWAY_SCENE: PackedScene = preload("res://world/doorway.tscn")
 ## The same, for the walk-into edges of outdoor areas (`world/gateway.gd`).
 const GATEWAY_SCENE: PackedScene = preload("res://world/gateway.tscn")
 
+## ...and for the people. `NpcMarkers` carry an id; the id names both the body's
+## tint and the conversation in `resources/dialogue/`.
+const NPC_SCENE: PackedScene = preload("res://world/npc.tscn")
+
+## Placeholder body colours, keyed by npc id. Temporary in the obvious way — a
+## real villager sheet replaces the whole idea — but six identical figures in one
+## square reads as a bug rather than as a placeholder.
+const NPC_TINTS: Dictionary = {
+	&"carpenter": Color(0.80, 0.68, 0.46),
+	&"child": Color(0.72, 0.80, 0.72),
+	&"fox": Color(0.86, 0.58, 0.34),
+	&"reluctant_guard": Color(0.58, 0.64, 0.74),
+	&"unrepentant": Color(0.56, 0.52, 0.50),
+	&"hidden_case": Color(0.46, 0.44, 0.48),
+	&"magistrate": Color(0.70, 0.62, 0.72),
+	&"smith": Color(0.78, 0.54, 0.44),
+	&"innkeeper": Color(0.84, 0.74, 0.56),
+	&"apothecary": Color(0.66, 0.78, 0.70),
+}
+
 @onready var world: Node2D = get_node_or_null(world_path) as Node2D
 @onready var map: Node2D = _in_world(map_path) as Node2D
 @onready var player: Player = _in_world(player_path) as Player
@@ -63,6 +83,7 @@ func _ready() -> void:
 	ensure_player_inside()
 	_spawn_doorways()
 	_spawn_gateways()
+	_spawn_npcs()
 
 
 ## Put the player on a named marker and point the camera at them.
@@ -154,6 +175,38 @@ func _spawn_gateways() -> void:
 		edge.span = int(marker.get_meta("span", 4))
 		world.add_child(edge)
 		edge.global_position = marker.global_position
+
+
+## The cast. Markers become bodies you can walk up to and talk to.
+func _spawn_npcs() -> void:
+	var root := map.find_child("NpcMarkers", true, false) if map != null else null
+	if root == null:
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var id := StringName(marker.get_meta("npc_id", ""))
+		if id == &"":
+			continue
+		var person: Npc = NPC_SCENE.instantiate()
+		person.name = "Npc_" + String(id)
+		person.dialogue_id = id
+		person.tint = NPC_TINTS.get(id, Color(0.78, 0.74, 0.66))
+		world.add_child(person)
+		person.global_position = marker.global_position
+
+
+## Everyone currently standing in this level, as {id, position}.
+func npcs() -> Array:
+	var found: Array = []
+	if world == null:
+		return found
+	for child in world.get_children():
+		var person := child as Npc
+		if person != null:
+			found.append({"id": person.dialogue_id, "position": person.global_position})
+	return found
 
 
 ## Every gateway currently in the world, as {id, target, spawn, facing}. The

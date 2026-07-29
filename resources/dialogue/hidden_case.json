@@ -1,0 +1,15 @@
+{
+  "id": "hidden_case",
+  "name": "Behind the door",
+  "voice_pitch": 0.9,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "The curtain moves. Nobody answers.",
+        "Whoever is in there is standing very close to the door."
+      ],
+      "choices": []
+    }
+  }
+}

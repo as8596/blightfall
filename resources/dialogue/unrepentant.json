@@ -1,0 +1,33 @@
+{
+  "id": "unrepentant",
+  "name": "The Unrepentant",
+  "voice_pitch": 0.82,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Don't expect an apology. The danger was real and the sentence was lawful.",
+        "You being alive doesn't make either of those untrue."
+      ],
+      "choices": [
+        { "text": "It was wrong.", "goto": "wrong" },
+        { "text": "You'd do it again.", "goto": "again" },
+        { "text": "Say nothing.", "goto": "" }
+      ]
+    },
+    "wrong": {
+      "lines": [
+        "Maybe. That's a thing you can only know afterwards.",
+        "We didn't have afterwards. We had that morning."
+      ],
+      "choices": []
+    },
+    "again": {
+      "lines": [
+        "With what I knew then? Yes.",
+        "That's the part nobody wants to hear, so I say it plainly."
+      ],
+      "choices": []
+    }
+  }
+}

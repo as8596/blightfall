@@ -1,0 +1,25 @@
+{
+  "id": "innkeeper",
+  "name": "The Innkeeper",
+  "voice_pitch": 0.95,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Bed's made. Second on the left, same as always.",
+        "There's stew. There is always stew; don't ask what's in it."
+      ],
+      "choices": [
+        { "text": "Same as always?", "goto": "always" },
+        { "text": "Thank you.", "goto": "" }
+      ]
+    },
+    "always": {
+      "lines": [
+        "I've made that bed every night for six years.",
+        "Somebody was going to come back eventually."
+      ],
+      "choices": []
+    }
+  }
+}

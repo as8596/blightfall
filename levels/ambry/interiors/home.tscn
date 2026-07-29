@@ -69,42 +69,42 @@ physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_31u30")
 
-[node name="Home" type="Node2D" unique_id=1485222118]
+[node name="Home" type="Node2D" unique_id=1592041154]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=996928313]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=270833734]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAADAAAAAAABAAAAAAADAAAAAAACAAAAAAADAAAAAAADAAAAAAADAAAAAAAEAAAAAAADAAAAAAAFAAAAAAADAAAAAAAGAAAAAAADAAAAAAAHAAAAAAADAAAAAAAIAAAAAAADAAAAAAAAAAEAAAADAAAAAAABAAEAAAADAAAAAAACAAEAAAADAAAAAAADAAEAAAADAAAAAAAEAAEAAAADAAAAAAAFAAEAAAADAAAAAAAGAAEAAAADAAAAAAAHAAEAAAADAAAAAAAIAAEAAAADAAAAAAAAAAIAAAADAAAAAAABAAIAAAADAAAAAAACAAIAAAADAAAAAAADAAIAAAADAAAAAAAEAAIAAAADAAAAAAAFAAIAAAADAAAAAAAGAAIAAAADAAAAAAAHAAIAAAADAAAAAAAIAAIAAAADAAAAAAAAAAMAAAADAAAAAAABAAMAAAADAAAAAAACAAMAAAADAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAAAAQAAAADAAAAAAABAAQAAAADAAAAAAACAAQAAAADAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAAAAUAAAADAAAAAAABAAUAAAADAAAAAAACAAUAAAADAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAAAAYAAAADAAAAAAABAAYAAAADAAAAAAACAAYAAAADAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=816228882]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=398163139]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAEAAAAAAAYAAAAAAAEAAAABAAAAAAAAAAEAAAABAAYAAAAAAAEAAAACAAAAAAABAAIAAAACAAYAAAAAAAEAAAADAAAAAAAAAAEAAAADAAYAAAAAAAEAAAAEAAAAAAAAAAEAAAAEAAYAAAAAAAIAAAAFAAAAAAAAAAEAAAAFAAYAAAAAAAEAAAAGAAAAAAABAAIAAAAGAAYAAAAAAAEAAAAHAAAAAAAAAAEAAAAHAAYAAAAAAAEAAAAIAAAAAAAAAAEAAAAIAAYAAAAAAAEAAAAAAAEAAAAAAAEAAAAIAAEAAAAAAAEAAAAAAAIAAAAAAAEAAAAIAAIAAAAAAAEAAAAAAAMAAAAAAAEAAAAIAAMAAAAAAAEAAAAAAAQAAAAAAAEAAAAIAAQAAAAAAAEAAAAAAAUAAAAAAAEAAAAIAAUAAAAAAAEAAAACAAIAAAAAAAYAAAAGAAIAAAADAAMAAAA=")
 tile_set = SubResource("TileSet_tk3om")
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=2113113180]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=2091420703]
 
-[node name="Poi_home_chest" type="Marker2D" parent="PointsOfInterest" unique_id=443690319]
+[node name="Poi_home_chest" type="Marker2D" parent="PointsOfInterest" unique_id=1068122678]
 position = Vector2(160, 224)
 metadata/poi_id = "home_chest"
 metadata/note = "store the haul"
 metadata/district = "interior"
 
-[node name="Poi_home_bed" type="Marker2D" parent="PointsOfInterest" unique_id=2093421830]
+[node name="Poi_home_bed" type="Marker2D" parent="PointsOfInterest" unique_id=893867341]
 position = Vector2(416, 224)
 metadata/poi_id = "home_bed"
 metadata/note = "save + rest"
 metadata/district = "interior"
 
-[node name="NpcMarkers" type="Node2D" parent="." unique_id=618590591]
+[node name="NpcMarkers" type="Node2D" parent="." unique_id=1733743983]
 
-[node name="Doorways" type="Node2D" parent="." unique_id=2147470274]
+[node name="Doorways" type="Node2D" parent="." unique_id=331006646]
 
-[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=651597616]
+[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=69744387]
 position = Vector2(288, 416)
 metadata/target_scene = "res://levels/ambry/ambry_level.tscn"
 metadata/target_spawn = "Door_home"
 metadata/prompt = "Leave"
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=138665733]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1011895855]
 position = Vector2(288, 288)

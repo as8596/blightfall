@@ -48,7 +48,7 @@ func open() -> void:
 	# Never over a transition: the scene is being torn down and a menu that
 	# survives into the next one would be sitting on top of a level the player
 	# has not seen yet.
-	if _open or Transition.is_busy() or GameMenu.is_open():
+	if _open or Transition.is_busy() or GameMenu.is_open() or Dialogue.is_open():
 		return
 	_open = true
 	_refresh()

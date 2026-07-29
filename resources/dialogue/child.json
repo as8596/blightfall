@@ -1,0 +1,25 @@
+{
+  "id": "child",
+  "name": "The Child",
+  "voice_pitch": 1.22,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "You're the one from the gallows.",
+        "Do you want to see where the fox sleeps? It's under the well."
+      ],
+      "choices": [
+        { "text": "Show me.", "goto": "fox" },
+        { "text": "Not now.", "goto": "" }
+      ]
+    },
+    "fox": {
+      "lines": [
+        "There. Don't point at it, it doesn't like that.",
+        "It came before you did. Everyone says that like it means something."
+      ],
+      "choices": []
+    }
+  }
+}

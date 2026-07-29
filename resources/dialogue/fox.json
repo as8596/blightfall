@@ -1,0 +1,14 @@
+{
+  "id": "fox",
+  "name": "The Fox",
+  "voice_pitch": 1.35,
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "It looks at you for a long moment, and does not run."
+      ],
+      "choices": []
+    }
+  }
+}

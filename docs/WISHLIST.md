@@ -45,7 +45,7 @@ size — later items are blocked by earlier ones.
 | 3 | ⭑ **Village state in saves** | A town that forgets what you built is not a progression system. |
 | 4 | ~~One zone outside the gate~~ | **Built.** Orchardfall: six areas, walk-into edges, one interior (`docs/ORCHARDFALL.md`). It has no enemies and nothing to pick up. |
 | 5 | ⭑ **Three more enemies** | One enemy is a test fixture. A fight needs a reason to choose between verbs. |
-| 6 | ⭑ **Dialogue** | Ten NPCs are markers. Without lines there is no reason to leave and no one to notice you came back. |
+| 6 | ~~Dialogue~~ | **Built.** Typewriter box, per-character voice blips, branching replies. All ten of the cast are bodies you can talk to. The lines are placeholders. |
 | 7 | ~~Title screen~~ | **Built.** `ui/main_menu.tscn` — continue, new game, UI scale, quit. |
 | 8 | ⭑ **The town visibly changes** | The payoff. Without it, building is a receipt. |
 
@@ -76,11 +76,13 @@ biggest gap in the project and it is not a large amount of code.
 
 ### Interaction
 
-- ⭑ **Dialogue.** No system at all. Needs: a data format, a box, a way for an
-  NPC to have different lines after the wall goes up. `Interactable` is the
-  base class and doors are its only user.
-- **Talk / build / rest / read as separate `Interactable` subclasses.** Each is
-  small now that the verb exists.
+- ~~Dialogue.~~ **Built** — `ui/dialogue_box.gd`, one JSON file per character in
+  `resources/dialogue/`. What it does *not* have is state: every conversation
+  starts at the same node every time. An NPC saying something different after
+  the wall goes up needs a condition on a node, and that needs village state
+  (item 3) to exist first.
+- **Talk / build / rest / read as separate `Interactable` subclasses.** Talking
+  is done (`world/npc.gd`); the rest are small now that the verb exists.
 - **The bed.** Rest, save, and the reason death has somewhere to send you.
 - **The chest.** Storage that survives death — the counterweight to
   loss-on-death.
@@ -170,10 +172,12 @@ feel inhabited.
 Nothing is written. The GDD has a beat sheet and a cast; the repo has ten
 markers and no words.
 
-- ⭑ **Ten NPCs with lines.** `docs/AMBRY.md` places all ten and says what each
-  one's warmth is expressed as. None of them speak.
-- ⭑ **A reason to leave town.** The slice needs one line of motivation, not a
-  quest system.
+- **Ten NPCs with lines.** All ten now speak, and every line is a placeholder
+  written to the "warmth expressed as" column in `docs/AMBRY.md` rather than to
+  a script that does not exist. The carpenter's is the only one that branches.
+  This is scaffolding for a writer, not writing.
+- ~~A reason to leave town.~~ The carpenter gives one: timber and stone, gate's
+  south.
 - **The opening sequence** (GDD §4). Full beat sheet exists. Built last, on
   purpose — but the slice may want text placeholder cards, which is what M2 was
   always supposed to prove.
@@ -227,7 +231,8 @@ license rather than make.
 - **1 of 6 music tracks.** And it is a **27 MB WAV** that should be an OGG at
   roughly a tenth the size. There is no encoder in the build environment; this
   is a job for the desktop.
-- **8 of ~45 SFX.** All eight are generated placeholders.
+- **13 of ~45 SFX.** All generated placeholders — the five newest are the
+  dialogue voice blips and two UI ticks.
 - **0 of 4 ambience beds.**
 - **No mixing.** One bus, no ducking, no options.
 - **Missing whole categories** — footsteps by surface, doors, UI, the build
@@ -245,7 +250,8 @@ Escape menu with UI scaling, pause, fade transitions, debug overlay.
 
 Missing:
 
-- ⭑ **Dialogue box.**
+- ~~Dialogue box.~~ **Built.** No portraits — a decision deferred, not an
+  oversight.
 - ⭑ **Build prompt** — what this costs, what you carry, what it gives.
 - **The map tab is a joke that has not been made yet.** It says *"You have no
   map"*, which is correct and deliberate — the archive grants it (project 6) —
