@@ -381,6 +381,7 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 
 	var ground := map.new_layer("Ground", tileset, GreyboxMap.Z_GROUND)
 	var objects := map.new_layer("Objects", tileset, GreyboxMap.Z_OBJECTS)
+	var overhead := map.new_layer("Overhead", tileset, GreyboxMap.Z_OVERHEAD)
 	objects.y_sort_enabled = true
 
 	map.fill(ground, Rect2i(0, 0, size.x, size.y), String(area["ground"]))
@@ -414,21 +415,21 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 
 	var building: Dictionary = area.get("building", {})
 	if not building.is_empty():
-		_place_building(ground, objects, building)
+		_place_building(ground, objects, overhead, building)
 
 	_border(objects, ground, size, String(area["border"]), area["exits"])
 
 	var root := Node2D.new()
 	root.name = id.to_pascal_case()
 	root.y_sort_enabled = true
-	for layer in [ground, objects]:
+	for layer in [ground, objects, overhead]:
 		root.add_child(layer)
 		layer.owner = root
 
 	_add_markers(root, area)
 
 	var layers: Array[TileMapLayer] = [ground, objects]
-	_assert_area(layers, area)
+	_assert_area(layers, area, overhead)
 
 	var map_path := "%s/%s.tscn" % [ZONE_DIR, id]
 	@warning_ignore("return_value_discarded")
@@ -469,7 +470,8 @@ func _terrace(objects: TileMapLayer, rect: Rect2i, tile: String, gaps: Array) ->
 			map.put(objects, Vector2i(x, y), tile)
 
 
-func _place_building(ground: TileMapLayer, objects: TileMapLayer, building: Dictionary) -> void:
+func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: TileMapLayer,
+		building: Dictionary) -> void:
 	var rect: Rect2i = building["rect"]
 	map.fill(ground, rect, "floorboards")
 	for x in range(rect.position.x, rect.end.x):
@@ -481,6 +483,10 @@ func _place_building(ground: TileMapLayer, objects: TileMapLayer, building: Dict
 	var door := _door_cell(building)
 	map.put(objects, door, "door")
 	map.put(ground, door + Vector2i(0, 1), "dirt_path")
+	# Roofed everywhere but the south face, so the door and the windows still
+	# read from the street. Same rule and same reason as Ambry's — see
+	# `tools/build_greybox.gd`.
+	map.fill(overhead, Rect2i(rect.position, Vector2i(rect.size.x, rect.size.y - 1)), "roof")
 
 
 static func _door_cell(building: Dictionary) -> Vector2i:
@@ -602,7 +608,8 @@ static func _span_centre(cell: Vector2i, facing: String, span: int) -> Vector2:
 # ---------------------------------------------------------------- assertions
 
 ## Everything a screenshot of this area would not tell you.
-func _assert_area(layers: Array[TileMapLayer], area: Dictionary) -> void:
+func _assert_area(layers: Array[TileMapLayer], area: Dictionary,
+		overhead: TileMapLayer) -> void:
 	var id: String = area["id"]
 	var size: Vector2i = area["size"]
 	var first: Array = area["exits"][0]
@@ -653,6 +660,19 @@ func _assert_area(layers: Array[TileMapLayer], area: Dictionary) -> void:
 	if not leaked.is_empty():
 		map.fail("%s: the border is open at %d cells that are not exits, e.g. %s"
 			% [id, leaked.size(), leaked.slice(0, 6)])
+		return
+
+	# Nothing on the Overhead layer may sit over ground the player can stand on.
+	# It draws above the actors unconditionally, so one tile in the wrong place
+	# erases the player from the waist down as they walk under it.
+	var covered: Array[Vector2i] = []
+	for cell in reached:
+		var at2: Vector2i = cell
+		if overhead.get_cell_atlas_coords(at2) != Vector2i(-1, -1):
+			covered.append(at2)
+	if not covered.is_empty():
+		map.fail("%s: overhead tiles cover %d walkable cells, e.g. %s"
+			% [id, covered.size(), covered.slice(0, 6)])
 		return
 
 	print("  %s: %d walkable cells, every exit and POI reachable, border holds"

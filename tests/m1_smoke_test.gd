@@ -1208,9 +1208,20 @@ func _test_village() -> void:
 		objects != null and objects.y_sort_enabled)
 	_check("ground is below both", level.map.get_node_or_null("Ground") != null
 		and (level.map.get_node("Ground") as TileMapLayer).z_index < level.player.z_index)
-	_check("overhead is above both, and empty until eaves can fade",
-		overhead != null and overhead.z_index > level.player.z_index
-			and overhead.get_used_rect().size == Vector2i.ZERO)
+	_check("overhead is above both", overhead != null
+		and overhead.z_index > level.player.z_index)
+	# It carries the roofs now. Without them a building is an open-topped box
+	# and the village reads as a floor plan.
+	_check("and it carries the roofs", overhead != null
+		and overhead.get_used_rect().size != Vector2i.ZERO)
+	# The other half of that: overhead draws above the actors unconditionally, so
+	# a tile of it over ground the player can stand on erases them from the waist
+	# down. `tools/build_greybox.gd` refuses to write one; this checks the tile
+	# the player is actually standing on, which is the case that matters.
+	_check("and none of it is over the tile the player is standing on",
+		overhead != null and overhead.get_cell_atlas_coords(
+			overhead.local_to_map(overhead.to_local(level.player.global_position))
+		) == Vector2i(-1, -1))
 
 	# ---- nobody starts outside the map.
 	var bounds := level.world_bounds()

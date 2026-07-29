@@ -531,6 +531,23 @@ func _assert_layout(layers: Array[TileMapLayer], overhead: TileMapLayer) -> void
 		_fail("overhead tiles cover %d walkable cells, e.g. %s"
 			% [covered.size(), covered.slice(0, 6)])
 
+	# Every built building has to be roofed. The failure is quiet — the village
+	# still works, it just reads as a floor plan — and it is exactly the kind of
+	# thing you stop noticing after the tenth screenshot.
+	var open_topped: Array[String] = []
+	for entry in BUILDINGS:
+		if String(entry[4]) != "built":
+			continue
+		var rect: Rect2i = entry[1]
+		for y in range(rect.position.y + 1, rect.end.y - 1):
+			for x in range(rect.position.x + 1, rect.end.x - 1):
+				if overhead.get_cell_atlas_coords(Vector2i(x, y)) == Vector2i(-1, -1):
+					open_topped.append("%s open at %s" % [entry[0], Vector2i(x, y)])
+	if open_topped.is_empty():
+		print("roofs: every built building is covered")
+	else:
+		_fail("you can see the floor of: %s" % [open_topped.slice(0, 6)])
+
 	# Nobody may stand close enough to a doorstep to take its prompt.
 	# `InteractorComponent` offers the nearest thing it can find, and a villager
 	# parked by a door is a door that cannot be opened — which looks like a
@@ -660,17 +677,27 @@ func _place_building(ground: TileMapLayer, objects: TileMapLayer, overhead: Tile
 	if door_offset + 2 < rect.size.x - 1:
 		_put(objects, door + Vector2i(2, 0), "window")
 
-	# No roof eave. There *was* one — a strip on the Overhead layer, one row
-	# above the north wall — and it was a bug: that row is walkable ground for
-	# most of these buildings (the inn's landed squarely on the ring road), and
-	# an opaque overhead tile over walkable ground erases the player from the
-	# waist down as they walk past.
+	# **The roof.** Without it a building is an open-topped box and the player
+	# can read its floorboards from the street, which makes the whole village
+	# look like a floor plan rather than a place.
 	#
-	# An eave you can walk under is a good effect, but it needs to fade when
-	# something is beneath it. That is a shader and a proximity test, not a
-	# tile, and it belongs with the art pass. The Overhead layer stays for it.
-	# `_assert_overhead_clear` below now refuses to build a village that puts
-	# anything opaque over a tile the player can stand on.
+	# It covers everything except the south face, so the wall you walk up to —
+	# the door, the windows, the thing that tells you which building this is —
+	# stays visible. That is the standard top-down read: roof from above, facade
+	# from the front.
+	#
+	# Strictly inside the footprint, with no eave. There was an eave once and it
+	# was a bug: the Overhead layer draws above the actors unconditionally, so a
+	# tile of it over walkable ground erases the player from the waist down as
+	# they walk past. `_assert_layout` refuses to build a village that does it
+	# again — which is also what makes this safe, since a built building's
+	# interior is enclosed by solid walls and a solid door, and nothing standing
+	# in the street can be under it.
+	#
+	# A derelict gets none, and that is the point: your home is the one building
+	# you can see straight into, because it has no roof yet and you are the one
+	# who is going to put it on.
+	_fill(overhead, Rect2i(rect.position, Vector2i(rect.size.x, rect.size.y - 1)), "roof")
 
 
 func _add_markers(root: Node2D) -> void:
