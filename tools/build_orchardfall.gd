@@ -41,6 +41,16 @@ const SEED := 0xB117FA11
 ## south out of one area arrives at the next one's northern edge.
 const OPPOSITE := {"north": "south", "south": "north", "east": "west", "west": "east"}
 
+## Wolf packs per area. Two wolves each where there is room for two.
+const PACKS_MIN := 2
+const PACKS_MAX := 3
+## No wolf within this many tiles of anywhere the player can arrive. Six tiles
+## is just under the wolf's 480px aggro range, so you get a moment to see the
+## place you are standing in before anything starts moving toward you.
+const SAFE_TILES := 6
+## And this far apart, so two packs do not read as one large one.
+const PACK_GAP := 8
+
 # --------------------------------------------------------------------------
 # The valley. Each area is: what the ground is, what fences it in, where the
 # ways out are, and then the specific things worth walking to.
@@ -429,6 +439,7 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 	_add_markers(root, area)
 
 	var layers: Array[TileMapLayer] = [ground, objects]
+	_add_wolves(root, area, layers)
 	_assert_area(layers, area, overhead)
 
 	var map_path := "%s/%s.tscn" % [ZONE_DIR, id]
@@ -593,6 +604,100 @@ func _add_markers(root: Node2D, area: Dictionary) -> void:
 	map.marker_at(root, root, "PlayerSpawn",
 		_span_centre(_edge_cell(size, String(first[0]), int(first[1]), 2),
 			String(first[0]), int(first[2])))
+
+
+## Wolves, scattered.
+##
+## **Placed at build time, not at run time.** The randomness goes through the
+## builder's seeded generator like everything else in the map (GDD §12 rule 5),
+## so "random" here means *arbitrary but identical on every run* — which is the
+## only kind of random a map can have and still be a place. Two players
+## describing the same clearing are describing the same clearing, and a bug that
+## only happens with a wolf in the doorway can be reproduced.
+##
+## The rules are all about where they may **not** go. Random placement with no
+## exclusions puts one on the tile you arrive on, which reads as the game
+## cheating rather than as the wood being dangerous.
+func _add_wolves(root: Node2D, area: Dictionary, layers: Array[TileMapLayer]) -> void:
+	var size: Vector2i = area["size"]
+	var first: Array = area["exits"][0]
+	var arrival := _edge_cell(size, String(first[0]), int(first[1]), 2)
+	var reached := map.flood(layers, arrival, size)
+	if reached.is_empty():
+		return
+
+	# Every tile the player can be standing on the instant a scene loads: the
+	# default spawn and the far side of every edge they can walk in through.
+	var arrivals: Array[Vector2i] = [arrival]
+	for exit in area["exits"]:
+		for i in range(int(exit[2])):
+			arrivals.append(_edge_cell(size, String(exit[0]), int(exit[1]) + i, 2))
+			arrivals.append(_edge_cell(size, String(exit[0]), int(exit[1]) + i, 0))
+	var building: Dictionary = area.get("building", {})
+	if not building.is_empty():
+		arrivals.append(_door_cell(building) + Vector2i(0, 1))
+
+	var candidates: Array[Vector2i] = []
+	for cell in reached:
+		var at: Vector2i = cell
+		if at.x < 2 or at.y < 2 or at.x >= size.x - 2 or at.y >= size.y - 2:
+			continue
+		var clear := true
+		for spot in arrivals:
+			if _tile_distance(at, spot) < SAFE_TILES:
+				clear = false
+				break
+		if not clear:
+			continue
+		# Not standing on the thing the player came to look at, either.
+		for entry in area["pois"]:
+			if _tile_distance(at, entry[1]) < 2:
+				clear = false
+				break
+		if clear:
+			candidates.append(at)
+	candidates.sort()                       # `flood` returns a set; order it or the
+	                                        # seed stops meaning anything.
+	if candidates.is_empty():
+		map.fail("%s: nowhere to put a wolf that is not on top of the player"
+			% [area["id"]])
+		return
+
+	var pack := map.group(root, "EnemyMarkers")
+	var placed: Array[Vector2i] = []
+	var wanted := _rng.randi_range(PACKS_MIN, PACKS_MAX)
+	var guard := 0
+	while placed.size() < wanted and guard < 400:
+		guard += 1
+		var lead: Vector2i = candidates[_rng.randi_range(0, candidates.size() - 1)]
+		var too_close := false
+		for other in placed:
+			if _tile_distance(lead, other) < PACK_GAP:
+				too_close = true
+				break
+		if too_close:
+			continue
+		placed.append(lead)
+
+		# Pairs, per the roster line. The second wolf goes on an adjacent
+		# walkable tile if there is one, and is simply skipped if there is not —
+		# a lone wolf in a tight row of trees is better than one inside a tree.
+		var pair: Array[Vector2i] = [lead]
+		var nudges: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0),
+			Vector2i(0, 1), Vector2i(0, -1)]
+		var beside: Vector2i = lead + nudges[_rng.randi_range(0, nudges.size() - 1)]
+		if candidates.has(beside):
+			pair.append(beside)
+
+		for i in range(pair.size()):
+			map.marker(root, pack, "Wolf_%d_%d" % [placed.size(), i], pair[i],
+				{"enemy_id": "forest_wolf"})
+
+	print("  %s: %d wolves in %d packs" % [area["id"], pack.get_child_count(), placed.size()])
+
+
+static func _tile_distance(a: Vector2i, b: Vector2i) -> int:
+	return maxi(absi(a.x - b.x), absi(a.y - b.y))
 
 
 static func _span_centre(cell: Vector2i, facing: String, span: int) -> Vector2:

@@ -109,6 +109,11 @@ func _run() -> void:
 	# Something to lose on the way out and on the way back.
 	ambry.player.inventory.add(&"timber", 4)
 
+	# Ambry is mechanically incapable of hurting you (GDD §7), and that is a
+	# property of the code, not of what happens to be in the map today.
+	_check("nothing is hunting in the village", ambry.enemies().is_empty(),
+		"%d enemies" % ambry.enemies().size())
+
 	var out := ambry.gateways()
 	_check("Ambry has exactly one way out to the valley", out.size() == 1, str(out.size()))
 	if out.is_empty():
@@ -149,6 +154,22 @@ func _run() -> void:
 
 	_check("the valley road has three ways out", valley.gateways().size() == 3,
 		str(valley.gateways().size()))
+
+	# The wood is not empty. Wolves are scattered by the builder through its
+	# seeded generator, so this is a fixed number rather than a lucky one.
+	var pack := valley.enemies()
+	_check("there are wolves in the valley road", pack.size() >= 2,
+		"%d" % pack.size())
+	# ...and none of them is standing on the doormat. Six tiles is just under the
+	# wolf's aggro range, so the player gets a moment to see where they are
+	# before anything moves toward them.
+	var ambushes: Array[String] = []
+	for wolf in pack:
+		var gap: float = wolf.global_position.distance_to(arrival)
+		if gap < 6.0 * 64.0:
+			ambushes.append("%.0fpx" % gap)
+	_check("and none of them is waiting on the tile you arrive on",
+		ambushes.is_empty(), ", ".join(ambushes))
 
 	# ...and out the other side, to prove the zone is a zone and not a cul-de-sac.
 	var onward := await _walk_until_scene_changes(&"move_down", ORCHARD, 900)

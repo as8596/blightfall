@@ -44,6 +44,13 @@ const GATEWAY_SCENE: PackedScene = preload("res://world/gateway.tscn")
 ## tint and the conversation in `resources/dialogue/`.
 const NPC_SCENE: PackedScene = preload("res://world/npc.tscn")
 
+## ...and for the things that are not people. `EnemyMarkers` carry an
+## `enemy_id`; the map says where and what, the scene says how it behaves.
+const ENEMY_SCENES: Dictionary = {
+	&"forest_wolf": preload("res://actors/enemies/forest_wolf/forest_wolf.tscn"),
+	&"blighted_villager": preload("res://actors/enemies/blighted_villager/blighted_villager.tscn"),
+}
+
 ## Placeholder body colours, keyed by npc id. Temporary in the obvious way — a
 ## real villager sheet replaces the whole idea — but six identical figures in one
 ## square reads as a bug rather than as a placeholder.
@@ -84,6 +91,7 @@ func _ready() -> void:
 	_spawn_doorways()
 	_spawn_gateways()
 	_spawn_npcs()
+	_spawn_enemies()
 
 
 ## Put the player on a named marker and point the camera at them.
@@ -195,6 +203,49 @@ func _spawn_npcs() -> void:
 		person.tint = NPC_TINTS.get(id, Color(0.78, 0.74, 0.66))
 		world.add_child(person)
 		person.global_position = marker.global_position
+
+
+## The things that are not people.
+##
+## **A safe level spawns nothing, whatever its map says.** GDD §7 wants Ambry to
+## be mechanically incapable of hurting the player, and that is a stronger
+## promise than "we did not put any enemies in the village" — it survives a
+## marker pasted in by accident, a map regenerated with the wrong flag, and a
+## builder change nobody reviewed. The village is safe because the code refuses,
+## not because the data happens to be empty.
+func _spawn_enemies() -> void:
+	var root := map.find_child("EnemyMarkers", true, false) if map != null else null
+	if root == null:
+		return
+	if is_safe:
+		if root.get_child_count() > 0:
+			push_warning("Level %s is marked safe; ignoring %d enemy markers."
+				% [name, root.get_child_count()])
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var id := StringName(marker.get_meta("enemy_id", ""))
+		var scene: PackedScene = ENEMY_SCENES.get(id)
+		if scene == null:
+			push_warning("Level %s: no scene for enemy '%s'." % [name, id])
+			continue
+		var enemy: Node2D = scene.instantiate()
+		enemy.name = marker.name
+		world.add_child(enemy)
+		enemy.global_position = marker.global_position
+
+
+## Everything currently hunting in this level.
+func enemies() -> Array:
+	var found: Array = []
+	if world == null:
+		return found
+	for child in world.get_children():
+		if child is BaseEnemy:
+			found.append(child)
+	return found
 
 
 ## Everyone currently standing in this level, as {id, position}.
