@@ -77,7 +77,7 @@ All three keep the same vertical landmarks — collar 45, belt 69, knee 84, sole
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 221 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 222 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -301,11 +301,22 @@ and the whole point of building it early is that you can go and find out.
 return 1.28 points per 0.48s dodge cycle against 1.00 spent, so it could never
 run out and the four-point pool was decoration.
 
-Two changes fixed it. **Sprinting** — hold the dash key while moving — drains
-2.0/s, which is a real cost rather than a tap. And **`regen_delay` is 0.7s**
-rather than zero, so the pool does not begin refilling until you stop spending;
-without that no plausible drain rate outruns a 2.67/s refill. The first sprint
-test proved exactly that by passing on speed and failing on cost.
+Three changes fixed it. **Sprinting** — hold the dash key while moving — drains
+2.0/s, which is a real cost rather than a tap. **`regen_delay` is 0.7s** rather
+than zero, so the pool does not begin refilling until you stop spending; without
+that no plausible drain rate outruns a fast refill. And after playing it,
+**`full_regen_time` went from 1.5s to 6.0s** — a straight 75% cut to the rate.
+
+That last one is the number GDD §6 asked to have validated at M1 by hand, and it
+did not survive contact. At 1.5s the pool returned 1.28 points per 0.48s dodge
+cycle against 1.00 spent; at 6.0s it returns 0.32, so four dodges is now a real
+limit. The smoke test still prints that ratio as a NOTE rather than an
+assertion — it is a tuning readout, not a rule.
+
+The cost is that stamina is now a step closer to "a resource to manage", which
+§6 explicitly does not want. The counterweight is that attacks are still free
+and the pool is still four dodges deep, so it only bites on panic-rolling —
+which is the exact thing it exists to stop.
 
 **Recovery is upgradeable** (GDD §15 A7). `StatsComponent.STAMINA_REGEN` is a
 percentage applied to both the pause and the refill time, as a ratio so

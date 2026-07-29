@@ -65,7 +65,7 @@ max_health = 6
 [node name="StaminaComponent" type="Node" parent="."]
 script = ExtResource("5_stamina")
 max_stamina = 4.0
-full_regen_time = 1.5
+full_regen_time = 6.0
 
 [node name="KnockbackComponent" type="Node" parent="."]
 script = ExtResource("6_knockback")

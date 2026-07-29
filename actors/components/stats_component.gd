@@ -37,7 +37,7 @@ var _base: Dictionary = {}
 ## repeatedly without compounding.
 var base_max_stamina: float = 4.0
 var base_regen_delay: float = 0.7
-var base_regen_time: float = 1.5
+var base_regen_time: float = 6.0
 
 
 ## How much faster recovery is than it shipped, as a multiplier.

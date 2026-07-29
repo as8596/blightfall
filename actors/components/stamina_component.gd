@@ -19,8 +19,20 @@ signal refused(amount: float)
 ## 4 consecutive dodges (GDD §6).
 @export var max_stamina: float = 4.0
 
-## Seconds to refill from empty. GDD: ~1.5s.
-@export var full_regen_time: float = 1.5
+## Seconds to refill from empty.
+##
+## **6.0, not the 1.5 in GDD §6** — amended after playing it. §6 asks for this
+## number to be validated at M1 by hand, and it was: at 1.5s the pool refilled
+## faster than the dodge cooldown could spend it, so four dodges was never a
+## limit and the meter was decoration. `m1_smoke_test` had been reporting that
+## as a standing finding for weeks.
+##
+## Four times slower makes it bind. It also moves stamina a step toward being
+## "a resource to manage", which §6 explicitly does not want it to be — the
+## counterweight is that attacks are still free and the pool is still four
+## dodges deep, so the limit only bites on panic-rolling, which is the exact
+## thing it exists to stop.
+@export var full_regen_time: float = 6.0
 
 ## Pause before regen resumes after spending. 0 keeps the pool generous.
 @export var regen_delay: float = 0.7

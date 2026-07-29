@@ -265,7 +265,10 @@ Placed by hand as rewards for exploration or challenge rooms. Never random drops
 ### Stamina — DODGE ONLY (decided)
 
 - **Attacks never cost stamina.** They stay free and snappy; the frame data already prevents mashing via commit windows and combo timeouts.
-- **Dodge costs stamina.** Generous pool (4 consecutive dodges), fast regen (full in ~1.5s).
+- **Dodge costs stamina.** Generous pool (4 consecutive dodges), refill in 6s
+  after a 0.7s pause. **Amended from ~1.5s**, which is what the "validate at M1"
+  line below asked for and got: at 1.5s the pool refilled faster than the dodge
+  cooldown could spend it, so it never bound and the meter was decoration.
 - It functions as a rhythm limiter that stops panic-rolling, not a resource to manage.
 
 Rationale: *Hyper Light Drifter*, the closest reference for this game's feel, has an unlimited dash, and that's a large part of why it plays as well as it does. Gating 0.08s-windup attacks behind a meter would fight pillar 1 directly. Validate the pool size at M1 — if dodging ever feels like budgeting, the pool is too small.

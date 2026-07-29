@@ -418,7 +418,7 @@ func _test_dodge() -> void:
 
 
 func _test_stamina() -> void:
-	print("\nStamina (GDD §6: dodge only, 4 dodges, ~1.5s refill)")
+	print("\nStamina (GDD §6 as amended: dodge only, 4 dodges, 6s refill)")
 	await _reset_player()
 
 	_check_near("starts full", _player.stamina.current, 4.0, 0.001)
@@ -439,13 +439,18 @@ func _test_stamina() -> void:
 		spends += 1
 	_check("pool holds exactly four dodges", spends == 4, "spent %d" % spends)
 
-	# Regen waits `regen_delay` before it starts. GDD §6 gives 1.5s to refill;
-	# the pause in front of it is what stops the pool refilling faster than
-	# anything can spend it, which is what made it decorative before sprinting
-	# existed (docs/M1-NOTES.md).
-	var settle: int = int((_player.stamina.regen_delay + 1.5) / TICK) + 20
+	# Regen waits `regen_delay` before it starts, then takes `full_regen_time`.
+	# Read off the component rather than hard-coded: this number is explicitly a
+	# tuning knob (GDD §6 asks for it to be validated by hand), and a test that
+	# pins it to a literal turns every tuning pass into a test edit.
+	var refill: float = _player.stamina.full_regen_time
+	var settle: int = int((_player.stamina.regen_delay + refill) / TICK) + 20
 	await _ticks(settle)
-	_check_near("refills in ~1.5s after the delay", _player.stamina.current, 4.0, 0.05)
+	_check_near("refills in full_regen_time after the delay", _player.stamina.current, 4.0, 0.05)
+	# The number itself, so a slip back to something that refills instantly is
+	# caught rather than absorbed.
+	_check("and that is slow enough for the pool to mean something", refill >= 4.0,
+		"%.1fs" % refill)
 	_check("and the delay is real", _player.stamina.regen_delay > 0.0,
 		"%.2fs" % _player.stamina.regen_delay)
 
