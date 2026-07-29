@@ -42,6 +42,23 @@ extends Node2D
 		footprint = value
 		_refresh()
 
+## Draw the art larger than it was authored.
+##
+## **Integer values only, and the reason is the pixel grid.** At 2.0 every source
+## pixel becomes a clean 2x2 block; at 1.6 some become 2px and some stay 1px, and
+## the eye reads the unevenness as a broken sprite long before it reads it as a
+## bigger tree. Anything non-integer is snapped down with a warning.
+##
+## This exists because a tree drawn at the same resolution as the character is a
+## tree the same height as the character. Scaling up trades pixel density for
+## scale, which is the right trade for background mass and the wrong one for
+## anything the player has to read quickly — so it is a per-prop knob rather than
+## a global one.
+@export var art_scale: float = 1.0:
+	set(value):
+		art_scale = value
+		_refresh()
+
 ## Nudge the drawn image without moving the sorting origin. For art whose base
 ## is not exactly at the bottom of its canvas.
 @export var art_offset: Vector2 = Vector2.ZERO:
@@ -88,9 +105,16 @@ func _refresh() -> void:
 		return
 	_sprite.texture = texture
 	_sprite.flip_h = flip
+	var zoom := maxf(floorf(art_scale), 1.0)
+	if not is_equal_approx(zoom, art_scale):
+		push_warning("Prop %s: art_scale %.2f is not a whole number; using %d."
+			% [name, art_scale, int(zoom)])
+	_sprite.scale = Vector2(zoom, zoom)
 	if texture != null:
 		# Base on the origin. Same rule as AnimationComponent's feet-on-origin.
-		_sprite.offset = Vector2(0, -texture.get_height() * 0.5) + art_offset
+		# In sprite-local units, so `scale` multiplies it and the base stays put
+		# however tall the thing is drawn.
+		_sprite.offset = Vector2(0, -texture.get_height() * 0.5) + art_offset / zoom
 	(_shape.shape as RectangleShape2D).size = footprint
 	# The footprint sits *behind* the base by half its depth, so the player can
 	# stand at the foot of a tree rather than being held a body-length away.

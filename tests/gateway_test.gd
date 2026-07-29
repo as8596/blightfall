@@ -243,6 +243,34 @@ func _check_canopy_blocks(level: Level) -> void:
 			flat.append(tree.name)
 	_check("every prop shares the player's z_index", flat.is_empty(), ", ".join(flat))
 
+	# Trees are drawn larger than they were authored, or a pine stands a head
+	# taller than a man and reads as a shrub.
+	var unscaled: Array[String] = []
+	for tree in (grove.get_children() if grove != null else []):
+		if tree.name.begins_with("Tree_") and (tree as Prop).art_scale < 2.0:
+			unscaled.append(tree.name)
+	_check("and the trees are drawn taller than the man walking past them",
+		unscaled.is_empty(), ", ".join(unscaled))
+
+	# Nothing grows in the road. The paths are the one thing in the zone that has
+	# to read as deliberate from across the screen, and a bush down the middle of
+	# one undoes that on its own.
+	var ground := level.map.find_child("Ground", true, false) as TileMapLayer
+	var overgrown: Array[String] = []
+	if ground != null and grove != null:
+		for bush in grove.get_children():
+			if not bush.name.begins_with("Bush_"):
+				continue
+			var cell := Vector2i((bush as Node2D).position / 64.0)
+			var atlas := ground.get_cell_atlas_coords(cell)
+			var index: int = atlas.y * GreyboxMap.ATLAS_COLS + atlas.x
+			if index < 0 or index >= GreyboxMap.TILES.size():
+				continue
+			var tile := String(GreyboxMap.TILES[index][0])
+			if tile in ["dirt_path", "bridge", "cobble"]:
+				overgrown.append("%s on %s" % [bush.name, tile])
+	_check("nothing grows in the road", overgrown.is_empty(), ", ".join(overgrown))
+
 
 ## Every area's edges lead where the map says they lead, and every one of them
 ## has a partner coming back. Loaded rather than walked — walking all fifteen

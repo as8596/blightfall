@@ -75,6 +75,26 @@ const CANOPY: Dictionary = {
 ## the props honest if the tiles are ever dropped.
 const TRUNK := Vector2(30, 18)
 
+## Trees are drawn at double size.
+##
+## The art is 128px tall and the player is 96, so at 1:1 a pine stands a head
+## taller than a man — which reads as a shrub he could step over rather than as a
+## tree. Doubling puts it at four tiles, near three times his height, which is
+## about right for a conifer.
+##
+## The cost is real and worth naming: the tree's pixels are twice the size of the
+## player's, so the wood is visibly chunkier than the man walking through it. A
+## tree authored at 256px would be strictly better and is the fix; this is the
+## version that works with the art that exists.
+const TREE_SCALE := 2.0
+
+## Ground the undergrowth stays off. Paths first — a road with bushes growing
+## down the middle of it is not a road, and the paths are the one thing in the
+## zone that has to read as deliberate from across the screen. Water and floors
+## for the obvious reasons.
+const BARE_GROUND: Array = ["dirt_path", "bridge", "cobble", "floorboards",
+	"water", "shallows", "hearth"]
+
 ## Undergrowth. Pure decoration: no tile, no collision, no effect on anything the
 ## assertions measure. Scattered on open ground the player can already walk, so a
 ## clearing reads as a clearing rather than as a flat green rectangle.
@@ -528,7 +548,7 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 		if choices.is_empty():
 			continue
 		_stand(root, grove, "Tree", cell,
-			String(choices[_rng.randi_range(0, choices.size() - 1)]), TRUNK)
+			String(choices[_rng.randi_range(0, choices.size() - 1)]), TRUNK, TREE_SCALE)
 
 	# Undergrowth goes only where the player can already walk, and blocks
 	# nothing. It is there so a clearing reads as a clearing; a bush that stopped
@@ -536,7 +556,12 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 	for y in range(2, size.y - 2):
 		for x in range(2, size.x - 2):
 			var cell := Vector2i(x, y)
-			if map.solid_at(layers, cell) or _rng.randf() >= UNDERGROWTH_DENSITY:
+			if map.solid_at(layers, cell) or BARE_GROUND.has(map.tile_at(layers, cell)):
+				continue
+			# Rolled after the exclusions, not before, so skipping the paths
+			# thins the bushes rather than shifting every later roll and
+			# rearranging the whole area.
+			if _rng.randf() >= UNDERGROWTH_DENSITY:
 				continue
 			_stand(root, grove, "Bush", cell,
 				String(UNDERGROWTH[_rng.randi_range(0, UNDERGROWTH.size() - 1)]),
@@ -544,7 +569,7 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 
 
 func _stand(root: Node2D, parent: Node2D, prefix: String, cell: Vector2i,
-		texture: String, footprint: Vector2) -> void:
+		texture: String, footprint: Vector2, zoom: float = 1.0) -> void:
 	var prop: Prop = PROP_SCENE.instantiate()
 	prop.name = "%s_%d_%d" % [prefix, cell.x, cell.y]
 	prop.texture = load("res://art/sprites/props/%s.png" % texture)
@@ -553,6 +578,7 @@ func _stand(root: Node2D, parent: Node2D, prefix: String, cell: Vector2i,
 	# Half of them mirrored, so a planted row is not the same photograph
 	# thirty times.
 	prop.flip = _rng.randf() < 0.5
+	prop.art_scale = zoom
 	parent.add_child(prop)
 	prop.owner = root
 	prop.position = GreyboxMap.centre(cell)
