@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://art/icons/items/gear/plate_boots.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"plate_boots"
+display_name = "Plate boots"
+description = "Guard issue. Heavy, and they will stop a bite."
+icon = ExtResource("2_icon")
+kind = 3
+stack_size = 1
+slot = 4
+modifiers = {&"max_health": 1, &"move_speed": -6}

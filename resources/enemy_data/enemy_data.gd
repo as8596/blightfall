@@ -49,6 +49,15 @@ extends Resource
 @export var death_time: float = 0.35
 
 @export_group("Presentation")
+## The sprites. Left null, the enemy runs on a flat `base_color` box — which is
+## what keeps a new enemy playable on the day its stats are written and its art
+## is not drawn (GDD §8 puts the player's sheet first and everything else after
+## the zone 1 tileset).
+@export var animations: ActorAnimationSet
+
+## The drawn body, in pixels. Sets the sprite offset that puts the feet on the
+## node origin, and the collider is derived from it — so this has to match the
+## art, not approximate it. `tools/import_pixellab.py` prints the measurement.
 @export var body_size: Vector2 = Vector2(16, 16)
 @export var base_color: Color = Color(0.45, 0.42, 0.38)
 @export var hitbox_size: Vector2 = Vector2(20, 18)

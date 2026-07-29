@@ -66,6 +66,10 @@ func _apply_data() -> void:
 	# The animation component owns the sprite: it sizes the placeholder box when
 	# there is no art, and sets the offset that puts the feet on the origin
 	# either way.
+	# Art first, then the box — `set_placeholder` only reinstalls the flat
+	# rectangle when there is no animation set, so assigning in this order means
+	# an enemy with sprites keeps them and an enemy without still gets a body.
+	animation.animations = data.animations
 	animation.body_height = data.body_size.y
 	animation.set_placeholder(data.body_size, data.base_color)
 

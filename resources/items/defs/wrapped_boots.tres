@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://art/icons/items/gear/wrapped_boots.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"wrapped_boots"
+display_name = "Wrapped boots"
+description = "Rag over leather over rag. They were somebody's once."
+icon = ExtResource("2_icon")
+kind = 3
+stack_size = 1
+slot = 4
+modifiers = {&"move_speed": 4}

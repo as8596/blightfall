@@ -59,19 +59,46 @@ The forest wolf: 96px frames, `body_size.y = 48` → paws at y=72.
 Get this wrong and the actor sinks into or floats above the ground, and
 y-sorting puts them behind things they are standing in front of.
 
-### Getting there from a generator's export
+### Getting there from a Pixellab export
+
+Unzip it somewhere and run two commands:
 
 ```bash
-python3 tools/pack_strips.py ~/Downloads/wolf --actor forest_wolf --dry-run
-python3 tools/pack_strips.py ~/Downloads/wolf --actor forest_wolf
+python3 tools/import_pixellab.py ~/Downloads/wolf --actor forest_wolf --frame 128 --dry-run
+python3 tools/import_pixellab.py ~/Downloads/wolf --actor forest_wolf --frame 128
 python3 tools/build_animation_set.py forest_wolf
 ```
 
-`pack_strips.py` reads the direction from compass words in the filename
-(`south`, `se`, `north-west`, …) and the frame order from the trailing number,
-then writes the strips. `build_animation_set.py` reads whatever strips exist and
-writes `resources/animation/<actor>.tres` — re-run it after adding a direction;
-it is generated, not hand-edited.
+`import_pixellab.py` reads `metadata.json`, re-canvases every frame onto the
+frame size you pick, and anchors the feet — **nothing is rescaled**, the exports
+are already 1:1 and resampling would destroy the grid.
+
+Two things about the crop are worth knowing, because they are why you can
+re-import later without breaking what is already in:
+
+- **Pixellab pads the canvas on purpose**, so animations have room to swing past
+  the idle silhouette. Choose `--frame` with headroom (128 for a human-sized
+  actor) rather than cropping tight.
+- The window is anchored to the **canvas centre** horizontally and the **feet of
+  the idle rotations** vertically. Both hold as clips are added, so a walk cycle
+  exported next month lines up with the idle exported today.
+
+Pass `--body` to declare the `body_height` you want on the AnimationComponent;
+the feet are anchored to satisfy it exactly, so the number in the scene and the
+pixels in the file cannot drift apart. Without it, the measured height is used
+and printed.
+
+A clip that is animated in only one direction is padded: the other seven hold
+their standing pose for the same number of frames, so `frames` stays one number
+per clip. You get motion where you are looking and nothing breaks.
+
+`tools/pack_strips.py` is the other route in — loose frames that are already the
+right size, with the direction in the filename (`south`, `se`, `north-west`, …)
+and the order in a trailing number.
+
+`build_animation_set.py` reads whatever strips exist and writes
+`resources/animation/<actor>.tres`. Re-run it after adding a direction; the file
+is generated, not hand-edited.
 
 Import every sprite with **filter off and mipmaps off**, or the pixel grid goes
 soft. Then `python3 tools/check_colour.py` before committing.

@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/enemy_data/enemy_data.gd" id="1_data"]
+[ext_resource type="Resource" path="res://resources/animation/forest_wolf.tres" id="2_anim"]
 
 [resource]
 resource_name = "Forest Wolf"
@@ -25,7 +26,8 @@ separation_radius = 44.0
 separation_strength = 0.6
 knockback_resistance = 1.0
 death_time = 0.4
-body_size = Vector2(76, 48)
+animations = ExtResource("2_anim")
+body_size = Vector2(87, 65)
 base_color = Color(0.42, 0.39, 0.35, 1)
-hitbox_size = Vector2(64, 52)
+hitbox_size = Vector2(72, 56)
 hitbox_offset = 40.0

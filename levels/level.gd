@@ -51,6 +51,19 @@ const ENEMY_SCENES: Dictionary = {
 	&"blighted_villager": preload("res://actors/enemies/blighted_villager/blighted_villager.tscn"),
 }
 
+## Real sprites for the villagers who have them. Everyone else falls back to the
+## tinted rectangle below — which is the honest state of the art budget, not an
+## oversight (GDD §8).
+const NPC_ANIMATIONS: Dictionary = {
+	&"fox": preload("res://resources/animation/fox.tres"),
+}
+
+## Drawn height per sprited villager, for the offset that puts their feet on the
+## node origin. Printed by `tools/import_pixellab.py` at import time.
+const NPC_HEIGHTS: Dictionary = {
+	&"fox": 87.0,
+}
+
 ## Placeholder body colours, keyed by npc id. Temporary in the obvious way — a
 ## real villager sheet replaces the whole idea — but six identical figures in one
 ## square reads as a bug rather than as a placeholder.
@@ -201,6 +214,8 @@ func _spawn_npcs() -> void:
 		person.name = "Npc_" + String(id)
 		person.dialogue_id = id
 		person.tint = NPC_TINTS.get(id, Color(0.78, 0.74, 0.66))
+		person.animations = NPC_ANIMATIONS.get(id)
+		person.body_height = float(NPC_HEIGHTS.get(id, 96.0))
 		world.add_child(person)
 		person.global_position = marker.global_position
 
