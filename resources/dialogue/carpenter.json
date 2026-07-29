@@ -10,9 +10,18 @@
         "Magistrate said you'd be along. Didn't say when."
       ],
       "choices": [
-        { "text": "Timber for what?", "goto": "deed" },
-        { "text": "Who are you?", "goto": "who" },
-        { "text": "I should go.", "goto": "" }
+        {
+          "text": "Timber for what?",
+          "goto": "deed"
+        },
+        {
+          "text": "Who are you?",
+          "goto": "who"
+        },
+        {
+          "text": "I should go.",
+          "goto": ""
+        }
       ]
     },
     "deed": {
@@ -22,8 +31,14 @@
         "He never told you, did he."
       ],
       "choices": [
-        { "text": "He never told me.", "goto": "never_told" },
-        { "text": "What do you need from me?", "goto": "materials" }
+        {
+          "text": "He never told me.",
+          "goto": "never_told"
+        },
+        {
+          "text": "What do you need from me?",
+          "goto": "materials"
+        }
       ]
     },
     "never_told": {
@@ -32,9 +47,16 @@
         "Reckons saying it out loud would make it a favour you owed."
       ],
       "choices": [
-        { "text": "What do you need from me?", "goto": "materials" },
-        { "text": "I'll think about it.", "goto": "" }
-      ]
+        {
+          "text": "What do you need from me?",
+          "goto": "materials"
+        },
+        {
+          "text": "I'll think about it.",
+          "goto": ""
+        }
+      ],
+      "once": true
     },
     "who": {
       "lines": [
@@ -42,9 +64,16 @@
         "Been busy."
       ],
       "choices": [
-        { "text": "Timber for what?", "goto": "deed" },
-        { "text": "Right.", "goto": "" }
-      ]
+        {
+          "text": "Timber for what?",
+          "goto": "deed"
+        },
+        {
+          "text": "Right.",
+          "goto": ""
+        }
+      ],
+      "once": true
     },
     "materials": {
       "lines": [
@@ -52,6 +81,27 @@
         "Gate's south. Come back with a satchel and we'll start."
       ],
       "choices": []
+    },
+    "again": {
+      "lines": [
+        "Back already. Or not already \u2014 I've lost track of the days.",
+        "Timber's where it was."
+      ],
+      "choices": [
+        {
+          "text": "Tell me about the house again.",
+          "goto": "deed"
+        },
+        {
+          "text": "Who are you?",
+          "goto": "who"
+        },
+        {
+          "text": "Just passing.",
+          "goto": ""
+        }
+      ]
     }
-  }
+  },
+  "revisit": "again"
 }

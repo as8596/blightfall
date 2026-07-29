@@ -127,6 +127,27 @@ var _held: Dictionary = {}
 ## When the last conversation ended. See `REOPEN_LOCK_MS`.
 var _closed_at: int = -100000
 
+## How many conversations each villager has had with the player, and which
+## nodes they have already been through.
+##
+## **This is the difference between a village and a diorama.** Without it every
+## NPC greets you as a stranger forever, which is the single loudest way a town
+## admits it is a set — GDD §7 wants the same handful of people under increasing
+## pressure, and people under pressure do not repeat their opening line.
+##
+## Two mechanisms, deliberately small:
+##
+## - a `revisit` node, used instead of `start` once you have spoken before, so a
+##   villager can have a greeting and an afterwards;
+## - `"once": true` on a node, which hides every reply leading to it after it has
+##   been seen. That is the fox's rule from GDD §7 — *never repeats* — and it is
+##   what stops a menu of questions you have already asked.
+##
+## Saved, because a conversation the player remembers and the game does not is
+## worse than no memory at all.
+var _visits: Dictionary = {}
+var _seen: Dictionary = {}
+
 var _root: Control
 var _panel: Control
 var _speaker: Label
@@ -145,9 +166,37 @@ var _library: Dictionary = {}
 func _ready() -> void:
 	layer = LAYER
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group(SaveGame.GROUP)
 	_build()
 	_root.visible = false
 	set_process(false)
+
+
+func save_id() -> StringName:
+	return &"conversations"
+
+
+func save_data() -> Dictionary:
+	# String keys, because JSON has no other kind and a StringName round-tripping
+	# through a save file comes back as a String regardless.
+	var visits := {}
+	for id in _visits:
+		visits[String(id)] = int(_visits[id])
+	var seen := {}
+	for id in _seen:
+		seen[String(id)] = (_seen[id] as Dictionary).keys()
+	return {"visits": visits, "seen": seen}
+
+
+func load_data(data: Dictionary) -> void:
+	forget_conversations()
+	for id in data.get("visits", {}):
+		_visits[StringName(id)] = int((data["visits"] as Dictionary)[id])
+	for id in data.get("seen", {}):
+		var nodes := {}
+		for node in (data["seen"] as Dictionary)[id]:
+			nodes[String(node)] = true
+		_seen[StringName(id)] = nodes
 
 
 func is_open() -> bool:
@@ -219,9 +268,33 @@ func start(id: StringName, portrait: Dictionary = {}) -> bool:
 	Hud.enabled = false
 	set_process(true)
 	_lock = 1
-	_enter_node(String(data.get("start", "greeting")))
+	# Somebody you have met opens differently, when the writing provides for it.
+	var opening := String(data.get("start", "greeting"))
+	var again := String(data.get("revisit", ""))
+	if visits(id) > 0 and again != "" and (data.get("nodes", {}) as Dictionary).has(again):
+		opening = again
+	_visits[id] = visits(id) + 1
+	_enter_node(opening)
 	started.emit(id)
 	return true
+
+
+## How many times this conversation has been opened, ever.
+func visits(id: StringName) -> int:
+	return int(_visits.get(id, 0))
+
+
+## Whether a node has been reached before. Replies into a `"once"` node are
+## hidden once this is true.
+func has_seen(id: StringName, node: String) -> bool:
+	return (_seen.get(id, {}) as Dictionary).has(node)
+
+
+## Wipe the memory. For tests, and for a new game — a fresh save must not start
+## with the whole village already acquainted.
+func forget_conversations() -> void:
+	_visits.clear()
+	_seen.clear()
 
 
 func close() -> void:
@@ -269,8 +342,20 @@ func _enter_node(name: String) -> void:
 	_node = name
 	var node: Dictionary = nodes[name]
 	_lines = node.get("lines", [])
-	_choices = node.get("choices", [])
+	# Replies into a node already seen and marked `once` are dropped before the
+	# player ever sees them, rather than greyed out. A greyed-out option is still
+	# a thing to read past every single time.
+	_choices = []
+	for choice in node.get("choices", []):
+		var target := String((choice as Dictionary).get("goto", ""))
+		var destination: Dictionary = nodes.get(target, {})
+		if bool(destination.get("once", false)) and has_seen(_id, target):
+			continue
+		_choices.append(choice)
 	_line = 0
+	if not _seen.has(_id):
+		_seen[_id] = {}
+	(_seen[_id] as Dictionary)[name] = true
 	_start_line()
 
 

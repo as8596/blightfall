@@ -86,6 +86,76 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 		print("  FAIL  %s%s" % [label, "  (%s)" % detail if detail != "" else ""])
 
 
+## The rebuild ledger.
+##
+## The map carries the eight plots and what each costs; it is regenerated
+## wholesale by a build script, so it cannot also be where "the forge is
+## standing" lives. `Village` is that, and the reason it is an autoload is that
+## the state has to survive walking out of the south gate — which is the entire
+## point of going out.
+func _test_village_state(level: Level) -> void:
+	print("\nVillage state (GDD §15 A4: the town is the progress bar)")
+	Village.reset()
+	_check("a new game starts with a ruined town", Village.count() == 0)
+
+	var projects := level.rebuild_projects()
+	_check("the map still carries the projects", projects.size() == 8,
+		"%d" % projects.size())
+	if projects.is_empty():
+		return
+
+	var by_id := {}
+	for entry in projects:
+		by_id[String(entry.get("id", ""))] = entry
+	var home: Dictionary = by_id.get("home", {})
+	var archive: Dictionary = by_id.get("archive", {})
+
+	# The chain is data — the archive waits on the breach — and the check for it
+	# lives here because this is where the record of what is built is.
+	_check("your home needs nothing first", Village.can_build(home))
+	_check("the archive does", not Village.can_build(archive))
+
+	var announced: Array[StringName] = []
+	var listener := func(id: StringName) -> void: announced.append(id)
+	Events.village_built.connect(listener)
+	_check("building the home works", Village.build(home))
+	_check("and it is announced once", announced.size() == 1 and announced[0] == &"home",
+		str(announced))
+	_check("it cannot be built twice", not Village.build(home))
+	Events.village_built.disconnect(listener)
+
+	# A satchel that cannot pay must not leave a building half-finished.
+	var breach: Dictionary = by_id.get("breach", {})
+	var purse := InventoryComponent.new()
+	add_child(purse)
+	purse.capacity = 99
+	# The map authors a tier; Village turns it into materials. The breach is one
+	# of the two "high" projects, so this also pins that the mapping happens at
+	# all — a tier read as a literal dictionary silently costs nothing, which is
+	# a rebuild economy anyone can skip.
+	var cost := Village.cost_of(breach)
+	_check("the breach costs materials, not a tier name",
+		cost.has(&"timber") and int(cost[&"timber"]) > 0, str(cost))
+	_check("and the expensive tiers want ironwork", cost.has(&"ironwork"), str(cost))
+	_check("a trivial project is cheaper than a high one",
+		int(Village.cost_of(home).get(&"timber", 0)) < int(cost[&"timber"]))
+	_check("an empty satchel cannot build it", not Village.build(breach, purse))
+	_check("and nothing was spent trying", purse.total() == 0, "%d" % purse.total())
+	for material in cost:
+		purse.add(StringName(material), int(cost[material]))
+	_check("a full one can", Village.build(breach, purse))
+	_check("and the materials are gone", purse.total() == 0, "%d" % purse.total())
+	purse.queue_free()
+
+	var saved := Village.save_data()
+	Village.reset()
+	_check("a reset town is ruined again", Village.count() == 0)
+	Village.load_data(saved)
+	_check("and a loaded one remembers what stood",
+		Village.is_built(&"home") and Village.is_built(&"breach"), str(Village.completed()))
+	Village.reset()
+
+
 ## Props and shrines: the two things a piece of drawn scenery becomes.
 ##
 ## The assertions here are all about *anchoring*, because that is the failure
@@ -1329,6 +1399,7 @@ func _test_village() -> void:
 	for entry in projects:
 		requires[String(entry["id"])] = String(entry.get("requires", ""))
 	_check("eight rebuild projects", projects.size() == 8, "%d" % projects.size())
+	_test_village_state(level)
 	_check("your home is the first build",
 		level.district_of("home") == "south" and requires.get("home", "") == "")
 	_check("the archive waits on the breach", requires.get("archive", "") == "breach",

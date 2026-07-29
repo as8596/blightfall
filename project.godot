@@ -32,6 +32,7 @@ UiScale="*res://ui/ui_scale.gd"
 Hud="*res://ui/hud.gd"
 GameMenu="*res://ui/game_menu.gd"
 PauseMenu="*res://ui/pause_menu.gd"
+Village="*res://autoloads/village.gd"
 Dialogue="*res://ui/dialogue_box.gd"
 
 [display]

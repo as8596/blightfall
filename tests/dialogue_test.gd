@@ -159,7 +159,85 @@ func _run() -> void:
 	_check("and that did not leave the game paused", not get_tree().paused)
 
 	await _test_clicking()
+	await _test_memory()
 	_finish()
+
+
+## A villager who greets you as a stranger forever is a village that admits it
+## is a set. Two mechanisms, both saved.
+func _test_memory() -> void:
+	Dialogue.forget_conversations()
+	_check("a fresh save has met nobody", Dialogue.visits(&"carpenter") == 0)
+
+	_check("the first conversation opens", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+	_check("and it opens on the greeting", Dialogue.node_name() == "greeting",
+		Dialogue.node_name())
+	var first := Dialogue.line_text()
+	_check("the visit is counted", Dialogue.visits(&"carpenter") == 1,
+		"%d" % Dialogue.visits(&"carpenter"))
+	Dialogue.close()
+	await _ticks(2)
+
+	# Second time through, the writing gets to open differently.
+	_check("the second conversation opens", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+	_check("and it opens somewhere else", Dialogue.node_name() == "again",
+		Dialogue.node_name())
+	_check("with different words", Dialogue.line_text() != first,
+		Dialogue.line_text())
+
+	# "Who are you?" is a question you ask once. Walk into it, then come back
+	# and confirm the reply is gone rather than greyed — a greyed-out option is
+	# still a thing to read past every time.
+	var before := Dialogue.choice_count()
+	_check("the reply is on offer the first time", before >= 2, "%d" % before)
+	Dialogue.close()
+	await _ticks(2)
+
+	_check("the 'who' node has not been reached yet",
+		not Dialogue.has_seen(&"carpenter", "who"))
+	_check("reopening works", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+	# Reply index 1 is "Who are you?" in the revisit node.
+	for _i in range(8):
+		if Dialogue.showing_replies():
+			break
+		_click()
+		await _ticks(2)
+	_check("the revisit node offers its replies", Dialogue.showing_replies())
+	await _tap(&"move_down")
+	await _press(&"interact")
+	_check("following it reaches 'who'", Dialogue.node_name() == "who", Dialogue.node_name())
+	_check("and it is now remembered", Dialogue.has_seen(&"carpenter", "who"))
+	Dialogue.close()
+	await _ticks(2)
+
+	_check("next time it is not offered again", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+	for _i in range(8):
+		if Dialogue.showing_replies():
+			break
+		_click()
+		await _ticks(2)
+	var texts: Array[String] = []
+	for i in Dialogue.choice_count():
+		texts.append(str(i))
+	_check("the once-only reply is gone, not greyed",
+		Dialogue.choice_count() == before - 1,
+		"%d replies, was %d" % [Dialogue.choice_count(), before])
+	Dialogue.close()
+	await _ticks(2)
+
+	# ...and all of it survives a save.
+	var saved := Dialogue.save_data()
+	Dialogue.forget_conversations()
+	_check("forgetting works", Dialogue.visits(&"carpenter") == 0)
+	Dialogue.load_data(saved)
+	_check("and a load remembers the visits",
+		Dialogue.visits(&"carpenter") >= 3, "%d" % Dialogue.visits(&"carpenter"))
+	_check("and which nodes were seen", Dialogue.has_seen(&"carpenter", "who"))
+	Dialogue.forget_conversations()
 
 
 ## The mouse does what the key does.

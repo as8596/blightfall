@@ -64,6 +64,10 @@ signal haul_recovered
 ## after the new scene is up and the player has been placed in it.
 signal doorway_used(scene_path: String, spawn: String)
 
+## A rebuild project was completed. Carries the id; listeners ask `Village` for
+## anything more, because the bus carries facts and not state.
+signal village_built(id: StringName)
+
 ## A waystone was lit for the first time. The id is stable across scenes, so a
 ## fast-travel network can key on it — see `world/shrine.gd`.
 signal shrine_lit(id: StringName)
