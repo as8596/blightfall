@@ -81,6 +81,26 @@ func _run() -> void:
 		return _finish()
 	await _ticks(6)
 
+	# The title screen is gone now, and anything it connected to an autoload has
+	# to have gone with it. A lambda does not: Godot only auto-disconnects a
+	# callable bound to the freed object, so `UiScale.changed.connect(func ...)`
+	# on the menu left a callback holding a freed Label, and every UI-scale press
+	# for the rest of the session ran it. That is a crash you only meet after
+	# starting a game and then opening the pause menu, which is late.
+	var dangling: Array[String] = []
+	for entry in UiScale.changed.get_connections():
+		var callable: Callable = entry["callable"]
+		if not is_instance_valid(callable.get_object()):
+			dangling.append(str(callable))
+	_check("nothing dead is still listening for a UI scale change",
+		dangling.is_empty(), ", ".join(dangling))
+	# ...and pressing it is safe, which is the thing the player actually does.
+	var before := UiScale.factor
+	UiScale.factor += UiScale.STEP
+	UiScale.factor = before
+	_check("changing the UI scale after leaving the menu is safe",
+		is_equal_approx(UiScale.factor, before), "%.1f" % UiScale.factor)
+
 	var ambry := get_tree().current_scene as Level
 	_check("Ambry loaded", ambry != null)
 	if ambry == null:

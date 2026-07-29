@@ -53,6 +53,10 @@ var _talk_advance: int = 0
 ## every fresh scene.
 var _grant_xp: int = 0
 
+## `--ui-scale=N` sets the interface scale, which is what most players will not
+## be running at 1x. Text crispness is a different question at 2x.
+var _ui_scale: float = 0.0
+
 ## `--pointer=x,y` puts the cursor somewhere, in window pixels. Hover states are
 ## invisible to a harness that never moves the mouse.
 var _pointer: Vector2 = Vector2.INF
@@ -90,6 +94,8 @@ func _capture() -> void:
 			_use_placeholder_animations = true
 		elif arg.begins_with("--near"):
 			_pull_enemies_close = true
+		elif arg.begins_with("--ui-scale="):
+			_ui_scale = arg.trim_prefix("--ui-scale=").to_float()
 		elif arg.begins_with("--talk-advance="):
 			_talk_advance = arg.trim_prefix("--talk-advance=").to_int()
 		elif arg.begins_with("--talk-ticks="):
@@ -109,6 +115,10 @@ func _capture() -> void:
 			_attack_delay = arg.trim_prefix("--attack=").to_int()
 		elif arg.begins_with("--attack"):
 			_attack = true
+
+	if _ui_scale > 0.0:
+		UiScale.factor = _ui_scale
+		await get_tree().process_frame
 
 	for i in settle_frames:
 		await get_tree().process_frame

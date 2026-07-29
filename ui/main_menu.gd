@@ -23,6 +23,7 @@ const DIM := Color(0.62, 0.58, 0.52)
 
 var _buttons: Array[Button] = []
 var _continue: Button
+var _scale_label: Label
 
 
 func _ready() -> void:
@@ -116,14 +117,14 @@ func _build() -> void:
 	smaller.add_theme_font_size_override("font_size", 22)
 	scale_row.add_child(smaller)
 
-	var scale_label := Label.new()
-	scale_label.custom_minimum_size = Vector2(176, 40)
-	scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	scale_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	scale_label.add_theme_font_size_override("font_size", 20)
-	scale_label.add_theme_color_override("font_color", DIM)
-	scale_label.text = "UI scale   %.1f x" % UiScale.factor
-	scale_row.add_child(scale_label)
+	_scale_label = Label.new()
+	_scale_label.custom_minimum_size = Vector2(176, 40)
+	_scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_scale_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_scale_label.add_theme_font_size_override("font_size", 20)
+	_scale_label.add_theme_color_override("font_color", DIM)
+	_scale_label.text = "UI scale   %.1f x" % UiScale.factor
+	scale_row.add_child(_scale_label)
 
 	var bigger := Button.new()
 	bigger.text = "+"
@@ -134,10 +135,15 @@ func _build() -> void:
 	# Adjustable from the title screen on purpose: it is the setting somebody
 	# needs *before* they can comfortably read anything else, and burying it
 	# behind a menu you reach by starting the game is the wrong way round.
-	smaller.pressed.connect(func() -> void: UiScale.factor -= UiScale.STEP)
-	bigger.pressed.connect(func() -> void: UiScale.factor += UiScale.STEP)
-	UiScale.changed.connect(func(f: float) -> void:
-		scale_label.text = "UI scale   %.1f x" % f)
+	smaller.pressed.connect(_smaller)
+	bigger.pressed.connect(_bigger)
+	# A **method**, not a lambda. `UiScale` is an autoload and outlives this
+	# scene, and Godot disconnects a signal automatically only when the callable
+	# is bound to the freed object — which a lambda is not. Connected as a
+	# lambda, every UI-scale change for the rest of the session ran a callback
+	# holding a freed Label: "Lambda capture at index 0 was freed", once per
+	# press, from the pause menu, long after the title screen was gone.
+	UiScale.changed.connect(_on_ui_scale_changed)
 
 	_gap(column, 18)
 	_button(column, "Quit", _on_quit)
@@ -152,6 +158,19 @@ func _button(column: VBoxContainer, text: String, action: Callable) -> Button:
 	column.add_child(button)
 	_buttons.append(button)
 	return button
+
+
+func _smaller() -> void:
+	UiScale.factor -= UiScale.STEP
+
+
+func _bigger() -> void:
+	UiScale.factor += UiScale.STEP
+
+
+func _on_ui_scale_changed(to: float) -> void:
+	if is_instance_valid(_scale_label):
+		_scale_label.text = "UI scale   %.1f x" % to
 
 
 func _gap(column: VBoxContainer, height: int) -> void:

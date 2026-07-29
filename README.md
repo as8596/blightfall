@@ -99,6 +99,9 @@ godot --headless --path . --script res://tools/build_orchardfall.gd
 # look at a level's whole layout rather than playing it
 godot --path . tests/screenshot.tscn -- --scene=res://levels/ambry/ambry_level.tscn --shot=/tmp/plan.png --fit
 
+# draw the UI font at a dozen sizes, for judging whether text is crisp
+godot --path . tests/font_sheet.tscn -- --shot=/tmp/font.png
+
 # capture a frame (needs a display; xvfb-run works)
 godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --attack=6
 ```

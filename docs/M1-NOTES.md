@@ -139,6 +139,30 @@ touching the Import tab per file. Two of the five are load-bearing:
   pixels to mush. It is the single most common way a pixel-art project
   mysteriously goes blurry.
 
+**Fonts are imported as pixel fonts, and that is three settings.** `dico`,
+`alagard` and `cavalhatriz` all ship with `antialiasing`, `hinting` and
+`subpixel_positioning` **off**, and `keep_rounding_remainders` false. Godot's
+defaults are the opposite of all four, and they are right for a vector typeface
+and wrong for a font drawn on a grid:
+
+- **Antialiasing** puts grey along every edge. On a pixel font that is not
+  smoothing, it is fringing — the glyph stops being two colours.
+- **Hinting** nudges stems to fit the current size, which is exactly the
+  distortion a pixel font is drawn to avoid.
+- **Subpixel positioning** lets a glyph start on a fractional pixel, so the same
+  letter is rasterised differently depending on what precedes it.
+
+Together they were the whole of "the UI text is not crisp". The world scaling
+was never the problem: the atlas is sampled Nearest, so once the glyphs are two
+colours, a 2x interface scale is clean pixel doubling.
+
+Whole-number scales stay pixel-exact. Half steps duplicate every other row, so
+they are slightly uneven by construction — a real trade, and the player's to
+make (GDD §14).
+
+`tests/font_sheet.tscn` renders the UI font at a dozen sizes for judging this by
+eye, which is the only way to judge it.
+
 **Physics runs at 60 ticks/second.** You will not find that in `project.godot`,
 because 60 is Godot's default and the editor drops the line. It matters anyway:
 every number in GDD §5 is expressed in seconds and converted against this rate,

@@ -116,6 +116,10 @@ func _refresh() -> void:
 		_scale_label.text = "UI scale   %.1f x" % UiScale.factor
 
 
+func _on_ui_scale_changed(_to: float) -> void:
+	_refresh()
+
+
 func _build() -> void:
 	_root = Control.new()
 	_root.name = "PauseMenu"
@@ -173,7 +177,10 @@ func _build() -> void:
 	bigger.pressed.connect(func() -> void: UiScale.factor += UiScale.STEP)
 	scale_row.add_child(bigger)
 
-	UiScale.changed.connect(func(_f: float) -> void: _refresh())
+	# A method rather than a lambda, for the reason in `ui/main_menu.gd`. This
+	# one is an autoload and never dies, so it was safe — but the pattern is not,
+	# and one of the two places it appeared was a real crash.
+	UiScale.changed.connect(_on_ui_scale_changed)
 
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 12)
