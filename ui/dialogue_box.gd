@@ -368,6 +368,29 @@ func _advance() -> void:
 	_start_line()
 
 
+## Click anywhere on the box to do what the key does: finish the line if it is
+## still typing, otherwise move on.
+##
+## The exception is while replies are up. There, a click on the box *behind* the
+## replies is not an answer — the reply frames own their own clicks, and
+## choosing the highlighted one on the player's behalf is a conversation they
+## did not have. Finishing a still-typing line is still allowed, because that is
+## not a choice.
+func _on_box_input(event: InputEvent) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	# No `_lock` check here on purpose. The lock is a frame of deadband against
+	# *polled* key state — the key that opened the box is still down on the frame
+	# it opens — and a mouse button arrives as one discrete event that cannot
+	# repeat itself. Honouring the lock here only ate clicks that landed on the
+	# same frame as the press before them, which is most of the fast ones.
+	if _replies.visible and not _typing():
+		return
+	_panel.accept_event()
+	_advance()
+
+
 func _pick() -> void:
 	if _choice < 0 or _choice >= _choices.size():
 		close()
@@ -537,6 +560,7 @@ func _build() -> void:
 	_panel.offset_bottom = -MARGIN
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.add_theme_stylebox_override("panel", _frame(BACK, EDGE))
+	_panel.gui_input.connect(_on_box_input)
 	_root.add_child(_panel)
 
 	var row := HBoxContainer.new()
@@ -546,6 +570,9 @@ func _build() -> void:
 	row.offset_top = PAD.y
 	row.offset_bottom = -PAD.y
 	row.add_theme_constant_override("separation", int(PORTRAIT_GAP))
+	# PASS, not STOP: a click on the layout should reach the box behind it, or
+	# click-to-advance would only work on the few pixels of visible padding.
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	_panel.add_child(row)
 
 	# The face, in its own frame on the left. Empty when nobody has one — a
@@ -555,6 +582,7 @@ func _build() -> void:
 	_portrait_frame.custom_minimum_size = Vector2(PORTRAIT, PORTRAIT)
 	_portrait_frame.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_portrait_frame.add_theme_stylebox_override("panel", _frame(REPLY_BACK, EDGE))
+	_portrait_frame.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(_portrait_frame)
 
 	_portrait = TextureRect.new()
@@ -571,6 +599,7 @@ func _build() -> void:
 	_column = VBoxContainer.new()
 	_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_column.add_theme_constant_override("separation", 6)
+	_column.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(_column)
 
 	_speaker = Label.new()
@@ -586,6 +615,8 @@ func _build() -> void:
 
 	_replies = VBoxContainer.new()
 	_replies.add_theme_constant_override("separation", 4)
+	# The reply frames themselves STOP, so they still own their own clicks.
+	_replies.mouse_filter = Control.MOUSE_FILTER_PASS
 	_column.add_child(_replies)
 
 	# Absolutely positioned rather than in the column, so a hint does not change

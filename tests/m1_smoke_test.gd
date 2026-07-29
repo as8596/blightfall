@@ -994,6 +994,32 @@ func _test_equipment() -> void:
 		gear.item_in(ItemData.Slot.WEAPON) != null,
 		String(gear.item_in(ItemData.Slot.WEAPON).id) if gear.item_in(ItemData.Slot.WEAPON) != null else "-")
 
+	# The library is scanned, not listed, so the only thing that can go wrong is
+	# a `.tres` that loads but is not a usable item — which `Items` warns about
+	# and then skips, quietly, leaving a hole nobody notices until an id fails
+	# to resolve out of somebody's save file.
+	var broken: Array[String] = []
+	var edible := 0
+	for id in Items.all():
+		var item: ItemData = Items.get_item(id)
+		if item == null or not item.is_valid() or item.icon == null:
+			broken.append(String(id))
+			continue
+		if item.kind == ItemData.Kind.CONSUMABLE and item.heals > 0:
+			edible += 1
+	_check("every item in the library is usable and has an icon", broken.is_empty(),
+		", ".join(broken))
+	_check("and there is a decent spread of things to eat", edible >= 20, "%d" % edible)
+	# GDD §5: 6 hearts to start. A single meal that fills the bar is not a
+	# decision, so nothing may heal more than half of it.
+	var too_strong: Array[String] = []
+	for id in Items.all():
+		var item: ItemData = Items.get_item(id)
+		if item != null and item.heals > 3:
+			too_strong.append("%s heals %d" % [id, item.heals])
+	_check("no single meal is worth more than half a starting health bar",
+		too_strong.is_empty(), ", ".join(too_strong))
+
 	var hood: ItemData = Items.get_item(&"leather_hood")
 	_check("there is a piece of armour to test with", hood != null)
 	if hood == null:

@@ -158,7 +158,53 @@ func _run() -> void:
 		not Dialogue.start(&"nobody_at_all"))
 	_check("and that did not leave the game paused", not get_tree().paused)
 
+	await _test_clicking()
 	_finish()
+
+
+## The mouse does what the key does.
+##
+## In its own conversation rather than woven into the run above, because a test
+## that advances the dialogue as a side effect of checking something else leaves
+## every assertion after it standing on a different node — which is exactly how
+## this failed the first time.
+func _test_clicking() -> void:
+	_check("a fresh conversation opens for the click test", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+
+	var typing_line := Dialogue.line_text()
+	_check("it is mid-line to begin with", Dialogue.is_typing())
+	_click()
+	await _ticks(2)
+	_check("clicking the box reveals the rest of a typing line",
+		Dialogue.line_text() == typing_line and not Dialogue.is_typing(),
+		"typing %s" % Dialogue.is_typing())
+
+	var before := Dialogue.line_index()
+	_click()
+	await _ticks(2)
+	_check("and clicking again turns the page",
+		Dialogue.line_index() > before, "line %d" % Dialogue.line_index())
+
+	# Run it to the replies with the mouse alone, then confirm a click on the
+	# box *behind* them is not an answer — choosing the highlighted reply for
+	# the player is a conversation they did not have.
+	for _i in range(8):
+		if Dialogue.showing_replies():
+			break
+		_click()
+		await _ticks(2)
+	_check("clicking alone reaches the replies", Dialogue.showing_replies())
+	var node_before := Dialogue.node_name()
+	_click()
+	await _ticks(2)
+	_check("clicking the box behind the replies chooses nothing",
+		Dialogue.node_name() == node_before and Dialogue.showing_replies(),
+		"%s -> %s" % [node_before, Dialogue.node_name()])
+
+	Dialogue.close()
+	await _ticks(2)
+	_check("the click test left the game unpaused", not get_tree().paused)
 
 
 ## Every file in `resources/dialogue/` parses, and every reply points at a node
@@ -200,6 +246,18 @@ func _check_library() -> void:
 
 ## Hold, release, settle. Nothing waits for the typewriter — checks that care
 ## about being mid-line need the press to land mid-line.
+## A left click on the dialogue box. Delivered straight to the handler rather
+## than through the viewport: `Input.parse_input_event` would have to land on
+## the panel's real screen rect, which depends on the window size and on the UI
+## scale, and a test that silently stops clicking the thing it means to click is
+## worse than no test.
+func _click() -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = true
+	Dialogue._on_box_input(event)
+
+
 func _tap(action: StringName) -> void:
 	Input.action_press(action)
 	await _ticks(3)
