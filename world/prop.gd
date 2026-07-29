@@ -1,0 +1,99 @@
+class_name Prop
+extends Node2D
+## A drawn thing standing in the world: a tree, a bush, a barrel, a cart.
+##
+## Props are not tiles. A tile is 64x64, aligned to the grid, and drawn on one
+## layer for the whole map — which is right for ground and walls, and wrong for
+## anything the player walks *behind*. A tree is 200px tall, occupies a third of
+## a tile at its base, and has to sort against the player by its trunk. That is a
+## node, not a cell.
+##
+## **The base is the origin.** The sprite is offset up by its own height so the
+## point the thing stands on sits at `position`, which is what y-sorting sorts
+## by. Get this wrong and a tree drawn from its centre sorts as though the player
+## were standing at its canopy — you walk behind a tree while still well in front
+## of it.
+##
+## **`z_index` stays 0.** Godot applies z_index before y-sorting, so a prop on a
+## different z than the player is either always in front or always behind it, and
+## no amount of correct sorting inside the layer will fix that (this cost an
+## afternoon once already — see the roofs in Ambry).
+
+## The picture. Frame 0 of a strip if `frames` is set.
+@export var texture: Texture2D:
+	set(value):
+		texture = value
+		_refresh()
+
+## Blocks movement. A bush usually should not; a tree should.
+@export var solid: bool = true:
+	set(value):
+		solid = value
+		_refresh()
+
+## The blocking footprint, in pixels, centred on the base.
+##
+## Deliberately separate from the sprite size and deliberately small: what stops
+## the player is the trunk, not the canopy. A collider matching the drawn
+## silhouette makes a forest feel like a maze of invisible walls, because the
+## player is stopped by branches they can clearly see they are under.
+@export var footprint: Vector2 = Vector2(28, 16):
+	set(value):
+		footprint = value
+		_refresh()
+
+## Nudge the drawn image without moving the sorting origin. For art whose base
+## is not exactly at the bottom of its canvas.
+@export var art_offset: Vector2 = Vector2.ZERO:
+	set(value):
+		art_offset = value
+		_refresh()
+
+## Mirror the sprite. Set per-instance by a map builder so a row of the same
+## tree is not a row of the same picture.
+@export var flip: bool = false:
+	set(value):
+		flip = value
+		_refresh()
+
+var _sprite: Sprite2D
+var _body: StaticBody2D
+var _shape: CollisionShape2D
+
+
+func _ready() -> void:
+	y_sort_enabled = true
+	# Same z as the player, or sorting cannot help us. See the class comment.
+	z_index = 0
+	_build()
+	_refresh()
+
+
+func _build() -> void:
+	_sprite = Sprite2D.new()
+	_sprite.centered = true
+	add_child(_sprite)
+
+	_body = StaticBody2D.new()
+	_body.collision_layer = 1        # World
+	_body.collision_mask = 0
+	_shape = CollisionShape2D.new()
+	_shape.shape = RectangleShape2D.new()
+	_body.add_child(_shape)
+	add_child(_body)
+
+
+func _refresh() -> void:
+	if _sprite == null:
+		return
+	_sprite.texture = texture
+	_sprite.flip_h = flip
+	if texture != null:
+		# Base on the origin. Same rule as AnimationComponent's feet-on-origin.
+		_sprite.offset = Vector2(0, -texture.get_height() * 0.5) + art_offset
+	(_shape.shape as RectangleShape2D).size = footprint
+	# The footprint sits *behind* the base by half its depth, so the player can
+	# stand at the foot of a tree rather than being held a body-length away.
+	_shape.position = Vector2(0, -footprint.y * 0.5)
+	_body.process_mode = Node.PROCESS_MODE_INHERIT if solid else Node.PROCESS_MODE_DISABLED
+	_shape.disabled = not solid

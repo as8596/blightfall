@@ -78,7 +78,7 @@ func unequip(slot: ItemData.Slot) -> ItemData:
 ## Everything currently worn, for the character sheet: [{slot, name, modifiers}].
 func summary() -> Array:
 	var out: Array = []
-	for slot in [ItemData.Slot.WEAPON, ItemData.Slot.ARMOUR, ItemData.Slot.TOOL_SLOT]:
+	for slot in ItemData.EQUIP_SLOTS:
 		var item: ItemData = worn.get(slot)
 		out.append({
 			"slot": slot,
@@ -118,6 +118,6 @@ func load_data(data: Dictionary, library: Dictionary) -> void:
 		var item: ItemData = library.get(StringName(String(data[key])))
 		if item != null and item.is_equippable():
 			worn[item.slot] = item
-	for slot in [ItemData.Slot.WEAPON, ItemData.Slot.ARMOUR, ItemData.Slot.TOOL_SLOT]:
+	for slot in ItemData.EQUIP_SLOTS:
 		_apply(slot)
 	changed.emit()

@@ -332,13 +332,13 @@ func _build() -> void:
 	_tabs.move_child(_tabs.get_node("Character"), 0)
 
 
-## Three worn slots: what you swing, what you wear, which of the four keys is in
-## your hand (GDD §6). New to the design — GDD §15 A9 is the record of it, and
-## the cap is three. A wardrobe is a §2 conversation, not a code change.
+## Four worn slots: what you swing, what you wear, what is on your feet, and
+## which of the four keys is in your hand (GDD §6). New to the design — GDD §15
+## A9 is the record of it — and the count is deliberately small. A full wardrobe
+## is a §2 conversation, not a code change. The list is ItemData.EQUIP_SLOTS, so
+## this loop never needs editing to gain or lose one.
 ##
-## Click a pack slot holding gear to put it on; click a worn slot to take it off.
-## No dragging: one button, and the item already knows which slot it belongs in,
-## so there is nothing for a drag to disambiguate.
+## Drag gear here, or right-click it. Clicking a worn slot takes it off.
 func _build_equipment() -> Control:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
@@ -350,7 +350,7 @@ func _build_equipment() -> Control:
 	heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
 	column.add_child(heading)
 
-	for slot in [ItemData.Slot.WEAPON, ItemData.Slot.ARMOUR, ItemData.Slot.TOOL_SLOT]:
+	for slot in ItemData.EQUIP_SLOTS:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		column.add_child(row)

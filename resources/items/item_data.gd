@@ -37,7 +37,15 @@ enum Slot {
 	ARMOUR,
 	## Which of the four keys is in your hand (GDD §6).
 	TOOL_SLOT,
+	## Boots. Appended rather than slotted in next to ARMOUR, so every `slot = n`
+	## already written into a `.tres` still means what it meant.
+	BOOTS,
 }
+
+## The worn slots, in the order they are shown. One list, because there were
+## three copies of it and a fourth slot would have been three edits and a bug in
+## whichever one got missed.
+const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT]
 
 @export var id: StringName = &""
 @export var display_name: String = ""
@@ -78,6 +86,7 @@ static func slot_name(which: Slot) -> String:
 		Slot.WEAPON: return "Weapon"
 		Slot.ARMOUR: return "Armour"
 		Slot.TOOL_SLOT: return "Tool"
+		Slot.BOOTS: return "Boots"
 		_: return ""
 
 

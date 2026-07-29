@@ -23,3 +23,4 @@ mono_crash.*.json
 .DS_Store
 Thumbs.db
 *.swp
+__pycache__/

@@ -64,6 +64,10 @@ signal haul_recovered
 ## after the new scene is up and the player has been placed in it.
 signal doorway_used(scene_path: String, spawn: String)
 
+## A waystone was lit for the first time. The id is stable across scenes, so a
+## fast-travel network can key on it — see `world/shrine.gd`.
+signal shrine_lit(id: StringName)
+
 ## Requested by hitboxes, consumed by the camera rig. Keeps camera logic out of
 ## the player (GDD §12, rule 4).
 signal screen_shake_requested(amount: float, duration: float)

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world/shrine.gd" id="1_shrine"]
+
+[sub_resource type="CircleShape2D" id="Circle_shrine"]
+radius = 44.0
+
+[node name="Shrine" type="Area2D"]
+collision_layer = 128
+collision_mask = 0
+script = ExtResource("1_shrine")
+prompt = "Rest"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -24)
+shape = SubResource("Circle_shrine")

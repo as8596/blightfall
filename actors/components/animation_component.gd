@@ -19,7 +19,20 @@ extends Node
 ## placeholder texture at `placeholder_size`, which is what keeps the grey-box
 ## prototype running while sprites are drawn one at a time.
 
-enum Facing { DOWN, UP, SIDE }
+## Eight directions, in octant order starting at east and turning clockwise on
+## screen (y grows downward), so the index is `round(angle / 45°)` with no table.
+##
+## An actor whose art has fewer strips than this still uses the same eight — the
+## missing ones resolve through `SpriteAnimation.resolve()`. Facing is a property
+## of movement, not of how much art got drawn.
+enum Facing { RIGHT, DOWN_RIGHT, DOWN, DOWN_LEFT, LEFT, UP_LEFT, UP, UP_RIGHT }
+
+const OCTANT: float = TAU / 8.0
+
+## How far past an octant boundary the facing has to travel before the strip
+## changes. Without it, a stick held exactly on a diagonal flickers between two
+## strips every frame; with it, the actor commits.
+const FACING_HYSTERESIS: float = deg_to_rad(7.0)
 
 @export var sprite_path: NodePath = ^"../Visual"
 
@@ -157,32 +170,40 @@ func set_automatic(enabled: bool) -> void:
 func _update_facing() -> void:
 	if _actor == null or not ("facing" in _actor):
 		return
-	var f: Vector2 = _actor.facing
-	var wanted := _facing
-	var flip := _flip
-	if absf(f.x) > absf(f.y):
-		wanted = Facing.SIDE
-		flip = f.x < 0.0
-	elif f.y < 0.0:
-		wanted = Facing.UP
-		flip = false
-	else:
-		wanted = Facing.DOWN
-		flip = false
-	if wanted == _facing and flip == _flip:
+	var wanted := facing_for(_actor.facing, _facing)
+	if wanted == _facing:
 		return
 	_facing = wanted
-	_flip = flip
-	sprite.flip_h = flip
 	_apply_texture()
+
+
+## Snap a direction vector to one of the eight facings, holding `current` until
+## the vector clears its octant by `FACING_HYSTERESIS`.
+##
+## Static and pure so the tests can walk it through a full turn without an actor.
+static func facing_for(direction: Vector2, current: int = Facing.DOWN) -> int:
+	if direction.length_squared() < 0.000001:
+		return current
+	var angle := direction.angle()
+	var index := wrapi(int(roundf(angle / OCTANT)), 0, 8)
+	if index == current:
+		return current
+	# Still inside the current octant's widened wedge? Then nothing changed.
+	var drift := absf(wrapf(angle - float(current) * OCTANT, -PI, PI))
+	if drift < OCTANT * 0.5 + FACING_HYSTERESIS:
+		return current
+	return index
 
 
 func _apply_texture() -> void:
 	if _current == null or sprite == null:
 		return
-	var texture := _current.texture_for(_facing)
+	var chosen := _current.resolve(_facing)
+	var texture: Texture2D = chosen["texture"]
 	if texture == null:
 		return
+	_flip = chosen["flip"]
+	sprite.flip_h = _flip
 	sprite.texture = texture
 	sprite.hframes = maxi(_current.frames, 1)
 	sprite.vframes = 1
@@ -234,6 +255,14 @@ func base_modulate() -> Color:
 
 func current_frame() -> int:
 	return _frame
+
+
+func current_facing() -> int:
+	return _facing
+
+
+func is_flipped() -> bool:
+	return _flip
 
 
 func has_art() -> bool:

@@ -41,7 +41,7 @@ Hard ceilings. Reread whenever a new idea seems exciting.
 |---|---|
 | Playable characters | 1 |
 | Zones | 3 + 1 hub |
-| Enemy types | 10 (incl. 3 variant reskins) |
+| Enemy types | 11 (incl. 3 variant reskins) |
 | Bosses | 3 |
 | Tools / abilities | 4 |
 | NPCs with dialogue | 10 (incl. the fox and the carpenter — §15 A6) |
@@ -189,9 +189,12 @@ Concrete starting values, all in seconds.
 
 Everything is a corrupted human or animal — one humanoid rig plus one quadruped rig, with corruption variants, covers nearly the whole list.
 
+**One exception, and it is the point.** The Forest Wolf is an ordinary animal: no rot, no accent, nothing to be merciful about. It exists so the valley is dangerous *before* the blight is, which is what makes the first Blighted Villager land as a change rather than as a difficulty curve. It also shares the quadruped rig with the Rot Hound, so it costs one sprite set rather than one enemy.
+
 | Enemy | Zone | Behavior | HP |
 |---|---|---|---|
 | Blighted Villager | All | Slow walker, lunge | 12 |
+| Forest Wolf | 1 | Fast, lunges; hunts in pairs. **Not blighted** | 10 |
 | Rotcrow | 1 | Erratic flight, dive attack | 8 |
 | Thornmass | 1 | Stationary, ranged volley | 16 |
 | Blighted Guard | 1 | Shielded front, flank to damage | 24 |

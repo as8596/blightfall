@@ -68,6 +68,7 @@ func _run() -> void:
 	await _test_save_load()
 	await _test_haul()
 	await _test_village()
+	await _test_world_objects()
 	_test_design_rules()
 
 	print("\n%d checks, %d failed\n" % [_checks, _failures])
@@ -85,6 +86,81 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 		print("  FAIL  %s%s" % [label, "  (%s)" % detail if detail != "" else ""])
 
 
+## Props and shrines: the two things a piece of drawn scenery becomes.
+##
+## The assertions here are all about *anchoring*, because that is the failure
+## mode. A prop sorted by its centre rather than its base is a tree the player
+## walks behind while standing well in front of it, and it looks like a
+## y-sorting bug rather than like an offset.
+func _test_world_objects() -> void:
+	print("\nWorld objects (props sort by their base; shrines remember)")
+	var art: Texture2D = load("res://art/sprites/player/player_idle_down.png")
+
+	var prop: Prop = load("res://world/prop.tscn").instantiate()
+	add_child(prop)
+	prop.texture = art
+	prop.footprint = Vector2(28, 16)
+	await _ticks(2)
+	_check("a prop shares the player's z_index", prop.z_index == 0, str(prop.z_index))
+	_check("a prop y-sorts", prop.y_sort_enabled)
+	var sprite := prop.get_node_or_null("Sprite2D") as Sprite2D
+	if sprite == null:
+		for child in prop.get_children():
+			if child is Sprite2D:
+				sprite = child
+	_check("the base of the picture sits on the origin",
+		sprite != null and is_equal_approx(sprite.offset.y, -art.get_height() * 0.5),
+		str(sprite.offset if sprite != null else Vector2.ZERO))
+
+	var body: StaticBody2D = null
+	for child in prop.get_children():
+		if child is StaticBody2D:
+			body = child
+	_check("a solid prop blocks on the World layer",
+		body != null and body.collision_layer == 1)
+	# The canopy is not the trunk. A collider matching the drawn silhouette makes
+	# a wood into a maze of walls you can see straight through.
+	var shape := body.get_child(0) as CollisionShape2D if body != null else null
+	_check("and its footprint is far smaller than its picture",
+		shape != null and (shape.shape as RectangleShape2D).size.y < art.get_height() * 0.25,
+		str((shape.shape as RectangleShape2D).size) if shape != null else "none")
+	prop.solid = false
+	await _ticks(2)
+	_check("a non-solid prop stops blocking", shape.disabled)
+	prop.queue_free()
+
+	var shrine: Shrine = load("res://world/shrine.tscn").instantiate()
+	shrine.id = &"test_waystone"
+	shrine.dormant = art
+	shrine.kindled = art
+	add_child(shrine)
+	await _ticks(2)
+	_check("a shrine starts dormant", not shrine.is_lit)
+	_check("and is in the saveable group", shrine.is_in_group(SaveGame.GROUP))
+	_check("its save id is stable and not a node path",
+		String(shrine.save_id()) == "shrine:test_waystone", String(shrine.save_id()))
+
+	var announced: Array[StringName] = []
+	var listener := func(id: StringName) -> void: announced.append(id)
+	Events.shrine_lit.connect(listener)
+	shrine.interact(_player)
+	await _ticks(2)
+	_check("resting lights it", shrine.is_lit)
+	_check("and announces it once on the bus",
+		announced.size() == 1 and announced[0] == &"test_waystone", str(announced))
+	shrine.interact(_player)
+	await _ticks(2)
+	_check("resting again does not re-announce", announced.size() == 1, str(announced.size()))
+	Events.shrine_lit.disconnect(listener)
+
+	var state := shrine.save_data()
+	shrine.load_data({"lit": false})
+	_check("a shrine can be un-lit by a load", not shrine.is_lit)
+	shrine.load_data(state)
+	_check("and a saved shrine comes back lit", shrine.is_lit)
+	shrine.queue_free()
+
+
 func _check_near(label: String, actual: float, expected: float, tolerance: float) -> void:
 	_check(
 		label,
@@ -97,6 +173,74 @@ func _check_near(label: String, actual: float, expected: float, tolerance: float
 ##
 ## Cheap to check and impossible to notice otherwise: a `_up` strip that is
 ## secretly the front view satisfies "facing north uses the up strip" perfectly.
+## Eight-way facing: the octant snap, the deadband that stops it flickering, and
+## the fallback chain that lets three-strip and eight-strip actors share one
+## component.
+##
+## The mirroring assertions are the load-bearing ones. An actor wearing a sword
+## on one hip is *wrong* when mirrored, and the failure is subtle enough to ship:
+## the scabbard swaps sides as you turn, which reads as an animation glitch
+## rather than as a missing file.
+func _check_eight_way(set: ActorAnimationSet) -> void:
+	const F := AnimationComponent.Facing
+	var compass := {
+		F.RIGHT: Vector2.RIGHT, F.LEFT: Vector2.LEFT,
+		F.DOWN: Vector2.DOWN, F.UP: Vector2.UP,
+		F.DOWN_RIGHT: Vector2(1, 1), F.DOWN_LEFT: Vector2(-1, 1),
+		F.UP_RIGHT: Vector2(1, -1), F.UP_LEFT: Vector2(-1, -1),
+	}
+	var wrong: Array[String] = []
+	for expected in compass:
+		# From the opposite facing, so nothing is decided by hysteresis.
+		var got := AnimationComponent.facing_for(compass[expected], F.DOWN if expected != F.DOWN else F.UP)
+		if got != expected:
+			wrong.append("%s -> %d, wanted %d" % [compass[expected], got, expected])
+	_check("all eight directions snap to their own octant", wrong.is_empty(), ", ".join(wrong))
+
+	# A stick resting on a boundary must not switch strips every frame.
+	var boundary := Vector2.RIGHT.rotated(deg_to_rad(23.0))
+	_check("a facing just inside the deadband holds its strip",
+		AnimationComponent.facing_for(boundary, F.RIGHT) == F.RIGHT)
+	_check("and past it, commits",
+		AnimationComponent.facing_for(Vector2.RIGHT.rotated(deg_to_rad(40.0)), F.RIGHT)
+			== F.DOWN_RIGHT)
+	_check("zero input keeps the last facing",
+		AnimationComponent.facing_for(Vector2.ZERO, F.UP_LEFT) == F.UP_LEFT)
+
+	# Three-strip set (what the placeholder is): the west half is mirrored, and
+	# the diagonals resolve onto the nearest drawn strip.
+	var clip: SpriteAnimation = set.idle
+	_check("three-strip set: east is the side strip, unmirrored",
+		clip.resolve(F.RIGHT)["texture"] == clip.side and not clip.resolve(F.RIGHT)["flip"])
+	_check("three-strip set: west mirrors it",
+		clip.resolve(F.LEFT)["texture"] == clip.side and clip.resolve(F.LEFT)["flip"])
+	_check("three-strip set: south-east falls back to a drawn strip",
+		clip.resolve(F.DOWN_RIGHT)["texture"] != null)
+	_check("a three-strip set reports three directions",
+		clip.direction_count() == 3, str(clip.direction_count()))
+
+	# Eight-strip set: nothing is mirrored, because mirroring is the bug.
+	var full := SpriteAnimation.new()
+	full.down = clip.down
+	full.up = clip.up
+	full.side = clip.side
+	full.down_side = clip.down
+	full.up_side = clip.up
+	full.side_west = clip.up          # distinct texture, so "not mirrored" is provable
+	full.down_side_west = clip.down
+	full.up_side_west = clip.side
+	full.frames = clip.frames
+	_check("eight-strip set reports eight directions",
+		full.direction_count() == 8, str(full.direction_count()))
+	var mirrored: Array[String] = []
+	for facing in compass:
+		if full.resolve(facing)["flip"]:
+			mirrored.append(str(facing))
+	_check("an eight-strip set mirrors nothing", mirrored.is_empty(), ", ".join(mirrored))
+	_check("and the west strip is its own picture, not the east one flipped",
+		full.resolve(F.LEFT)["texture"] == full.side_west)
+
+
 func _check_distinct_directions(set: ActorAnimationSet) -> void:
 	var clips := {
 		"idle": set.idle, "walk": set.walk, "attack_1": set.attack_1,
@@ -745,6 +889,7 @@ func _test_animation() -> void:
 	# every direction, so the character walked north facing the camera and every
 	# check above still passed. Compare the pixels.
 	_check_distinct_directions(set)
+	_check_eight_way(set)
 
 	# The load-bearing one: attack frames track the combo's phase boundaries,
 	# not a frame rate. Hit 1 is windup 0.08 / active 0.10 / recovery 0.16.
