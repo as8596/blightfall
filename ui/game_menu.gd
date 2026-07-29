@@ -21,6 +21,13 @@ signal opened
 signal closed
 
 var stats: Dictionary = {}
+
+## What the player is wearing, pushed here rather than fetched. This menu is an
+## autoload and outlives every scene it opens over, so anything it *holds* is a
+## freed reference waiting to happen — and reaching into `current_scene` for a
+## player is the singleton habit GDD §12 rule 1 exists to stop. Actions still
+## need the real player; the display does not.
+var worn: Dictionary = {}
 var materials: Dictionary = {}
 
 var _root: Control
@@ -43,6 +50,10 @@ const ASIDE := "8a8378"   ## flavour text, parentheticals, "nothing here"
 const BODY := "ebe3d2"
 
 var _detail: RichTextLabel
+var _gear_panels: Array[Panel] = []
+var _gear_icons: Array[TextureRect] = []
+var _gear_labels: Array[Label] = []
+var _gear_slots: Array[int] = []
 var _satchel: Label
 var _hovered: int = -1
 var _pages: Dictionary = {}
@@ -60,6 +71,10 @@ func _ready() -> void:
 		if _open:
 			_refresh())
 	Events.player_items_changed.connect(func(_i: Array, _c: Array) -> void:
+		if _open:
+			_refresh())
+	Events.player_equipment_changed.connect(func(gear: Dictionary) -> void:
+		worn = gear.duplicate()
 		if _open:
 			_refresh())
 	Events.material_collected.connect(func(id: StringName, amount: int) -> void:
@@ -150,6 +165,7 @@ func _refresh() -> void:
 	_pages["Character"].text = _character_text()
 	_refresh_inventory()
 	_pages["Map"].text = _map_text()
+	_refresh_equipment()
 
 
 func _character_text() -> String:
@@ -316,6 +332,117 @@ func _build() -> void:
 	_tabs.move_child(_tabs.get_node("Character"), 0)
 
 
+## Three worn slots: what you swing, what you wear, which of the four keys is in
+## your hand (GDD §6). New to the design — GDD §15 A9 is the record of it, and
+## the cap is three. A wardrobe is a §2 conversation, not a code change.
+##
+## Click a pack slot holding gear to put it on; click a worn slot to take it off.
+## No dragging: one button, and the item already knows which slot it belongs in,
+## so there is nothing for a drag to disambiguate.
+func _build_equipment() -> Control:
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 8)
+
+	var heading := Label.new()
+	heading.text = "Worn"
+	heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
+	column.add_child(heading)
+
+	for slot in [ItemData.Slot.WEAPON, ItemData.Slot.ARMOUR, ItemData.Slot.TOOL_SLOT]:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		column.add_child(row)
+
+		var panel := Panel.new()
+		panel.custom_minimum_size = Vector2(62, 62)
+		panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(0.13, 0.11, 0.10)
+		box.border_color = Color(0.42, 0.35, 0.26)
+		box.set_border_width_all(2)
+		panel.add_theme_stylebox_override("panel", box)
+		row.add_child(panel)
+
+		var icon := TextureRect.new()
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.offset_left = 8.0
+		icon.offset_top = 8.0
+		icon.offset_right = -8.0
+		icon.offset_bottom = -8.0
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(icon)
+
+		var label := Label.new()
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(190, 62)
+		label.add_theme_font_size_override("font_size", TypeScale.SMALL)
+		label.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
+		row.add_child(label)
+
+		var index := _gear_panels.size()
+		panel.gui_input.connect(_on_gear_click.bind(index))
+		_gear_panels.append(panel)
+		_gear_icons.append(icon)
+		_gear_labels.append(label)
+		_gear_slots.append(slot)
+	return column
+
+
+func _refresh_equipment() -> void:
+	for i in _gear_panels.size():
+		var item: ItemData = worn.get(_gear_slots[i])
+		_gear_icons[i].texture = item.icon if item != null else null
+		_gear_labels[i].text = item.display_name if item != null \
+			else ItemData.slot_name(_gear_slots[i])
+		_gear_labels[i].add_theme_color_override("font_color",
+			Color(0.86, 0.80, 0.68) if item != null else Color(0.52, 0.48, 0.43))
+
+
+## The player, if this menu is over a level that has one. Found rather than
+## held: the menu is an autoload and outlives every scene it opens over, so a
+## stored reference would be a freed one (GDD §12 rule 1 — nothing looks the
+## player up globally, and this asks the current scene).
+func _player() -> Player:
+	var scene := get_tree().current_scene
+	return scene.get("player") as Player if scene != null else null
+
+
+func _on_gear_click(event: InputEvent, index: int) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var player := _player()
+	if player == null:
+		return
+	var removed := player.equipment.unequip(_gear_slots[index])
+	if removed != null:
+		# Back into the pack rather than gone. A slot that eats what it takes off
+		# is a slot nobody experiments with.
+		@warning_ignore("return_value_discarded")
+		player.items.add(removed)
+	_refresh()
+
+
+func _on_slot_click(event: InputEvent, slot: int) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var player := _player()
+	var item := _item_in(slot)
+	if player == null or item == null or not item.is_equippable():
+		return
+	var displaced := player.equipment.equip(item)
+	@warning_ignore("return_value_discarded")
+	player.items.remove(slot, 1)
+	if displaced != null:
+		@warning_ignore("return_value_discarded")
+		player.items.add(displaced)
+	_refresh()
+
+
 func _text_page(page_name: String) -> RichTextLabel:
 	var text := RichTextLabel.new()
 	text.name = page_name
@@ -353,12 +480,21 @@ func _build_inventory_page() -> Control:
 			gap.custom_minimum_size = Vector2(0, 14)
 			page.add_child(gap)
 			page.move_child(gap, 1)
+			# The pack and the worn gear, side by side. The space to the right of
+			# a ten-wide pack was empty and the panel is wide enough for both —
+			# and what you are wearing belongs next to what you are carrying,
+			# not on another tab.
+			var middle := HBoxContainer.new()
+			middle.add_theme_constant_override("separation", 28)
+			page.add_child(middle)
+			page.move_child(middle, 2)
+
 			var pack := GridContainer.new()
 			pack.columns = 10
 			pack.add_theme_constant_override("h_separation", 6)
 			pack.add_theme_constant_override("v_separation", 6)
-			page.add_child(pack)
-			page.move_child(pack, 2)
+			middle.add_child(pack)
+			middle.add_child(_build_equipment())
 			grid = pack
 		var slot := Panel.new()
 		slot.custom_minimum_size = Vector2(62, 62)
@@ -402,6 +538,7 @@ func _build_inventory_page() -> Control:
 
 		slot.mouse_entered.connect(_on_slot_hover.bind(i, true))
 		slot.mouse_exited.connect(_on_slot_hover.bind(i, false))
+		slot.gui_input.connect(_on_slot_click.bind(i))
 
 		grid.add_child(slot)
 		_slot_panels.append(slot)

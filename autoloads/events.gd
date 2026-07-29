@@ -41,6 +41,10 @@ signal player_xp_changed(current: int, needed: int, level: int)
 ## that (GDD §15 A7) — but it is the hook for the moment being *marked*.
 signal player_leveled(level: int)
 
+## What the player is wearing changed. {slot: ItemData} — see
+## `actors/components/equipment_component.gd`.
+signal player_equipment_changed(worn: Dictionary)
+
 ## Which hotbar slot the tool verb will use.
 signal player_hotbar_selected(slot: int)
 

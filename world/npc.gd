@@ -57,6 +57,13 @@ func _process(delta: float) -> void:
 		_sprite.frame = int(_time * BREATH_FPS) % 2
 
 
+## What the dialogue box puts in its frame. The placeholder body, cropped to the
+## head, in this villager's colour — which is not a portrait, but it is this
+## villager rather than a blank square, and it costs nothing.
+func portrait() -> Dictionary:
+	return {"texture": BODY, "region": Dialogue.BUST, "tint": tint}
+
+
 func can_interact(actor: Node) -> bool:
 	if not super(actor):
 		return false
@@ -70,5 +77,5 @@ func interact(actor: Node) -> void:
 	if actor is Node2D:
 		var away: Vector2 = (actor as Node2D).global_position - global_position
 		_sprite.flip_h = away.x < 0.0
-	if not Dialogue.start(dialogue_id):
+	if not Dialogue.start(dialogue_id, portrait()):
 		push_warning("Npc %s: nothing to say (dialogue '%s')" % [name, dialogue_id])

@@ -56,9 +56,23 @@ const BLIP_EVERY: int = 3
 ## refusing to let you leave.
 const REOPEN_LOCK_MS: int = 250
 
-const BOX_HEIGHT: float = 196.0
+## The box is sized to what is in it rather than fixed. A pane with a one-line
+## greeting and no replies used to draw the same 196px slab as one with three
+## replies in it, and the empty two-thirds read as a layout bug.
+##
+## The floor is the portrait: the box can never be shorter than the frame on its
+## left, plus its padding.
 const MARGIN: float = 28.0
 const PAD: Vector2 = Vector2(22.0, 16.0)
+
+## The portrait frame, and the gap between it and the words.
+const PORTRAIT: float = 112.0
+const PORTRAIT_GAP: float = 16.0
+
+## Where a villager's face is in the placeholder body strip — head and
+## shoulders out of the 128x128 first frame. Real portraits, when they exist,
+## come from the conversation file and are drawn whole.
+const BUST := Rect2(32, 14, 64, 64)
 const BACK := Color(0.09, 0.08, 0.07, 0.95)
 const EDGE := Color(0.42, 0.35, 0.26)
 const TEXT := Color(0.95, 0.92, 0.85)
@@ -73,9 +87,21 @@ const PICKED := Color(0.95, 0.88, 0.70)
 ## The name and the replies are the same size as each other and are told apart
 ## by colour and position: the name is the panel's border colour above the line,
 ## the replies are dim below it with a cursor on the chosen one.
+## The spoken line and the replies are the same size, because they are the same
+## kind of thing: what is being said, and what you can say back. Having the
+## replies a step down made them read as a footnote to a conversation the player
+## is supposed to be in.
+##
+## The name is the one caption here, and captions are allowed to be small — it
+## is a label on the box rather than part of the exchange.
 const NAME_SIZE: int = TypeScale.SMALL
 const LINE_SIZE: int = TypeScale.HEADING
-const REPLY_SIZE: int = TypeScale.SMALL
+const REPLY_SIZE: int = TypeScale.HEADING
+
+## A reply's own box, so the choice you are about to make has an edge round it.
+const REPLY_PAD := Vector2(12.0, 4.0)
+const REPLY_BACK := Color(0.14, 0.13, 0.11)
+const REPLY_BACK_PICKED := Color(0.22, 0.19, 0.14)
 
 var _open: bool = false
 var _data: Dictionary = {}
@@ -104,6 +130,9 @@ var _speaker: Label
 var _body: Label
 var _replies: VBoxContainer
 var _prompt: Label
+var _portrait: TextureRect
+var _portrait_frame: Panel
+var _column: VBoxContainer
 
 ## Cached per id. A conversation restarted forty times should not re-parse forty
 ## times, and these files never change at runtime.
@@ -165,7 +194,10 @@ func choice_index() -> int:
 
 ## Begin `id`'s conversation. Returns false if there is nothing to say, so a
 ## caller can fall back to a shrug rather than opening an empty box.
-func start(id: StringName) -> bool:
+## `portrait` is {texture, region, tint}, as `Npc.portrait()` returns it. A
+## conversation file may override it with a `"portrait"` path, which is drawn
+## whole rather than cropped — that is the door real portrait art comes in by.
+func start(id: StringName, portrait: Dictionary = {}) -> bool:
 	if _open or Transition.is_busy() or PauseMenu.is_open() or GameMenu.is_open():
 		return false
 	var data := load_dialogue(id)
@@ -175,6 +207,7 @@ func start(id: StringName) -> bool:
 	_id = id
 	_voice_pitch = float(data.get("voice_pitch", 1.0))
 	_speaker.text = String(data.get("name", String(id)))
+	_set_portrait(data, portrait)
 	_open = true
 	_root.visible = true
 	get_tree().paused = true
@@ -243,6 +276,56 @@ func _start_line() -> void:
 	_body.visible_characters = 0
 	_replies.visible = false
 	_prompt.visible = false
+	_fit_box()
+
+
+## Fill the frame from the speaker, or leave it empty and say nothing about it.
+func _set_portrait(data: Dictionary, portrait: Dictionary) -> void:
+	var drawn := String(data.get("portrait", ""))
+	if drawn != "" and ResourceLoader.exists(drawn):
+		_portrait.texture = load(drawn)
+		_portrait.modulate = Color.WHITE
+		return
+	var texture: Texture2D = portrait.get("texture")
+	if texture == null:
+		_portrait.texture = null
+		return
+	# Cropped to the bust. The placeholder body is a whole standing figure and a
+	# whole standing figure in a 112px frame is a thumbnail of a person, not a
+	# face.
+	var atlas := AtlasTexture.new()
+	atlas.atlas = texture
+	atlas.region = portrait.get("region", BUST)
+	_portrait.texture = atlas
+	_portrait.modulate = portrait.get("tint", Color.WHITE)
+
+
+## Height is content, not a constant.
+##
+## Measured rather than guessed: `get_multiline_string_size` gives the exact
+## wrapped height of the line at the width it will actually be drawn at, so a
+## one-line greeting gets a short box and a wrapped one gets a taller box, and
+## neither gets the empty two-thirds the fixed height used to leave.
+func _fit_box() -> void:
+	if _panel == null or _root == null:
+		return
+	var text_width: float = maxf(_root.size.x - MARGIN * 2.0 - PAD.x * 2.0
+		- PORTRAIT - PORTRAIT_GAP, 64.0)
+	var font: Font = _body.get_theme_font(&"font")
+	var line: float = float(LINE_SIZE) + 8.0
+	if font != null and not _body.text.is_empty():
+		line = font.get_multiline_string_size(_body.text, HORIZONTAL_ALIGNMENT_LEFT,
+			text_width, LINE_SIZE).y + 8.0
+
+	var content := PAD.y * 2.0 + float(NAME_SIZE) + 8.0 + line
+	if _replies.visible and not _choices.is_empty():
+		content += 6.0 + _choices.size() * (_reply_height() + 4.0)
+	else:
+		content += 10.0
+
+	# Never shorter than the portrait it is standing next to.
+	var height: float = maxf(content, PORTRAIT + PAD.y * 2.0)
+	_panel.offset_top = -(height + MARGIN)
 
 
 func _typing() -> bool:
@@ -262,6 +345,7 @@ func _finish_line() -> void:
 		_show_replies()
 	else:
 		_prompt.visible = true
+	_fit_box()
 
 
 func _advance() -> void:
@@ -374,18 +458,40 @@ func _show_replies() -> void:
 	_paint_replies()
 
 
+## Each reply in its own frame, because a reply is a button whether or not it
+## looks like one — a list of bare lines does not say "these are the things you
+## can do", it says "more text".
+##
+## The chosen one gets a brighter edge, a lighter fill **and** a cursor. Three
+## signals for one state is not redundancy: colour alone disappears on a bad
+## monitor and for a colourblind player, and fill alone is invisible on a dark
+## panel at a glance.
 func _paint_replies() -> void:
 	for child in _replies.get_children():
 		child.queue_free()
 	for i in _choices.size():
-		var row := Label.new()
 		var chosen := i == _choice
-		# A cursor, not just a colour. Colour alone is a bad way to say "this
-		# one" — it disappears on a bad monitor and for a colourblind player.
-		row.text = "%s %s" % ["▸" if chosen else " ", String(_choices[i].get("text", "..."))]
+		var frame := Panel.new()
+		frame.custom_minimum_size = Vector2(0, _reply_height())
+		frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		frame.add_theme_stylebox_override("panel",
+			_frame(REPLY_BACK_PICKED if chosen else REPLY_BACK, PICKED if chosen else EDGE))
+
+		var row := Label.new()
+		row.set_anchors_preset(Control.PRESET_FULL_RECT)
+		row.offset_left = REPLY_PAD.x
+		row.offset_right = -REPLY_PAD.x
+		row.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.text = "%s %s" % ["\u25b8" if chosen else " ", String(_choices[i].get("text", "..."))]
 		row.add_theme_font_size_override("font_size", REPLY_SIZE)
-		row.add_theme_color_override("font_color", PICKED if chosen else DIM)
-		_replies.add_child(row)
+		row.add_theme_color_override("font_color", PICKED if chosen else TEXT)
+		frame.add_child(row)
+		_replies.add_child(frame)
+	_fit_box()
+
+
+static func _reply_height() -> float:
+	return float(REPLY_SIZE) + REPLY_PAD.y * 2.0 + 8.0
 
 
 func _build() -> void:
@@ -400,46 +506,80 @@ func _build() -> void:
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_panel.offset_left = MARGIN
 	_panel.offset_right = -MARGIN
-	_panel.offset_top = -(BOX_HEIGHT + MARGIN)
 	_panel.offset_bottom = -MARGIN
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var style := StyleBoxFlat.new()
-	style.bg_color = BACK
-	style.border_color = EDGE
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(3)
-	style.set_content_margin_all(0)
-	_panel.add_theme_stylebox_override("panel", style)
+	_panel.add_theme_stylebox_override("panel", _frame(BACK, EDGE))
 	_root.add_child(_panel)
 
-	var column := VBoxContainer.new()
-	column.set_anchors_preset(Control.PRESET_FULL_RECT)
-	column.offset_left = PAD.x
-	column.offset_right = -PAD.x
-	column.offset_top = PAD.y
-	column.offset_bottom = -PAD.y
-	column.add_theme_constant_override("separation", 6)
-	_panel.add_child(column)
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = PAD.x
+	row.offset_right = -PAD.x
+	row.offset_top = PAD.y
+	row.offset_bottom = -PAD.y
+	row.add_theme_constant_override("separation", int(PORTRAIT_GAP))
+	_panel.add_child(row)
+
+	# The face, in its own frame on the left. Empty when nobody has one — a
+	# frame with nothing in it still tells you where to look next time, and it
+	# stops the text reflowing the day portraits arrive.
+	_portrait_frame = Panel.new()
+	_portrait_frame.custom_minimum_size = Vector2(PORTRAIT, PORTRAIT)
+	_portrait_frame.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_portrait_frame.add_theme_stylebox_override("panel", _frame(REPLY_BACK, EDGE))
+	row.add_child(_portrait_frame)
+
+	_portrait = TextureRect.new()
+	_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_portrait.offset_left = 4.0
+	_portrait.offset_top = 4.0
+	_portrait.offset_right = -4.0
+	_portrait.offset_bottom = -4.0
+	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_frame.add_child(_portrait)
+
+	_column = VBoxContainer.new()
+	_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_column.add_theme_constant_override("separation", 6)
+	row.add_child(_column)
 
 	_speaker = Label.new()
 	_speaker.add_theme_font_size_override("font_size", NAME_SIZE)
 	_speaker.add_theme_color_override("font_color", EDGE)
-	column.add_child(_speaker)
+	_column.add_child(_speaker)
 
 	_body = Label.new()
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_body.custom_minimum_size = Vector2(0, 76)
 	_body.add_theme_font_size_override("font_size", LINE_SIZE)
 	_body.add_theme_color_override("font_color", TEXT)
-	column.add_child(_body)
+	_column.add_child(_body)
 
 	_replies = VBoxContainer.new()
-	_replies.add_theme_constant_override("separation", 2)
-	column.add_child(_replies)
+	_replies.add_theme_constant_override("separation", 4)
+	_column.add_child(_replies)
 
+	# Absolutely positioned rather than in the column, so a hint does not change
+	# how tall the box is.
 	_prompt = Label.new()
 	_prompt.text = "E"
+	_prompt.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_prompt.offset_left = -40.0
+	_prompt.offset_top = -30.0
+	_prompt.offset_right = -12.0
+	_prompt.offset_bottom = -6.0
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_prompt.add_theme_font_size_override("font_size", REPLY_SIZE)
+	_prompt.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_prompt.add_theme_color_override("font_color", DIM)
-	column.add_child(_prompt)
+	_panel.add_child(_prompt)
+
+
+static func _frame(fill: Color, edge: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = fill
+	box.border_color = edge
+	box.set_border_width_all(2)
+	box.set_corner_radius_all(3)
+	box.set_content_margin_all(0)
+	return box

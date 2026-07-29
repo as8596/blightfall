@@ -253,6 +253,8 @@ Missing:
 - ~~Dialogue box.~~ **Built.** No portraits — a decision deferred, not an
   oversight.
 - ⭑ **Build prompt** — what this costs, what you carry, what it gives.
+- ~~Equipment slots.~~ **Built** — weapon, armour, tool, in the inventory pane
+  (GDD §15 A9). Two placeholder items exist; nothing in the world drops gear.
 - **The map tab is a joke that has not been made yet.** It says *"You have no
   map"*, which is correct and deliberate — the archive grants it (project 6) —
   but nothing grants it and there is no map to grant.

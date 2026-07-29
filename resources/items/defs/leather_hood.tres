@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://art/icons/items/gear/leather_hood.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_item")
+id = &"leather_hood"
+display_name = "Leather hood"
+description = "Cheap, and it has been rained on."
+icon = ExtResource("2_icon")
+kind = 3
+stack_size = 1
+slot = 2
+modifiers = {
+&"max_health": 1,
+&"move_speed": -8
+}

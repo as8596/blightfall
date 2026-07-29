@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6hxfnydbnho7"
-path="res://.godot/imported/helmet_armor.png-c256e843a405f2112662256492f7a5b9.ctex"
+uid="uid://d0sxefuh0lo3i"
+path="res://.godot/imported/worn_sword.png-9d782134cbe3b6be49478c7edb6dbc7e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/parked/helmet_armor.png"
-dest_files=["res://.godot/imported/helmet_armor.png-c256e843a405f2112662256492f7a5b9.ctex"]
+source_file="res://art/icons/items/gear/worn_sword.png"
+dest_files=["res://.godot/imported/worn_sword.png-9d782134cbe3b6be49478c7edb6dbc7e.ctex"]
 
 [params]
 

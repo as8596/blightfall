@@ -97,6 +97,21 @@ func sources() -> Array:
 	return _modifiers.keys()
 
 
+## Move a base value.
+##
+## Snapshotting the shipped numbers at `_ready` is right for the common case and
+## wrong for exactly one: a save that restored a *larger* maximum than the one
+## shipped — heart containers the player earned. Without this, the next thing
+## that touches stats recomputes health from the shipped base and quietly takes
+## those containers away again, which is a save-load bug that only shows up on
+## the second thing you do after loading.
+func set_base(stat: StringName, value: int) -> void:
+	if int(_base.get(stat, 0)) == value:
+		return
+	_base[stat] = value
+	changed.emit()
+
+
 func base(stat: StringName) -> int:
 	return int(_base.get(stat, 0))
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://88iuhesupjbw"
-path="res://.godot/imported/a_worn_metal_sword.png-418e98ff53a72b4c15d7409d045be51b.ctex"
+uid="uid://gw1kb3tadi4g"
+path="res://.godot/imported/leather_hood.png-9d30e34367be3a0de24a8c85ec8b65d9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/parked/a_worn_metal_sword.png"
-dest_files=["res://.godot/imported/a_worn_metal_sword.png-418e98ff53a72b4c15d7409d045be51b.ctex"]
+source_file="res://art/icons/items/gear/leather_hood.png"
+dest_files=["res://.godot/imported/leather_hood.png-9d30e34367be3a0de24a8c85ec8b65d9.ctex"]
 
 [params]
 

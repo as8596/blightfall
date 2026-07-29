@@ -64,6 +64,7 @@ func _run() -> void:
 	await _test_enemy_behaviour()
 	await _test_animation()
 	await _test_experience()
+	await _test_equipment()
 	await _test_save_load()
 	await _test_haul()
 	await _test_village()
@@ -812,6 +813,55 @@ func _test_experience() -> void:
 		"a level must never write a stat — only a rebuilt building may (GDD §15 A7)")
 	_check("levelling adds no stat source", _player.stats.sources().size() == sources_before)
 	_check("a modifier still needs a source", not _player.stats.apply(&"", {"damage": 5}))
+
+
+## Worn gear, and the rule that keeps GDD §15 A7 alive through the amendment
+## that let equipment write stats at all (A9).
+func _test_equipment() -> void:
+	print("\nEquipment (GDD §15 A9: worn gear writes stats, and always names itself)")
+	await _reset_player()
+	var gear := _player.equipment
+
+	_check("the player starts with something to swing",
+		gear.item_in(ItemData.Slot.WEAPON) != null,
+		String(gear.item_in(ItemData.Slot.WEAPON).id) if gear.item_in(ItemData.Slot.WEAPON) != null else "-")
+
+	var hood: ItemData = Items.get_item(&"leather_hood")
+	_check("there is a piece of armour to test with", hood != null)
+	if hood == null:
+		return
+
+	var before := _player.health.max_health
+	@warning_ignore("return_value_discarded")
+	gear.equip(hood)
+	await _ticks(2)
+	_check("wearing it moves the stat it says it moves",
+		_player.health.max_health == before + int(hood.modifiers.get(&"max_health", 0)),
+		"%d -> %d" % [before, _player.health.max_health])
+	_check("and the modifier names its slot, not nothing",
+		_player.stats.has_source(StringName(EquipmentComponent.SOURCE_PREFIX
+			+ str(ItemData.Slot.ARMOUR))))
+
+	# The bug this guards is swapping: sourced by item rather than by slot, the
+	# first hood's bonus would stay applied forever and the second would look
+	# unusually good.
+	var sources := _player.stats.sources().size()
+	@warning_ignore("return_value_discarded")
+	gear.equip(hood)
+	_check("re-equipping does not stack a second source",
+		_player.stats.sources().size() == sources, "%d sources" % _player.stats.sources().size())
+
+	@warning_ignore("return_value_discarded")
+	gear.unequip(ItemData.Slot.ARMOUR)
+	await _ticks(2)
+	_check("taking it off takes the stat off with it",
+		_player.health.max_health == before, "%d" % _player.health.max_health)
+	_check("and revokes the source", not _player.stats.has_source(
+		StringName(EquipmentComponent.SOURCE_PREFIX + str(ItemData.Slot.ARMOUR))))
+
+	# A9 amends A7's "every source is a building"; it does **not** amend the
+	# rule underneath it, which is that nothing moves a number anonymously.
+	_check("an anonymous modifier is still refused", not _player.stats.apply(&"", {"damage": 5}))
 
 
 func _test_save_load() -> void:

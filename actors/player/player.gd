@@ -58,6 +58,7 @@ extends CharacterBody2D
 @onready var items: ItemsComponent = $ItemsComponent
 @onready var stats: StatsComponent = $StatsComponent
 @onready var experience: ExperienceComponent = $ExperienceComponent
+@onready var equipment: EquipmentComponent = $EquipmentComponent
 @onready var weapon_arc: WeaponArc = $WeaponArc
 
 ## Last committed facing. Drives hitbox placement and the default dodge
@@ -113,6 +114,10 @@ func _ready() -> void:
 		Events.player_xp_changed.emit(current, need, level))
 	experience.leveled.connect(func(level: int) -> void:
 		Events.player_leveled.emit(level))
+	equipment.changed.connect(func() -> void:
+		Events.player_equipment_changed.emit(equipment.worn)
+		# Worn gear writes stats, so the sheet has to be re-read after it moves.
+		Events.player_stats_changed.emit(stat_block()))
 	hurtbox.hit_taken.connect(_on_hit_taken)
 	# `EnemyData.xp_value` has been sitting there unread since M1. This is what
 	# reads it — off the bus rather than off a reference, because the enemy has
@@ -135,6 +140,7 @@ func _broadcast_state() -> void:
 	Events.player_hotbar_selected.emit(items.selected)
 	Events.player_stats_changed.emit(stat_block())
 	Events.player_xp_changed.emit(experience.current, experience.needed(), experience.level)
+	Events.player_equipment_changed.emit(equipment.worn)
 
 
 func _on_enemy_died(enemy: Node) -> void:
@@ -391,6 +397,7 @@ func save_data() -> Dictionary:
 		"inventory": inventory.save_data(),
 		"items": items.save_data(),
 		"experience": experience.save_data(),
+		"equipment": equipment.save_data(),
 	}
 
 
@@ -401,6 +408,11 @@ func load_data(data: Dictionary) -> void:
 	# Order matters: raise the ceiling before restoring current, or a save with
 	# more heart containers than the default clamps down to the default.
 	health.set_max_health(SaveGame.read_int(data, "max_health", health.max_health), false)
+	# ...and tell the stat sheet, or the next thing that touches stats will
+	# recompute health off the *shipped* base and take the extra containers
+	# straight back off again.
+	stats.set_base(StatsComponent.MAX_HEALTH,
+		health.max_health - stats.bonus(StatsComponent.MAX_HEALTH))
 	health.current = clampi(SaveGame.read_int(data, "health", health.current), 0, health.max_health)
 	health.changed.emit(health.current, health.max_health)
 
@@ -414,6 +426,10 @@ func load_data(data: Dictionary) -> void:
 	var earned: Variant = data.get("experience")
 	if earned is Dictionary:
 		experience.load_data(earned)
+
+	var worn: Variant = data.get("equipment")
+	if worn is Dictionary:
+		equipment.load_data(worn, Items.all())
 
 	# Whatever the player was doing when they saved, they are standing still now.
 	motion_velocity = Vector2.ZERO

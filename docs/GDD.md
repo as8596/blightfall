@@ -922,6 +922,40 @@ the day someone adds the convenient exception the suite says so.
 players will eventually resent. This is a placeholder for a decision, not the
 decision.
 
+### A9 — Equipment exists, and it names itself (amends A7)
+
+**Was (A7):** every stat modifier carries the id of the **building** that
+granted it, and the village is the only thing that writes to a number.
+**Now:** worn gear writes stats too, under a source named for the slot.
+
+Three slots and no more: a **weapon**, a piece of **armour**, and which of the
+four keys is in your hand. The tool slot is already §6's design; the other two
+are new, and §2 says nothing about equipment, so this is an addition to the
+scope contract rather than an interpretation of it. A wardrobe — helm, chest,
+gloves, boots, two rings — is a §2 conversation and the answer is no.
+
+**What survives from A7, and it is the part that mattered:** nothing moves a
+number anonymously. `StatsComponent.apply()` still refuses a modifier with no
+source, and the player can still point at exactly what is doing it. What gave is
+the "and every source is a building" clause.
+
+**Sources are named for the slot, not the item.** Keyed by item, swapping one
+sword for another would apply the new one and leave the old one's bonus in place
+forever — which does not read as a bug, it reads as the second sword being
+unusually good. Keyed by slot, equipping replaces, which is what equipping
+means. `_test_equipment` asserts it.
+
+**The player starts with a worn sword.** §4 hands them nothing — the opening is
+an escape from an execution — but the opening is M6 work, and until it exists an
+unarmed character cannot test the combat the whole of M1 is about. It is one
+line in `player.tscn` when the intro lands.
+
+**The risk, stated plainly:** equipment is the standard way an RPG's numbers
+stop meaning anything, because it is the easiest content to add. A4's whole
+point was that capability is a *place you rebuilt*, and every stat that comes
+from a sword instead is one the village did not give you. Three slots is the
+brake. If it ever needs a fourth, that is the moment to reread A4.
+
 ---
 
 *Living document. Revisit §2 monthly.*
