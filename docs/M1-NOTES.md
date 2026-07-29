@@ -77,7 +77,7 @@ All three keep the same vertical landmarks — collar 45, belt 69, knee 84, sole
 
 ## Verification
 
-`godot --headless --path . tests/m1_smoke_test.tscn` — 222 assertions, currently
+`godot --headless --path . tests/m1_smoke_test.tscn` — 227 assertions, currently
 all passing. It checks project configuration (viewport, stretch, snapping,
 all eight physics layer names, every input action), measured frame data
 (hitbox on at windup, active window length, hit durations, dodge duration and
@@ -156,9 +156,28 @@ Together they were the whole of "the UI text is not crisp". The world scaling
 was never the problem: the atlas is sampled Nearest, so once the glyphs are two
 colours, a 2x interface scale is clean pixel doubling.
 
-Whole-number scales stay pixel-exact. Half steps duplicate every other row, so
-they are slightly uneven by construction — a real trade, and the player's to
-make (GDD §14).
+**And the sizes have to be on the font's grid too.** All three fonts are drawn
+on a 16 units-per-em grid — 99.9% of their outline points land on it, measured —
+so one grid unit is a whole pixel only when the size is a whole multiple of 16.
+At 20 every fourth stem gains a pixel; at 24 every other one does. The UI was at
+18, 20, 21, 22, 24, 44 and 72.
+
+`ui/type_scale.gd` is now the only place a size comes from, and it holds three:
+16 for everything you read, 32 for the spoken line and screen titles, 64 for the
+game's name. The grid leaves nothing in between, so there is no "slightly
+bigger" — a label and the body text are the same size and are told apart by
+colour, spacing and position. That is how pixel-font interfaces are built, and
+fighting it is how you get 21px text that looks subtly broken.
+
+`m1_smoke_test` checks the scale against the font that actually shipped rather
+than against that paragraph: on a clean grid, doubling the size doubles the
+advance width exactly, and it asserts that for every size in the scale *and*
+that an off-grid size measurably fails it. 20 measures 220.0px where the grid
+wants 217.5.
+
+Whole-number *interface* scales stay pixel-exact on top of that. Half steps
+duplicate every other row, so they are slightly uneven by construction — a real
+trade, and the player's to make (GDD §14).
 
 `tests/font_sheet.tscn` renders the UI font at a dozen sizes for judging this by
 eye, which is the only way to judge it.

@@ -270,7 +270,7 @@ func _build() -> void:
 	_tabs.offset_top = 70.0
 	_tabs.offset_right = -120.0
 	_tabs.offset_bottom = -70.0
-	_tabs.add_theme_font_size_override("font_size", 22)
+	_tabs.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	# Opaque, not translucent. The default panel lets the debug overlay show
 	# straight through the page you are trying to read.
 	var panel := StyleBoxFlat.new()
@@ -296,9 +296,9 @@ func _text_page(page_name: String) -> RichTextLabel:
 	text.name = page_name
 	text.bbcode_enabled = true
 	text.scroll_active = true
-	text.add_theme_font_size_override("normal_font_size", 20)
-	text.add_theme_font_size_override("bold_font_size", 20)
-	text.add_theme_font_size_override("italics_font_size", 20)
+	text.add_theme_font_size_override("normal_font_size", TypeScale.SMALL)
+	text.add_theme_font_size_override("bold_font_size", TypeScale.SMALL)
+	text.add_theme_font_size_override("italics_font_size", TypeScale.SMALL)
 	text.add_theme_color_override("default_color", Color(0.92, 0.89, 0.82))
 	return text
 
@@ -359,7 +359,7 @@ func _build_inventory_page() -> Control:
 		# Only the hotbar row is numbered; the pack has no keys to advertise.
 		number.text = Hud._slot_key(i) if i < ItemsComponent.HOTBAR_SLOTS else ""
 		number.position = Vector2(5, 1)
-		number.add_theme_font_size_override("font_size", 13)
+		number.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		number.add_theme_color_override("font_color", Color(0.75, 0.70, 0.62, 0.85))
 		number.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(number)
@@ -371,7 +371,7 @@ func _build_inventory_page() -> Control:
 		count.offset_right = -6.0
 		count.offset_bottom = -4.0
 		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		count.add_theme_font_size_override("font_size", 18)
+		count.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		slot.add_child(count)
 
@@ -388,7 +388,7 @@ func _build_inventory_page() -> Control:
 	page.add_child(_detail)
 
 	_satchel = Label.new()
-	_satchel.add_theme_font_size_override("font_size", 20)
+	_satchel.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_satchel.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
 	page.add_child(_satchel)
 	return page

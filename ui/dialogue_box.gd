@@ -56,7 +56,7 @@ const BLIP_EVERY: int = 3
 ## refusing to let you leave.
 const REOPEN_LOCK_MS: int = 250
 
-const BOX_HEIGHT: float = 188.0
+const BOX_HEIGHT: float = 196.0
 const MARGIN: float = 28.0
 const PAD: Vector2 = Vector2(22.0, 16.0)
 const BACK := Color(0.09, 0.08, 0.07, 0.95)
@@ -65,9 +65,17 @@ const TEXT := Color(0.95, 0.92, 0.85)
 const DIM := Color(0.60, 0.56, 0.50)
 const PICKED := Color(0.95, 0.88, 0.70)
 
-const NAME_SIZE: int = 20
-const LINE_SIZE: int = 24
-const REPLY_SIZE: int = 21
+## The spoken line leads and everything else supports it. There is no size
+## between these two that the font rasterises cleanly — the grid gives 16 and 32
+## and nothing in between (`ui/type_scale.gd`) — so the jump is large on purpose
+## rather than a near-miss at 20 or 24, which is what it used to be.
+##
+## The name and the replies are the same size as each other and are told apart
+## by colour and position: the name is the panel's border colour above the line,
+## the replies are dim below it with a cursor on the chosen one.
+const NAME_SIZE: int = TypeScale.SMALL
+const LINE_SIZE: int = TypeScale.HEADING
+const REPLY_SIZE: int = TypeScale.SMALL
 
 var _open: bool = false
 var _data: Dictionary = {}
@@ -420,7 +428,7 @@ func _build() -> void:
 
 	_body = Label.new()
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_body.custom_minimum_size = Vector2(0, 64)
+	_body.custom_minimum_size = Vector2(0, 76)
 	_body.add_theme_font_size_override("font_size", LINE_SIZE)
 	_body.add_theme_color_override("font_color", TEXT)
 	column.add_child(_body)

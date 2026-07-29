@@ -73,7 +73,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 222 assertions over the M1 systems and Ambry
+# headless self-check — 227 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -180,7 +180,7 @@ resources/
 world/             pickups, the haul cache, interactables, doorways, gateways,
                    npcs
 ui/                main menu, world viewport, HUD, dialogue box, stamina
-                   wheel, menus, ui scale, debug overlay
+                   wheel, menus, ui scale, type scale, debug overlay
 tests/             headless smoke test + screenshot tool
 tools/             SFX + tileset generators, colour checker, map builders
 ```

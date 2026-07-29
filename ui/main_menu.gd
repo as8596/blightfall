@@ -87,14 +87,14 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "BLIGHTFALL"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 72)
+	title.add_theme_font_size_override("font_size", TypeScale.DISPLAY)
 	title.add_theme_color_override("font_color", TEXT)
 	column.add_child(title)
 
 	var tagline := Label.new()
 	tagline.text = "the valley remembers what the town decided"
 	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	tagline.add_theme_font_size_override("font_size", 18)
+	tagline.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	tagline.add_theme_color_override("font_color", DIM)
 	column.add_child(tagline)
 
@@ -114,14 +114,14 @@ func _build() -> void:
 	var smaller := Button.new()
 	smaller.text = "-"
 	smaller.custom_minimum_size = Vector2(48, 40)
-	smaller.add_theme_font_size_override("font_size", 22)
+	smaller.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	scale_row.add_child(smaller)
 
 	_scale_label = Label.new()
 	_scale_label.custom_minimum_size = Vector2(176, 40)
 	_scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_scale_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_scale_label.add_theme_font_size_override("font_size", 20)
+	_scale_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_scale_label.add_theme_color_override("font_color", DIM)
 	_scale_label.text = "UI scale   %.1f x" % UiScale.factor
 	scale_row.add_child(_scale_label)
@@ -129,7 +129,7 @@ func _build() -> void:
 	var bigger := Button.new()
 	bigger.text = "+"
 	bigger.custom_minimum_size = Vector2(48, 40)
-	bigger.add_theme_font_size_override("font_size", 22)
+	bigger.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	scale_row.add_child(bigger)
 
 	# Adjustable from the title screen on purpose: it is the setting somebody
@@ -153,7 +153,7 @@ func _button(column: VBoxContainer, text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.custom_minimum_size = Vector2(288, 46)
-	button.add_theme_font_size_override("font_size", 24)
+	button.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	button.pressed.connect(action)
 	column.add_child(button)
 	_buttons.append(button)

@@ -143,7 +143,7 @@ func _build() -> void:
 	var title := Label.new()
 	title.text = "Paused"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 44)
+	title.add_theme_font_size_override("font_size", TypeScale.HEADING)
 	title.add_theme_color_override("font_color", Color(0.95, 0.92, 0.85))
 	column.add_child(title)
 
@@ -159,7 +159,7 @@ func _build() -> void:
 	var smaller := Button.new()
 	smaller.text = "-"
 	smaller.custom_minimum_size = Vector2(48, 40)
-	smaller.add_theme_font_size_override("font_size", 22)
+	smaller.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	smaller.pressed.connect(func() -> void: UiScale.factor -= UiScale.STEP)
 	scale_row.add_child(smaller)
 
@@ -167,13 +167,13 @@ func _build() -> void:
 	_scale_label.custom_minimum_size = Vector2(176, 40)
 	_scale_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_scale_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_scale_label.add_theme_font_size_override("font_size", 20)
+	_scale_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	scale_row.add_child(_scale_label)
 
 	var bigger := Button.new()
 	bigger.text = "+"
 	bigger.custom_minimum_size = Vector2(48, 40)
-	bigger.add_theme_font_size_override("font_size", 22)
+	bigger.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	bigger.pressed.connect(func() -> void: UiScale.factor += UiScale.STEP)
 	scale_row.add_child(bigger)
 
@@ -195,7 +195,7 @@ func _build() -> void:
 		var button := Button.new()
 		button.text = entry[0]
 		button.custom_minimum_size = Vector2(280, 44)
-		button.add_theme_font_size_override("font_size", 24)
+		button.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		button.pressed.connect(entry[1])
 		column.add_child(button)
 		_buttons.append(button)

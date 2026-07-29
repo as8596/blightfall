@@ -53,6 +53,7 @@ func _run() -> void:
 
 	print("\n=== Blightfall M1 smoke test ===\n")
 	await _test_project_configuration()
+	_test_type_scale()
 	await _test_movement()
 	await _test_attack_frame_data()
 	await _test_weapon_arc()
@@ -229,6 +230,49 @@ func _test_project_configuration() -> void:
 			dodge_keys.append(key.physical_keycode)
 	_check("dash is on shift", dodge_keys.has(KEY_SHIFT), "%s" % [dodge_keys])
 	_check("and still on space", dodge_keys.has(KEY_SPACE))
+
+
+## The UI font is a pixel font on a 16 units-per-em grid, so it only rasterises
+## evenly at whole multiples of 16 — at 20 every fourth stem gains a pixel and at
+## 24 every other one does. `ui/type_scale.gd` is the list of sizes that are
+## allowed; this checks that list against the font actually shipped rather than
+## against the comment above it.
+##
+## The measurement: on a clean grid, doubling the size doubles the advance width
+## exactly. Off the grid it does not, because the rounding differs per glyph.
+func _test_type_scale() -> void:
+	print("\nType scale (ui/type_scale.gd: pixel fonts only work on their grid)")
+	var font: Font = ThemeDB.fallback_font
+	_check("the UI has a font", font != null)
+	if font == null:
+		return
+
+	const SAMPLE := "Hamburgefonstiv 0123"
+	var unit := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, TypeScale.STEP).x
+	_check("one grid step renders", unit > 0.0, "%.1fpx wide" % unit)
+
+	var off: Array[String] = []
+	for size in TypeScale.ALL:
+		if size % TypeScale.STEP != 0:
+			off.append("%d is not a multiple of %d" % [size, TypeScale.STEP])
+			continue
+		var want: float = unit * float(size) / float(TypeScale.STEP)
+		var got := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x
+		if not is_equal_approx(got, want):
+			off.append("%d measures %.1f, wants %.1f" % [size, got, want])
+	_check("every size in the scale lands on the font\u2019s grid", off.is_empty(),
+		", ".join(off))
+
+	# ...and the negative case, so this is testing the font rather than testing
+	# arithmetic. 20 was the HUD size and is exactly the kind of value that looks
+	# fine in a diff.
+	var want_20: float = unit * 20.0 / float(TypeScale.STEP)
+	var got_20 := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20).x
+	_check("and an off-grid size measurably does not", not is_equal_approx(got_20, want_20),
+		"20 measures %.1f vs %.1f" % [got_20, want_20])
+
+	_check("snap() rounds onto it", TypeScale.snap(21) == 16 and TypeScale.snap(25) == 32
+		and TypeScale.snap(1) == TypeScale.STEP)
 
 
 func _test_movement() -> void:

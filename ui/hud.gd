@@ -50,9 +50,12 @@ const SATCHEL_FULL := Color(0.88, 0.76, 0.44)
 const TEXT := Color(0.95, 0.92, 0.85)
 
 ## Authored against the 1280x720 viewport and scaled up with everything else, so
-## this is "how big on a 720p screen", not "how big in pixels". 16 was legible
-## in a window and thin across a fullscreen monitor.
-const FONT_SIZE: int = 20
+## this is "how big on a 720p screen", not "how big in pixels".
+##
+## One size for the whole HUD, and it is the only one the font rasterises
+## cleanly at — see `ui/type_scale.gd`. It used to be 20, which is 1.25 grid
+## units per pixel and puts an extra pixel on every fourth stem.
+const FONT_SIZE: int = TypeScale.SMALL
 
 const SLOT_SIZE: float = 52.0
 const SLOT_GAP: float = 6.0
