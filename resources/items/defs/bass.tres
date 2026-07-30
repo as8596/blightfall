@@ -11,4 +11,5 @@ description = "Taken from the millpond before the water turned."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 4
 heals = 1

@@ -48,6 +48,8 @@ const SATCHEL_FILL := Color(0.78, 0.60, 0.32)
 ## stops being hypothetical, so it gets its own colour rather than a full bar.
 const SATCHEL_FULL := Color(0.88, 0.76, 0.44)
 const TEXT := Color(0.95, 0.92, 0.85)
+## Dimmer than `TEXT` on purpose: the purse is reference, not a warning.
+const PURSE := Color(0.80, 0.68, 0.38)
 
 ## Authored against the 1280x720 viewport and scaled up with everything else, so
 ## this is "how big on a 720p screen", not "how big in pixels".
@@ -117,6 +119,7 @@ func _ready() -> void:
 	Events.player_item_refused.connect(_on_item_refused)
 	Events.player_hotbar_selected.connect(_on_selected)
 	Events.player_xp_changed.connect(_on_xp)
+	Events.player_gold_changed.connect(func(_amount: int) -> void: _canvas.queue_redraw())
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
 	# whatever is underneath it — so it cannot be told by `gui_input`.
@@ -191,7 +194,9 @@ func _draw_hud() -> void:
 	_draw_health(Vector2(MARGIN.x, xp_top - XP_GAP - HEALTH_SIZE.y))
 	_draw_experience(Vector2(MARGIN.x, xp_top))
 	_draw_hotbar(size)
-	_draw_satchel(Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y))
+	var satchel := Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y)
+	_draw_satchel(satchel)
+	_draw_purse(satchel)
 	# Last, so it sits over everything it might overlap.
 	_draw_cursor_bubble()
 
@@ -298,6 +303,27 @@ func _draw_satchel(origin: Vector2) -> void:
 		Color(0.05, 0.04, 0.04, 0.9))
 	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
 
+
+
+## What is in the purse, tucked under the satchel bar.
+##
+## **No bar, no icon, just a number**, and it is the quietest thing on screen.
+## The satchel gets a bar because "how much more will fit" is a decision you
+## make in the field with no time to read; gold is only ever spent standing
+## still in front of somebody, so it needs to be *available* rather than
+## legible-at-a-glance. Giving it a bar of its own would put a second progress
+## meter next to health and experience and imply filling it is the point.
+func _draw_purse(satchel_origin: Vector2) -> void:
+	var font := ThemeDB.fallback_font
+	var label := "%d gold" % Purse.amount()
+	var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+	# Above the satchel's own count, not below the bar: below put it inside the
+	# bottom margin, where it read as something that had fallen off the screen.
+	# Right-aligned to the same edge, so the two numbers stack.
+	var at := satchel_origin + Vector2(SATCHEL_SIZE.x - width, -6.0 - FONT_SIZE - 6.0)
+	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
+		FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
+	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, PURSE)
 
 
 ## Five slots, centred along the bottom edge — the row the hand finds without

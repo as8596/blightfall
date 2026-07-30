@@ -11,4 +11,5 @@ description = "Made at the same hour it is made every year."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 21
 heals = 2

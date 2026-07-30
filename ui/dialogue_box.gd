@@ -35,6 +35,16 @@ signal finished(id: StringName)
 ## quest starting, a project unlocking — listens here rather than reaching in.
 signal chose(id: StringName, node: String, index: int)
 
+## A reply carried an `"action"`. This is the seam between *talking* and
+## *anything else*: the dialogue box knows a choice was marked `"shop"` and
+## knows nothing whatsoever about shops, and whoever cares is listening.
+##
+## `params` is the rest of the choice's own JSON object, so an action can carry
+## whatever it needs — `{"action": "shop", "shop": "sundries"}` arrives here as
+## `(&"shop", {"shop": "sundries", ...})` — without this file gaining a field
+## per feature.
+signal action_chosen(action: StringName, params: Dictionary)
+
 ## Above the HUD (64) and below the menus (108/110): a conversation should cover
 ## the health bar, and the pause menu should cover a conversation.
 const LAYER: int = 106
@@ -351,12 +361,41 @@ func _enter_node(name: String) -> void:
 		var destination: Dictionary = nodes.get(target, {})
 		if bool(destination.get("once", false)) and has_seen(_id, target):
 			continue
+		if not _allowed(choice as Dictionary):
+			continue
 		_choices.append(choice)
 	_line = 0
 	if not _seen.has(_id):
 		_seen[_id] = {}
 	(_seen[_id] as Dictionary)[name] = true
 	_start_line()
+
+
+## Whether a reply is offered at all, given what has been said before.
+##
+## Two keys, and they are the forward and backward halves of the same idea:
+##
+## - `"if_seen": "node"` — offer this only once that node has been reached. This
+##   is what lets a thread exist: you cannot agree to look for something before
+##   she has told you it is missing.
+## - `"unless_seen": "node"` — offer it until that node has been reached, then
+##   stop. The same rule `"once": true` applies to a destination, but pointing
+##   the other way, so a reply can retire on somebody else's node rather than
+##   only on its own.
+##
+## Deliberately built on `_seen`, which already exists and is already saved,
+## rather than on a flag store of its own. A quest system will want real flags
+## eventually; until there is one, "have they heard this yet" answers most of
+## what a branching conversation actually needs to ask, and it cannot fall out
+## of step with the conversation because it *is* the conversation.
+func _allowed(choice: Dictionary) -> bool:
+	var needs := String(choice.get("if_seen", ""))
+	if needs != "" and not has_seen(_id, needs):
+		return false
+	var blocks := String(choice.get("unless_seen", ""))
+	if blocks != "" and has_seen(_id, blocks):
+		return false
+	return true
 
 
 func _start_line() -> void:
@@ -483,7 +522,16 @@ func _pick() -> void:
 	var choice: Dictionary = _choices[_choice]
 	Sfx.play(&"ui_select", -8.0)
 	chose.emit(_id, _node, _choice)
+
+	# The action fires *after* the conversation has moved, so a listener that
+	# opens a window over the top of us is looking at a box that has already
+	# settled — and an action with an empty `goto` closes first, which is what
+	# makes "Let's trade." feel like leaving the conversation rather than
+	# stacking a shop on top of one.
+	var action := StringName(String(choice.get("action", "")))
 	_enter_node(String(choice.get("goto", "")))
+	if action != &"":
+		action_chosen.emit(action, choice)
 
 
 # ------------------------------------------------------------------- input

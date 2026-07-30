@@ -11,4 +11,5 @@ description = "From before. Nobody in the valley can make this now."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 2
+value = 55
 heals = 3

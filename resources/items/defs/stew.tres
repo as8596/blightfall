@@ -11,4 +11,5 @@ description = "Hot, and more than you were going to be given."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 35
 heals = 3

@@ -11,4 +11,5 @@ description = "The apothecary's, and she was honest about what it can and cannot
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 32
 heals = 2

@@ -11,4 +11,5 @@ description = "The last of the birds that were laying. Nobody says so."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 1
+value = 35
 heals = 3

@@ -11,5 +11,6 @@ description = "Someone spent an evening on the stitching, years ago."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 54
 slot = 4
 modifiers = {&"move_speed": 8, &"stamina": 1}

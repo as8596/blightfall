@@ -11,4 +11,5 @@ description = "Thin, hot, and there is always more of it."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 21
 heals = 2

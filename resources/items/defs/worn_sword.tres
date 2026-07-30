@@ -11,6 +11,7 @@ description = "Somebody kept it oiled for a long time and then stopped."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 60
 slot = 1
 modifiers = {
 &"damage": 1

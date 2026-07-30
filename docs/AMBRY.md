@@ -73,8 +73,9 @@ road goes.
 | **The well** | Nothing, mechanically. Where the child plays and the fox sits |
 | **The hearth** | The town's fire. Social, not mechanical |
 | **The bell** | Rang three times the morning they nearly hanged you (GDD §4, beat 0) |
+| **Tallow & Son** | The general store. Open from day one, and the only building that is. Buy supplies, sell your haul. Interior |
 | **The apothecary** | Ruined → rebuild. Healing you can carry *into* a zone |
-| **The market** | Empty plot → rebuild. Convert materials; buy supplies |
+| **The market** | Empty plot → rebuild. Convert materials; buy supplies at scale |
 | **The watchpost** | Empty plot → rebuild. Safer, faster departures |
 | **The hidden case's house** | Door shut, curtain drawn. Not interacting *is* the interaction |
 | **The allotment** | Kitchen garden. Where the food comes from |
@@ -198,10 +199,40 @@ score it.
 | The unrepentant | The gallows | None — and that's the point |
 | The hidden case | Their own doorway | Warmth curdling into dread |
 | The fox | The well's edge → **the old shrine** once the north opens | Unambiguous gentleness |
+| **Maren Tallow** | Behind her counter in the general store | Charging you full price |
 
 **The apothecary works out of the inn** until you rebuild her shop, which means
 rebuilding visibly *moves a person* rather than unlocking a menu — the
 difference between a village and a hub.
+
+### Maren Tallow, and why she is the eleventh
+
+§2 caps NPCs with dialogue at ten and the table above is exactly ten. She is
+over that line on purpose; GDD §15 A11 is the record of the cost.
+
+She keeps the general store, which her father built and named **TALLOW & SON**
+before he had any children. He got a daughter, then a son, then the valley got
+the son, and she got the shop. She has never repainted the sign. Not grief —
+everybody knows where the shop is.
+
+**Her warmth is charging you full price.** The town condemned you; she sells to
+you at the same rate she sells to them, and says so unprompted the first time
+you notice. She is careful that this is not mistaken for a kindness: asked
+whether she was at the gallows, she says she was minding the shop, and then —
+without being pushed — that she would probably have gone if she hadn't been.
+She does not get to be the good one. She gets to be the one who was busy.
+
+That is the whole character, and it is deliberately not redemptive. Everyone
+else in the cast expresses warmth by *doing something for you*. She expresses it
+by refusing to treat you as a special case, which in a town that tried to hang
+you is the only one of the eleven that reads as citizenship rather than pity.
+
+**Mechanically she is the reason to come home with a full pack.** The carpenter
+wants timber and stone; she takes everything else — the fish, the meals, the
+gear you have outgrown — and turns it into the food that makes the next
+expedition survivable. Her side quests hang off that: the carters stopped coming
+up the south road in the spring, which is the road the player is already
+walking.
 
 Four of the cast are indoors, so the square has fewer bodies in it than it used
 to. If that reads as empty, the answer is mute idle villagers: §2 caps NPCs with

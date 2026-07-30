@@ -11,4 +11,5 @@ description = "A child's catch. Someone kept it for you anyway."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 4
 heals = 1

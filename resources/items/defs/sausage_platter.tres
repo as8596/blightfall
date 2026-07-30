@@ -11,4 +11,5 @@ description = "The last of the autumn slaughter, kept back for someone who would
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 2
+value = 35
 heals = 3

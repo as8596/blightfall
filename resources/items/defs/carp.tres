@@ -11,4 +11,5 @@ description = "Heavy, muddy, and enough for two. Nobody in Ambry is proud."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 4
+value = 9
 heals = 2

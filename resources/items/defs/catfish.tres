@@ -11,4 +11,5 @@ description = "Bottom-feeder. Fat on whatever the river has been carrying."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 4
+value = 9
 heals = 2

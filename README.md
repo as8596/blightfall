@@ -88,8 +88,14 @@ godot --headless --path . tests/dialogue_test.tscn
 # dies, with and without a save on disk, and checks the haul is still on the floor
 godot --headless --path . tests/death_test.tscn
 
+# money, prices, and every way a trade can go wrong
+godot --headless --path . tests/shop_test.tscn
+
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
+
+# re-derive every item price from what the item does (--check to only report)
+python3 tools/price_items.py --check
 
 # regenerate the greybox tileset, then rebuild the village and the valley
 python3 tools/gen_greybox_tileset.py

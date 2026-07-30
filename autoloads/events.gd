@@ -54,6 +54,20 @@ signal player_item_refused(slot: int)
 ## A material was picked up.
 signal material_collected(id: StringName, amount: int)
 
+## The purse changed. Carries the new total and nothing else — a listener that
+## wants to know *why* it changed wants `Shop.traded`, not this.
+signal player_gold_changed(amount: int)
+
+## A trade completed. `delta` is negative buying and positive selling, so the
+## one signal covers both and a listener that only cares about the money does
+## not have to know which way it went.
+signal traded(item: StringName, amount: int, delta: int)
+
+## Somebody's shop was opened or closed. The world uses this the way it uses
+## `Dialogue` — a villager stops wandering while you are buying from them.
+signal shop_opened(id: StringName)
+signal shop_closed(id: StringName)
+
 ## The player died carrying a haul; it is now on the ground at `where`.
 signal haul_dropped(items: Dictionary, where: Vector2)
 

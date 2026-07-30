@@ -113,6 +113,21 @@ const BUILDINGS: Array = [
 		INTERIOR_DIR + "/forge_level.tscn"],
 	["magistrate",  Rect2i(27, 18, 10, 5), 4, "magistrate", "built",    "south",
 		INTERIOR_DIR + "/magistrate_hall_level.tscn"],
+	# The general store, on the west side of the square. Standing and trading
+	# from the start, which every other *useful* building in Ambry is not — and
+	# that is the point of it. GDD §688 keeps progression in the rebuild loop, so
+	# a shop that was itself a rebuild project would be a second one; this sells
+	# supplies, it sells no combat stat (asserted in `tests/shop_test.gd`), and
+	# it is open on day one because the player needs somewhere to spend a coin
+	# before they have rebuilt anything at all.
+	#
+	# Door on offset 3, which is the only offset that works. At 2 the doorstep
+	# lands within three tiles of the carpenter on the ring road; at 4 it lands
+	# within three of the child at the well. The assertion below caught both, the
+	# same way it caught the inn's eave — a shop whose prompt is stolen by a
+	# villager standing outside it is a shop the player cannot enter.
+	["sundries",    Rect2i(12, 25, 5, 5),  3, "sundries",    "built",    "south",
+		INTERIOR_DIR + "/sundries_level.tscn"],
 	["apothecary",  Rect2i(4, 18, 7, 5),  3, "apothecary",  "ruined",   "south", ""],
 	["market",      Rect2i(13, 32, 6, 4), 2, "market",      "empty",    "south", ""],
 	["watchpost",   Rect2i(36, 32, 5, 4), 2, "watchpost",   "empty",    "south", ""],
@@ -209,6 +224,14 @@ const INTERIORS: Array = [
 	["magistrate_hall", Vector2i(11, 7), 5,
 		[["chest", Vector2i(5, 2)]],
 		[["ledger", Vector2i(5, 3), "your name, wrongly, still open on the desk"]]],
+	# Shelves down both long walls and a counter she stands behind. The crate by
+	# the door is the one she tells you to mind, and it has been there four
+	# months — a line of dialogue that costs one tile.
+	["sundries", Vector2i(11, 7), 4,
+		[["stockpile", Vector2i(2, 2)], ["stockpile", Vector2i(3, 2)],
+			["stockpile", Vector2i(8, 2)], ["chest", Vector2i(6, 2)],
+			["stockpile", Vector2i(2, 5)]],
+		[["counter", Vector2i(6, 3), "Maren Tallow: buy and sell"]]],
 ]
 
 ## Where each named NPC stands: id, which map, cell. Ten of them — §2's cast
@@ -233,6 +256,9 @@ const NPCS: Array = [
 	# Works out of the inn until her own building is rebuilt. Rebuilding visibly
 	# moves a person rather than unlocking a menu.
 	["apothecary",      "inn", Vector2i(7, 4)],
+	# Behind her counter. The eleventh speaking part — see GDD §15 A11 for why
+	# the cast budget moved, and `docs/AMBRY.md` for who she is.
+	["shopkeeper",      "sundries", Vector2i(5, 3)],
 ]
 
 var _index := {}

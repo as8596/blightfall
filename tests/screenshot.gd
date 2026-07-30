@@ -65,6 +65,12 @@ var _ui_scale: float = 0.0
 ## invisible to a harness that never moves the mouse.
 var _pointer: Vector2 = Vector2.INF
 
+## `--shop=<id>` opens that shop's window, and `--gold=N` sets the purse first —
+## the shelf looks completely different at 0 gold, where every row is dimmed,
+## and both states are worth being able to shoot.
+var _shop: String = ""
+var _gold: int = -1
+
 var _room: Node
 
 
@@ -100,6 +106,10 @@ func _capture() -> void:
 			_pull_enemies_close = true
 		elif arg.begins_with("--menu="):
 			_menu = arg.trim_prefix("--menu=")
+		elif arg.begins_with("--shop="):
+			_shop = arg.trim_prefix("--shop=")
+		elif arg.begins_with("--gold="):
+			_gold = arg.trim_prefix("--gold=").to_int()
 		elif arg.begins_with("--ui-scale="):
 			_ui_scale = arg.trim_prefix("--ui-scale=").to_float()
 		elif arg.begins_with("--talk-advance="):
@@ -221,6 +231,18 @@ func _capture() -> void:
 	if _menu != "":
 		const PAGES := {"character": 0, "inventory": 1, "skills": 2, "map": 3}
 		GameMenu.show_page(int(PAGES.get(_menu, 1)))
+		for i in 8:
+			await get_tree().process_frame
+
+	if _shop != "":
+		# Straight to the window rather than through her conversation: what a
+		# screenshot of a shop needs to show is the shelf, and reaching it by
+		# script means the shot does not silently change when a reply is
+		# reworded.
+		if _gold >= 0:
+			Purse.set_amount(_gold)
+		@warning_ignore("return_value_discarded")
+		ShopMenu.open(StringName(_shop))
 		for i in 8:
 			await get_tree().process_frame
 

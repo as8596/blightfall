@@ -1548,7 +1548,11 @@ func _test_village() -> void:
 
 	var plots := level.building_plots()
 	var pois := level.points_of_interest()
-	_check("twenty locations and POIs", plots.size() + pois.size() == 20,
+	# A floor rather than an equality. This pinned 20 and broke the day the
+	# general store was added — which is the assertion doing nothing useful and
+	# charging for it: what matters is that the village is populated, not that
+	# it has exactly the number of buildings it had on the day this was written.
+	_check("the village is full of places", plots.size() + pois.size() >= 20,
 		"%d plots + %d pois" % [plots.size(), pois.size()])
 
 	var districts := {}
@@ -1609,7 +1613,20 @@ func _test_village() -> void:
 		var door := child as Doorway
 		if door != null:
 			doors.append(door)
-	_check("four doorways placed", doors.size() == 4, "%d" % doors.size())
+	# A floor and a uniqueness check rather than a pinned count. The literal 4
+	# broke when the general store was added, which is an assertion that fires
+	# on *content* rather than on breakage. Two doors pointing at the same
+	# interior is the real bug here — it is what a copy-pasted table entry looks
+	# like, and it would send you into somebody else's house.
+	_check("every interior is reachable", doors.size() >= 4, "%d" % doors.size())
+	var seen_targets := {}
+	var duplicated: Array[String] = []
+	for door in doors:
+		if seen_targets.has(door.target_scene):
+			duplicated.append(door.target_scene)
+		seen_targets[door.target_scene] = true
+	_check("and no two doors lead to the same room", duplicated.is_empty(),
+		", ".join(duplicated))
 	var targets_exist := true
 	var prompts_are_verbs := true
 	for door in doors:

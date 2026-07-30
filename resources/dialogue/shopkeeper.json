@@ -1,0 +1,190 @@
+{
+  "id": "shopkeeper",
+  "name": "Maren Tallow",
+  "voice_pitch": 0.98,
+  "start": "greeting",
+  "revisit": "again",
+  "nodes": {
+    "greeting": {
+      "lines": [
+        "Mind the crate. It's been there four months and it'll be there four more.",
+        "You'll be the one from the gallows.",
+        "Prices are on the shelf. Same as they are for everybody."
+      ],
+      "choices": [
+        { "text": "Same as everybody?", "goto": "same" },
+        { "text": "Let me see what you have.", "action": "shop", "shop": "sundries", "goto": "" },
+        { "text": "Later.", "goto": "" }
+      ]
+    },
+
+    "same": {
+      "lines": [
+        "You were sentenced. You weren't convicted of not paying.",
+        "I'm not doing you a kindness. I'm doing arithmetic."
+      ],
+      "choices": [
+        { "text": "Were you there?", "goto": "were_you_there" },
+        { "text": "Fair enough.", "goto": "trade_offer" }
+      ],
+      "once": true
+    },
+
+    "were_you_there": {
+      "lines": [
+        "No. I was here. Somebody has to be, or the door's shut when they come back needing rope.",
+        "I'm not telling you that to look better than them. I'd probably have gone."
+      ],
+      "choices": [
+        { "text": "You'd have gone?", "goto": "would_have" },
+        { "text": "Let's trade.", "goto": "trade_offer" }
+      ],
+      "once": true
+    },
+
+    "would_have": {
+      "lines": [
+        "Everyone else did. That's what a crowd is — it's not a decision, it's the absence of one.",
+        "So no. I don't get to be the good one. I get to be the one who was busy."
+      ],
+      "choices": [
+        { "text": "That's honest.", "goto": "honest" },
+        { "text": "Let's trade.", "goto": "trade_offer" }
+      ],
+      "once": true
+    },
+
+    "honest": {
+      "lines": [
+        "It's cheap. Honesty always is when it's about something you didn't do."
+      ],
+      "choices": [
+        { "text": "Let's trade.", "goto": "trade_offer" }
+      ],
+      "once": true
+    },
+
+    "trade_offer": {
+      "lines": [
+        "Right. Food, rope, a salve if you've been careless.",
+        "I'll take most things off you. Not everything — I've a shop, not a midden."
+      ],
+      "choices": [
+        { "text": "Show me.", "action": "shop", "shop": "sundries", "goto": "" },
+        { "text": "What's your father's name doing on the sign?", "goto": "sign" },
+        { "text": "Another time.", "goto": "" }
+      ]
+    },
+
+    "sign": {
+      "lines": [
+        "TALLOW AND SON. My father painted it before he had children, which tells you what he was expecting.",
+        "He got me. Then he got a son, and the valley got him, and I got the shop.",
+        "I've not repainted it. Everybody knows where the shop is."
+      ],
+      "choices": [
+        { "text": "I'm sorry.", "goto": "sorry" },
+        { "text": "It's a good sign.", "goto": "good_sign" }
+      ],
+      "once": true
+    },
+
+    "sorry": {
+      "lines": [
+        "You didn't do it. Don't stand in my shop apologising for the weather.",
+        "But — thank you. Noted and filed."
+      ],
+      "choices": [
+        { "text": "Is there anything you need?", "goto": "errand_offer" },
+        { "text": "Show me the shelf.", "action": "shop", "shop": "sundries", "goto": "" }
+      ]
+    },
+
+    "good_sign": {
+      "lines": [
+        "It's a *painted* sign. It's not good or bad, it's just up.",
+        "...it is a good sign."
+      ],
+      "choices": [
+        { "text": "Is there anything you need?", "goto": "errand_offer" },
+        { "text": "Show me the shelf.", "action": "shop", "shop": "sundries", "goto": "" }
+      ]
+    },
+
+    "errand_offer": {
+      "lines": [
+        "Since you ask. The carters stopped coming through in the spring.",
+        "Half my shelf comes up the south road, and the south road is where you've been going.",
+        "Bring me things and I'll pay over the odds for them. Not charity — I've nobody else to buy from."
+      ],
+      "choices": [
+        { "text": "What sort of things?", "goto": "errand_detail" },
+        { "text": "I'll keep an eye out.", "goto": "errand_accepted" }
+      ],
+      "once": true
+    },
+
+    "errand_detail": {
+      "lines": [
+        "Anything the valley still makes. Anything you'd eat and not regret.",
+        "I'll know it when I see it, and I'll tell you what it's worth before you hand it over."
+      ],
+      "choices": [
+        { "text": "Understood.", "goto": "errand_accepted" }
+      ]
+    },
+
+    "errand_accepted": {
+      "lines": [
+        "Good. That's an arrangement, not a favour.",
+        "Come back with a full pack and we'll both have had a decent day."
+      ],
+      "choices": [
+        { "text": "Let's start now.", "action": "shop", "shop": "sundries", "goto": "" },
+        { "text": "Soon.", "goto": "" }
+      ]
+    },
+
+    "again": {
+      "lines": [
+        "Back. Still standing, still solvent.",
+        "Shelf's where it was."
+      ],
+      "choices": [
+        { "text": "Let me see what you have.", "action": "shop", "shop": "sundries", "goto": "" },
+        {
+          "text": "You said you needed things brought up.",
+          "goto": "errand_status",
+          "if_seen": "errand_accepted"
+        },
+        {
+          "text": "Is there anything you need?",
+          "goto": "errand_offer",
+          "if_seen": "sign",
+          "unless_seen": "errand_accepted"
+        },
+        { "text": "What's your father's name doing on the sign?", "goto": "sign" },
+        { "text": "Just passing.", "goto": "" }
+      ]
+    },
+
+    "errand_status": {
+      "lines": [
+        "I did. I still do. That's the trouble with the arrangement — it doesn't finish.",
+        "Empty the pack out and I'll tell you what's worth having."
+      ],
+      "choices": [
+        { "text": "Here's what I've got.", "action": "shop", "shop": "sundries", "goto": "" },
+        { "text": "Nothing yet.", "goto": "nothing_yet" }
+      ]
+    },
+
+    "nothing_yet": {
+      "lines": [
+        "Then you've come a long way to tell me so.",
+        "Go on. South road. Mind the crate on your way out."
+      ],
+      "choices": []
+    }
+  }
+}

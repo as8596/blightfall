@@ -11,6 +11,7 @@ description = "Cheap, and it has been rained on."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 21
 slot = 2
 modifiers = {
 &"max_health": 1,

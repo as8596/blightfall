@@ -11,4 +11,5 @@ description = "Cut from the joint hung for midwinter. It is not midwinter."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 2
+value = 35
 heals = 3

@@ -11,4 +11,5 @@ description = "Bitter, and it works. She is not sure which of those is the point
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 55
 heals = 3

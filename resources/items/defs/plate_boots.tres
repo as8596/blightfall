@@ -11,5 +11,6 @@ description = "Guard issue. Heavy, and they will stop a bite."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 27
 slot = 4
 modifiers = {&"max_health": 1, &"move_speed": -6}

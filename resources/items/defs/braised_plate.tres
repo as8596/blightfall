@@ -11,4 +11,5 @@ description = "Slow work for a house with little fuel. She did it anyway."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 2
+value = 35
 heals = 3

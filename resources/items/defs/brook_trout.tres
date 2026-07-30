@@ -11,4 +11,5 @@ description = "From the high stream. The rot has not reached that far up."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 4
 heals = 1

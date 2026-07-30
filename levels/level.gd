@@ -82,6 +82,10 @@ const NPC_TINTS: Dictionary = {
 	&"smith": Color(0.78, 0.54, 0.44),
 	&"innkeeper": Color(0.84, 0.74, 0.56),
 	&"apothecary": Color(0.66, 0.78, 0.70),
+	# Dyed wool, and a good one — she sells things and dresses like somebody who
+	# does. The most saturated of the cast, which is still nowhere near the
+	# blight's band (`tools/check_colour.py` guards that).
+	&"shopkeeper": Color(0.74, 0.56, 0.62),
 }
 
 @onready var world: Node2D = get_node_or_null(world_path) as Node2D

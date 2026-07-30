@@ -11,4 +11,5 @@ description = "It was in the deed envelope. Nobody mentioned it."
 icon = ExtResource("2_icon")
 kind = 2
 stack_size = 1
+value = 0
 heals = 0

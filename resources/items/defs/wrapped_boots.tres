@@ -11,5 +11,6 @@ description = "Rag over leather over rag. They were somebody's once."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 20
 slot = 4
 modifiers = {&"move_speed": 4}

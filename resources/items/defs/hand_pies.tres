@@ -11,4 +11,5 @@ description = "Wrapped in cloth and pressed on you as you left."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 9
 heals = 1

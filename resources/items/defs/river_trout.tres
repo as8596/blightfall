@@ -11,4 +11,5 @@ description = "Still pink along the flank. Still worth the walk."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 4
 heals = 1

@@ -32,12 +32,19 @@ Items="*res://autoloads/items.gd"
 ; skill tree rendered as three empty columns.
 Village="*res://autoloads/village.gd"
 Skills="*res://autoloads/skills.gd"
+; Purse before Shops (a shop asks it whether a price is affordable) and before
+; every UI autoload, because Hud draws the coin counter from its first signal.
+Purse="*res://autoloads/purse.gd"
+Shops="*res://autoloads/shops.gd"
 Music="*res://autoloads/music.gd"
 UiScale="*res://ui/ui_scale.gd"
 Hud="*res://ui/hud.gd"
 GameMenu="*res://ui/game_menu.gd"
 PauseMenu="*res://ui/pause_menu.gd"
 Dialogue="*res://ui/dialogue_box.gd"
+; After Dialogue: the shop window subscribes to its `action_chosen` in _ready,
+; and a listener registered before the thing it listens to does not exist yet.
+ShopMenu="*res://ui/shop_menu.gd"
 
 [display]
 

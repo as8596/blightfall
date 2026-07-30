@@ -11,5 +11,6 @@ description = "Cut for stirrups. There are no horses left in Ambry."
 icon = ExtResource("2_icon")
 kind = 3
 stack_size = 1
+value = 36
 slot = 4
 modifiers = {&"move_speed": 12}

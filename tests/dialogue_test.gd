@@ -315,6 +315,20 @@ func _check_library() -> void:
 				var goto := String(choice.get("goto", ""))
 				if goto != "" and not nodes.has(goto):
 					broken.append("%s/%s -> '%s' goes nowhere" % [id, name, goto])
+				# A condition naming a node that does not exist is worse than a
+				# broken `goto`: `if_seen` on a typo is a reply that can never
+				# appear, and nothing about that looks like a fault from
+				# inside the game. It just quietly is not there.
+				for key in ["if_seen", "unless_seen"]:
+					var gate := String(choice.get(key, ""))
+					if gate != "" and not nodes.has(gate):
+						broken.append("%s/%s %s '%s' is not a node" % [id, name, key, gate])
+		# `revisit` is used *instead of* `start` from the second conversation on,
+		# so a typo here is a villager who greets you as a stranger forever —
+		# and only from the second visit, which is not when anyone is testing.
+		var again := String(data.get("revisit", ""))
+		if again != "" and not nodes.has(again):
+			broken.append("%s revisits '%s', which is not a node" % [id, again])
 	_check("every conversation parses and every reply goes somewhere", broken.is_empty(),
 		", ".join(broken))
 	_check("the whole cast has something to say", count >= 10, "%d files" % count)

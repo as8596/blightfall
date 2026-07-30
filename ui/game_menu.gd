@@ -439,36 +439,16 @@ func _build() -> void:
 ## what makes the page read as regions instead of as a wall of boxes: the frames
 ## do the grouping that a second font weight would normally do, and this project
 ## has one weight (see KEY).
+## Both of these moved to `UiKit` when the shop window turned out to want the
+## same box. Kept as forwarders rather than replaced at ~20 call sites, because
+## the rename is churn in a file that is already long and the indirection costs
+## nothing.
 func _framed(title: String, tip: String = "") -> VBoxContainer:
-	var panel := PanelContainer.new()
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.11, 0.10, 0.09)
-	box.border_color = Color(0.30, 0.25, 0.19)
-	box.set_border_width_all(2)
-	box.set_content_margin_all(12)
-	panel.add_theme_stylebox_override("panel", box)
-
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
-	panel.add_child(column)
-
-	if not title.is_empty():
-		var heading := Label.new()
-		heading.text = title.to_upper()
-		heading.tooltip_text = tip
-		heading.add_theme_font_override("font", DISPLAY)
-		heading.add_theme_font_size_override("font_size", TypeScale.SMALL)
-		heading.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
-		column.add_child(heading)
-
-	# The caller wants the inside; the frame is plumbing. Stash it so the layout
-	# can add the panel rather than the column.
-	column.set_meta(&"frame", panel)
-	return column
+	return UiKit.framed(title, tip)
 
 
 static func _frame_of(column: Control) -> Control:
-	return column.get_meta(&"frame", column)
+	return UiKit.frame_of(column)
 
 
 func _build_equipment() -> Control:

@@ -11,4 +11,5 @@ description = "Cut for you at the door, no plate, no ceremony."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 3
+value = 21
 heals = 2

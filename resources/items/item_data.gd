@@ -56,6 +56,18 @@ const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT
 ## How many fit in one slot. Tools and keys are 1.
 @export_range(1, 99) var stack_size: int = 1
 
+## What one of these is worth, in gold, before anybody's margin.
+##
+## **One number, not a buy price and a sell price.** The spread belongs to the
+## merchant (`ShopData.margin`), because it is a fact about *her*, not about the
+## bread — and keeping it there means a second merchant who deals fairer is a
+## field on her, rather than a second column on all thirty-four of these.
+##
+## Zero means unsellable, which is the honest default for anything the player
+## should not be able to liquidate: quest keys, and anything whose loss would
+## strand them. `is_tradeable()` is the one place that decides.
+@export_range(0, 9999) var value: int = 0
+
 @export_group("Equipment")
 @export var slot: Slot = Slot.NONE
 
@@ -78,6 +90,15 @@ const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT
 
 func is_equippable() -> bool:
 	return slot != Slot.NONE
+
+
+## Whether this can be bought or sold at all.
+##
+## Keys never can. A player who sells the rusted key is a player who has locked
+## themselves out of the thing it opens, and no amount of "are you sure" makes
+## that a decision worth offering — the fix is that the option is never there.
+func is_tradeable() -> bool:
+	return value > 0 and kind != Kind.KEY
 
 
 ## What the slot is called on screen.

@@ -11,4 +11,5 @@ description = "The innkeeper's, and she will not take anything for it."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 5
+value = 4
 heals = 1

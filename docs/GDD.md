@@ -987,6 +987,51 @@ point was that capability is a *place you rebuilt*, and every stat that comes
 from a sword instead is one the village did not give you. Three slots is the
 brake. If it ever needs a fourth, that is the moment to reread A4.
 
+### A11 — There is money, and one shop to spend it in (amends §15 A4; extends §2)
+
+**Was (A4):** "Not a hub with shops. The *rebuild state of Ambry is* the
+player's progression." **Now:** there is a currency, and a general store that
+trades in supplies. The clause that survives — and it is the one that mattered —
+is *the shop sells no capability and no combat stat.*
+
+A4 was arguing against a specific failure: a hub where you buy your power, which
+makes rebuilding the town decorative. It banned the *shop* to kill the *stat
+counter*, exactly as A7 banned the XP bar to kill stat points, and A8 has
+already established that those two are separable. This separates them again:
+
+- **What the store sells is consumed.** Food, a salve, a pair of boots that
+  make you no stronger. Nothing on the shelf raises damage, health or stamina,
+  and `tests/shop_test.gd` fails the build if anything ever does —
+  `ShopData.sells_power()` is that rule written down as code rather than as
+  prose in this document.
+- **Capabilities are untouched.** No amount of gold opens the north gate, gives
+  you a map, or lights the forge. Every one of those is still a building
+  brought back, and a player who never rebuilds anything is exactly as stuck as
+  they were before this amendment.
+- **So gold is a smoothing mechanism, not a track.** It converts a haul you
+  cannot use into a meal you can. The interesting decision it adds is *when to
+  sell the fish*, and that decision is about the expedition loop rather than
+  beside it.
+
+**Gold does not drop on death.** The haul does (A4), because losing it is what
+makes turning back a decision. Losing the purse as well would mean one death
+costs the run *and* the thing you were saving for, which is the double
+punishment that teaches players to take the boring route.
+
+**The cast budget moves from ten to eleven.** §2 caps NPCs *with dialogue* at
+ten and the cast was already exactly ten (docs/AMBRY.md). Maren Tallow is the
+eleventh, and that is a real cost against a real budget rather than a rounding
+error — the budget exists because a solo dev writes every line. She earns it by
+being the only one of the eleven the player has a mechanical reason to visit
+repeatedly, which is also what makes her the right character to hang the first
+side quests on.
+
+**The risk, stated plainly:** a shop is the easiest content in a game to extend,
+and every item added to that shelf is a small argument that the shelf is where
+progress comes from. The brake is `sells_power()` and the assertion behind it.
+If the day comes that the store wants to sell a sword, that is not a stock
+edit — it is the moment to reread A4.
+
 ---
 
 *Living document. Revisit §2 monthly.*
