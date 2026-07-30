@@ -53,7 +53,7 @@ var _talk_advance: int = 0
 ## every fresh scene.
 var _grant_xp: int = 0
 
-## `--menu=character|inventory|map` opens the Tab menu on that page, which is
+## `--menu=character|inventory|skills|map` opens the Tab menu on that page, which is
 ## otherwise unreachable without a keyboard.
 var _menu: String = ""
 
@@ -219,7 +219,7 @@ func _capture() -> void:
 		await _wait_ticks(2)
 
 	if _menu != "":
-		const PAGES := {"character": 0, "inventory": 1, "map": 2}
+		const PAGES := {"character": 0, "inventory": 1, "skills": 2, "map": 3}
 		GameMenu.show_page(int(PAGES.get(_menu, 1)))
 		for i in 8:
 			await get_tree().process_frame

@@ -1,5 +1,5 @@
 extends CanvasLayer
-## Tab. Character, inventory, map.
+## Tab. Character, inventory, skills, map.
 ##
 ## An autoload for the reasons `Hud` and `PauseMenu` are, and it pauses the same
 ## way — a menu you can be hit while reading is a menu nobody opens.
@@ -79,6 +79,10 @@ var _gear_icons: Array[TextureRect] = []
 var _gear_labels: Array[Label] = []
 var _gear_slots: Array[int] = []
 var _satchel: Label
+var _skill_panels: Dictionary = {}
+var _skill_points: Label
+var _skill_detail: RichTextLabel
+var _skill_hovered: StringName = &""
 var _hovered: int = -1
 var _pages: Dictionary = {}
 var _open: bool = false
@@ -163,7 +167,7 @@ func close() -> void:
 const PAGE_KEYS := {
 	&"open_character": 0,
 	&"open_inventory": 1,
-	&"open_map": 2,
+	&"open_map": 3,
 }
 
 
@@ -190,6 +194,7 @@ func _refresh() -> void:
 	_refresh_inventory()
 	_pages["Map"].text = _map_text()
 	_refresh_equipment()
+	_refresh_skills()
 
 
 func _character_text() -> String:
@@ -411,11 +416,13 @@ func _build() -> void:
 
 	_tabs.add_child(_build_inventory_page())
 
+	_tabs.add_child(_build_skills_page())
+
 	for page_name in ["Character", "Map"]:
 		var text := _text_page(page_name)
 		_tabs.add_child(text)
 		_pages[page_name] = text
-	# Character first, then the grid, then the map.
+	# Character first, then the grid, then the tree, then the map.
 	_tabs.move_child(_tabs.get_node("Character"), 0)
 
 
@@ -789,6 +796,192 @@ func _build_inventory_page() -> Control:
 	hints.add_theme_color_override("font_color", Color(0.54, 0.50, 0.45))
 	footer.add_child(hints)
 	return page
+
+
+## The tree. Three branches across, two deep, and what each one costs you.
+##
+## **Laid out as columns rather than as a graph** because that is what the data
+## is: one prerequisite per skill, so every path is a straight line down a
+## column and there is nothing a drawn edge would tell you that the stacking
+## does not. A node graph here would be decoration pretending to be information.
+##
+## Each skill is a button that changes state rather than a list with a Buy
+## column — taken, available, and locked read as three different objects at a
+## glance, and the player never has to work out why a row is refusing them.
+func _build_skills_page() -> Control:
+	var page := VBoxContainer.new()
+	page.name = "Skills"
+	page.add_theme_constant_override("separation", 12)
+
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 12)
+	page.add_child(header)
+
+	_skill_points = Label.new()
+	_skill_points.add_theme_font_override("font", DISPLAY)
+	_skill_points.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	_skill_points.add_theme_color_override("font_color", Color(0.86, 0.72, 0.36))
+	header.add_child(_skill_points)
+
+	var note := Label.new()
+	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	note.text = "A level is a point. A point is a choice."
+	note.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	note.add_theme_color_override("font_color", Color(0.54, 0.50, 0.45))
+	header.add_child(note)
+
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 12)
+	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_child(columns)
+
+	# Group by branch. Read off the data rather than hard-coded, so adding a
+	# skill is a `.tres` and nothing here changes.
+	var branches: Dictionary = {}
+	for skill in Skills.all():
+		var entry: SkillData = skill
+		branches.get_or_add(entry.branch, []).append(entry)
+
+	for branch in [0, 1, 2]:
+		var column := _framed(SkillData.branch_name(branch))
+		_frame_of(column).custom_minimum_size = Vector2(236, 0)
+		_frame_of(column).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		columns.add_child(_frame_of(column))
+		for skill in branches.get(branch, []):
+			column.add_child(_build_skill_node(skill as SkillData))
+		# Push the nodes to the top so two-deep and three-deep columns line up.
+		var filler := Control.new()
+		filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		column.add_child(filler)
+
+	_skill_detail = _text_page("SkillDetail")
+	_skill_detail.custom_minimum_size = Vector2(0, 92)
+	page.add_child(_skill_detail)
+	return page
+
+
+func _build_skill_node(skill: SkillData) -> Control:
+	var panel := Panel.new()
+	panel.custom_minimum_size = Vector2(0, 52)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.tooltip_text = skill.description
+
+	var name_label := Label.new()
+	name_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	name_label.offset_left = 10.0
+	name_label.offset_top = 6.0
+	name_label.add_theme_font_override("font", DISPLAY)
+	name_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_label.text = skill.display_name
+	panel.add_child(name_label)
+
+	var effect := Label.new()
+	effect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	effect.offset_left = 10.0
+	effect.offset_top = 26.0
+	effect.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	effect.text = _effect_line(skill)
+	panel.add_child(effect)
+
+	panel.gui_input.connect(_on_skill_input.bind(skill.id))
+	panel.mouse_entered.connect(_on_skill_hover.bind(skill.id, true))
+	panel.mouse_exited.connect(_on_skill_hover.bind(skill.id, false))
+	_skill_panels[skill.id] = {"panel": panel, "name": name_label, "effect": effect}
+	return panel
+
+
+## "+1 damage", "+15 reach". Built from the modifiers rather than written out,
+## so a tuning change to a skill cannot leave its own label lying.
+static func _effect_line(skill: SkillData) -> String:
+	var parts: Array[String] = []
+	for stat in skill.modifiers:
+		var delta := int(skill.modifiers[stat])
+		parts.append("%s%d %s" % ["+" if delta >= 0 else "", delta,
+			String(stat).replace("_", " ")])
+	return ", ".join(parts)
+
+
+func _on_skill_hover(id: StringName, entered: bool) -> void:
+	if entered:
+		_skill_hovered = id
+	elif _skill_hovered == id:
+		_skill_hovered = &""
+	if _open:
+		_refresh_skills()
+
+
+## Left click takes it. Nothing else does anything — there is no refund, because
+## a tree you can respec freely is a tree with no decision in it.
+func _on_skill_input(event: InputEvent, id: StringName) -> void:
+	var click := event as InputEventMouseButton
+	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var actor := _player()
+	if Skills.unlock(id, actor.stats if actor != null else null):
+		Sfx.play(&"ui_select", -6.0)
+		_refresh_skills()
+	else:
+		Sfx.play(&"ui_move", -14.0)
+
+
+## Three states, three looks: taken is warm and filled, available is outlined
+## and bright, locked is dim and flat.
+func _refresh_skills() -> void:
+	if _skill_points == null:
+		return
+	var points := Skills.points()
+	_skill_points.text = "%d point%s to spend" % [points, "" if points == 1 else "s"]
+
+	for id in _skill_panels:
+		var parts: Dictionary = _skill_panels[id]
+		var panel: Panel = parts["panel"]
+		var skill := Skills.get_skill(id)
+		var taken := Skills.is_unlocked(id)
+		var open := Skills.can_unlock(id)
+
+		var box := StyleBoxFlat.new()
+		box.set_border_width_all(2)
+		box.set_content_margin_all(6)
+		if taken:
+			box.bg_color = Color(0.20, 0.17, 0.11)
+			box.border_color = Color(0.72, 0.61, 0.39)
+		elif open:
+			box.bg_color = Color(0.13, 0.12, 0.10)
+			box.border_color = Color(0.56, 0.48, 0.32)
+		else:
+			box.bg_color = Color(0.10, 0.09, 0.09)
+			box.border_color = Color(0.26, 0.23, 0.20)
+		panel.add_theme_stylebox_override("panel", box)
+
+		var bright := Color(0.90, 0.84, 0.70) if taken or open else Color(0.46, 0.43, 0.39)
+		(parts["name"] as Label).add_theme_color_override("font_color", bright)
+		(parts["effect"] as Label).add_theme_color_override("font_color",
+			Color(0.72, 0.66, 0.55) if taken or open else Color(0.38, 0.36, 0.33))
+
+	_skill_detail.text = _skill_detail_text()
+
+
+func _skill_detail_text() -> String:
+	var skill := Skills.get_skill(_skill_hovered) if _skill_hovered != &"" else null
+	if skill == null:
+		return "\n  " + _aside("Point at a skill to read it.")
+	var lines := ["", "  %s    %s" % [_named(skill.display_name), _kind(_effect_line(skill))]]
+	if Skills.is_unlocked(skill.id):
+		lines.append("  " + _aside("Taken."))
+	elif skill.requires != &"" and not Skills.is_unlocked(skill.requires):
+		var needs := Skills.get_skill(skill.requires)
+		lines.append("  Needs %s first." % (needs.display_name if needs != null else "something else"))
+	elif Skills.points() < skill.cost:
+		lines.append("  " + _aside("No points to spend."))
+	else:
+		lines.append("  Click to take it.")
+	if not skill.description.is_empty():
+		lines.append("")
+		lines.append("  " + _aside(skill.description))
+	return "\n".join(lines)
 
 
 ## Left column: the paper doll's other half — who this is, and the numbers that

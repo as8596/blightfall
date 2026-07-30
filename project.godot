@@ -27,13 +27,16 @@ SaveGame="*res://systems/save/save_game.gd"
 ScreenFade="*res://autoloads/screen_fade.gd"
 Transition="*res://autoloads/transition.gd"
 Items="*res://autoloads/items.gd"
+; Data before UI. GameMenu builds its pages in _ready and reads both of
+; these while doing it — listed after it, they were still empty and the
+; skill tree rendered as three empty columns.
+Village="*res://autoloads/village.gd"
+Skills="*res://autoloads/skills.gd"
 Music="*res://autoloads/music.gd"
 UiScale="*res://ui/ui_scale.gd"
 Hud="*res://ui/hud.gd"
 GameMenu="*res://ui/game_menu.gd"
 PauseMenu="*res://ui/pause_menu.gd"
-Village="*res://autoloads/village.gd"
-Skills="*res://autoloads/skills.gd"
 Dialogue="*res://ui/dialogue_box.gd"
 
 [display]
