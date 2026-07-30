@@ -1119,7 +1119,7 @@ func _test_animation() -> void:
 ## rule that decays the moment someone adds a convenient exception, so it is
 ## asserted rather than written down.
 func _test_experience() -> void:
-	print("\nExperience (GDD §15 A7, amended: levels exist, they still grant nothing)")
+	print("\nExperience (GDD §15 A10: levels exist and they buy a point)")
 	await _reset_player()
 
 	var xp := _player.experience
@@ -1158,15 +1158,80 @@ func _test_experience() -> void:
 	_check("a negative award does nothing", xp.current >= 0)
 	xp.changed.disconnect(on_changed)
 
-	# The rule A7 exists to protect: levelling is not a stat source.
+	# A8 asserted that levelling grants nothing, and named the risk of that in
+	# the same breath. A10 takes the risk's side: a level now grants a point.
+	# The guard is retired by being *rewritten*, not deleted — the rule it was
+	# really protecting is the one below it, and that one still holds.
+	Skills.reset()
 	var stats_before := _player.stat_block().duplicate()
-	var sources_before: int = _player.stats.sources().size()
+	var points_before := Skills.points()
 	xp.grant(xp.needed())
 	await _ticks(2)
-	_check("levelling grants no stats", _player.stat_block() == stats_before,
-		"a level must never write a stat — only a rebuilt building may (GDD §15 A7)")
-	_check("levelling adds no stat source", _player.stats.sources().size() == sources_before)
+	_check("levelling grants a skill point", Skills.points() > points_before,
+		"%d -> %d" % [points_before, Skills.points()])
+	_check("but the point alone moves no stat", _player.stat_block() == stats_before,
+		"a point is a currency, not a stat — spending it is a separate act")
+
+	# ...and the rule A7 actually existed to protect, which survives every
+	# amendment: nothing moves a number without saying what moved it.
 	_check("a modifier still needs a source", not _player.stats.apply(&"", {"damage": 5}))
+	await _test_skill_tree()
+
+
+## Skills: what a point buys, and the accounting around it.
+func _test_skill_tree() -> void:
+	print("\nSkills (GDD §15 A10: a level buys a point, a point buys a skill)")
+	Skills.reset()
+	Skills.apply_all(_player.stats)
+
+	var tree := Skills.all()
+	_check("there is a tree to spend in", tree.size() >= 6, "%d skills" % tree.size())
+
+	var broken: Array[String] = []
+	for skill in tree:
+		var entry: SkillData = skill
+		if entry.requires != &"" and Skills.get_skill(entry.requires) == null:
+			broken.append("%s needs missing '%s'" % [entry.id, entry.requires])
+	_check("every prerequisite names a skill that exists", broken.is_empty(),
+		", ".join(broken))
+
+	# Nothing is free.
+	_check("a skill cannot be taken with no points", not Skills.can_unlock(&"edge"))
+	Skills.grant(1)
+	_check("a point makes the first tier available", Skills.can_unlock(&"edge"))
+	_check("but not the second", not Skills.can_unlock(&"long_arm"),
+		"long_arm requires edge")
+
+	var damage_before: int = _player.stats.bonus(StatsComponent.DAMAGE)
+	_check("taking it works", Skills.unlock(&"edge", _player.stats))
+	_check("the point is spent", Skills.points() == 0, "%d" % Skills.points())
+	_check("and the stat moved", _player.stats.bonus(StatsComponent.DAMAGE) > damage_before,
+		"%d -> %d" % [damage_before, _player.stats.bonus(StatsComponent.DAMAGE)])
+	# The rule that survives A7: every number names what granted it.
+	_check("under a source that names the skill",
+		_player.stats.sources().has(StringName("skill:edge")),
+		str(_player.stats.sources()))
+	_check("it cannot be taken twice", not Skills.unlock(&"edge", _player.stats))
+
+	Skills.grant(1)
+	_check("the prerequisite now unlocks the next tier", Skills.can_unlock(&"long_arm"))
+
+	# Survives a save, and survives being re-pushed into a fresh component —
+	# which is what happens every time the player walks into another scene.
+	var saved := Skills.save_data()
+	Skills.reset()
+	_check("a reset forgets them", not Skills.is_unlocked(&"edge"))
+	Skills.load_data(saved)
+	_check("a load remembers them", Skills.is_unlocked(&"edge"))
+	Skills.apply_all(_player.stats)
+	_check("and re-applies them to a fresh sheet",
+		_player.stats.sources().has(StringName("skill:edge")))
+
+	Skills.reset()
+	Skills.apply_all(_player.stats)
+	_check("clearing the tree takes the stat back with it",
+		not _player.stats.sources().has(StringName("skill:edge")),
+		str(_player.stats.sources()))
 
 
 ## Worn gear, and the rule that keeps GDD §15 A7 alive through the amendment

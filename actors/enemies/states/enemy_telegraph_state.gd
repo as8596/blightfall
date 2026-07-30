@@ -27,15 +27,32 @@ func enter(_msg: Dictionary = {}) -> void:
 	enemy.visual.scale = Vector2.ONE * data.telegraph_scale
 	if data.telegraph_sfx != &"":
 		Sfx.play(data.telegraph_sfx)
+	# ...and where. Colour and pose say an attack is coming; only this says which
+	# ground it covers, which is the difference between dodging and guessing when
+	# three of them arrive from three directions.
+	var marker := enemy.telegraph_marker()
+	if marker != null:
+		marker.begin(enemy.facing, data.lunge_distance + data.attack_range,
+			data.hitbox_size.y)
 
 
 func exit() -> void:
 	enemy.visual.modulate = enemy.animation.base_modulate()
 	enemy.visual.scale = Vector2.ONE
+	var marker := enemy.telegraph_marker()
+	if marker != null:
+		marker.finish()
 
 
 func physics_update(delta: float) -> void:
 	_t += delta
+	var marker := enemy.telegraph_marker()
+	if marker != null:
+		# Fed from the state's own clock, so the bar filling and the lunge firing
+		# cannot drift apart.
+		marker.advance(_t / maxf(data.telegraph_time, 0.001))
+		if _t <= data.telegraph_time * tracking_fraction:
+			marker.rotation = enemy.facing.angle()
 
 	if _t <= data.telegraph_time * tracking_fraction:
 		var wanted := enemy.direction_to_target()

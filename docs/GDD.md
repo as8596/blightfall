@@ -925,6 +925,34 @@ the day someone adds the convenient exception the suite says so.
 players will eventually resent. This is a placeholder for a decision, not the
 decision.
 
+### A10 — A level buys a skill point (amends A8)
+
+**Was (A8):** "a level grants nothing", with `_test_experience` asserting it.
+**Now:** a level grants one point, and points buy skills.
+
+A8 named the risk it was taking in the same breath as the rule: *"a progress
+bar that pays out nothing is a bar players will eventually resent. This is a
+placeholder for a decision, not the decision."* This is the decision, so the
+guard it left behind is retired rather than worked around — the test now asserts
+the new rule instead of being deleted.
+
+**What survives from A7, and it is the part that mattered:** nothing moves a
+number anonymously. Skills write to `StatsComponent` under `skill:<id>`, exactly
+as buildings write under their building id and gear writes under its slot. Every
+number on the character sheet can still name what granted it, and a refund
+removes precisely what it added.
+
+**What is given up, stated plainly:** the village is no longer the *only* thing
+that raises a stat. It is still the majority of them — six skills against eight
+projects — and it remains the only source of **capabilities**. A player who
+never rebuilds anything still cannot open the north gate, still has no map, and
+still has no forge. The town is the progression; skills are the seasoning.
+
+**Six skills, three branches, two deep.** Blade (damage, then reach), Body
+(a heart, then carry), Wind (stamina, then recovery). Small on purpose: six
+choices a player can hold in their head beats twenty they scroll past, and every
+modifier is a stat that already exists and is already tested.
+
 ### A9 — Equipment exists, and it names itself (amends A7)
 
 **Was (A7):** every stat modifier carries the id of the **building** that

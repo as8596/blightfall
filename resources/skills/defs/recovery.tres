@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/skills/skill_data.gd" id="1_skill"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"recovery"
+display_name = "Steady"
+description = "Rest, when you get it, goes further than it used to."
+cost = 1
+requires = &"breath"
+branch = 2
+modifiers = {&"stamina_regen": 20}

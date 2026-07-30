@@ -95,6 +95,10 @@ func _ready() -> void:
 	hurtbox.owner_actor = self
 
 	animation.bind(state_machine)
+	# Skills outlive the scene; this component does not. Re-push them on every
+	# spawn, or a skill taken in the valley is gone the moment you walk into
+	# Ambry — the component that knew about it was freed with the level.
+	Skills.apply_all(stats)
 	health.died.connect(_on_died)
 	health.changed.connect(func(current: int, maximum: int) -> void:
 		Events.player_health_changed.emit(current, maximum)

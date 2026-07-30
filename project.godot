@@ -33,6 +33,7 @@ Hud="*res://ui/hud.gd"
 GameMenu="*res://ui/game_menu.gd"
 PauseMenu="*res://ui/pause_menu.gd"
 Village="*res://autoloads/village.gd"
+Skills="*res://autoloads/skills.gd"
 Dialogue="*res://ui/dialogue_box.gd"
 
 [display]

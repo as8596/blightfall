@@ -88,6 +88,10 @@ func _apply_data() -> void:
 	# The bar has to know how tall the thing is to float above it, which is only
 	# known once the data is applied — so it is wired here rather than in the
 	# scene.
+	var mark := telegraph_marker()
+	if mark != null:
+		mark.position = Vector2(0.0, -data.body_size.y * 0.5)
+
 	var bar := get_node_or_null("HealthBar") as EnemyHealthBar
 	if bar != null:
 		bar.watch(health, data.body_size.y)
@@ -190,3 +194,9 @@ func _on_hit_taken(_hitbox: Hitbox) -> void:
 func _on_died() -> void:
 	Events.enemy_died.emit(self)
 	state_machine.transition_to(&"Dead")
+
+
+## The ground-band warning shown during the wind-up. Nullable: an enemy scene
+## without one still works, it just warns with colour and pose alone.
+func telegraph_marker() -> TelegraphMarker:
+	return get_node_or_null("TelegraphMarker") as TelegraphMarker

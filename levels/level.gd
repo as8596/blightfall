@@ -111,6 +111,12 @@ func _ready() -> void:
 	_spawn_enemies()
 	_spawn_pickups()
 
+	# Damage numbers are spawned here rather than by the hitbox, for the same
+	# reason doorways are: the hitbox knows what it hit, but only the level knows
+	# where the world node is — and a number parented to the thing it describes
+	# would vanish with it the moment that thing died.
+	Events.hit_landed.connect(_on_hit_landed)
+
 
 ## Put the player on a named marker and point the camera at them.
 ##
@@ -253,6 +259,24 @@ func _spawn_pickups() -> void:
 		loose.amount = int(marker.get_meta("amount", 1))
 		world.add_child(loose)
 		loose.global_position = marker.global_position
+
+
+## Throw a number off whatever was just hit.
+##
+## Coloured by who took it rather than who dealt it: the player reads "I lost
+## two" and "it lost four" completely differently, and in the middle of a fight
+## they are reading colour before they are reading digits.
+func _on_hit_landed(_attacker: Node, target: Node, damage: int) -> void:
+	if world == null or damage <= 0 or not (target is Node2D):
+		return
+	var body := target as Node2D
+	# Above the middle of whatever it was, not at its feet.
+	var lift := 48.0
+	var animation := body.get_node_or_null("AnimationComponent") as AnimationComponent
+	if animation != null:
+		lift = animation.body_height * 0.75
+	DamageNumber.pop(world, body.global_position - Vector2(0.0, lift), damage,
+		target != player)
 
 
 ## Everything still lying about in this level.

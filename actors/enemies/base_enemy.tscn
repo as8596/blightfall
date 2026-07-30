@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://actors/enemies/base_enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://actors/components/health_component.gd" id="2_health"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://actors/enemies/states/enemy_dead_state.gd" id="14_dead"]
 [ext_resource type="Script" path="res://actors/enemies/states/enemy_circle_state.gd" id="16_circle"]
 [ext_resource type="Script" path="res://actors/enemies/enemy_health_bar.gd" id="17_bar"]
+[ext_resource type="Script" path="res://actors/enemies/telegraph_marker.gd" id="18_mark"]
 
 [sub_resource type="RectangleShape2D" id="Rect_enemy_body"]
 size = Vector2(48, 32)
@@ -109,3 +110,6 @@ script = ExtResource("14_dead")
 
 [node name="HealthBar" type="Node2D" parent="."]
 script = ExtResource("17_bar")
+
+[node name="TelegraphMarker" type="Node2D" parent="."]
+script = ExtResource("18_mark")
