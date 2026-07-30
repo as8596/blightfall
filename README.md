@@ -111,7 +111,7 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Action | Keyboard | Gamepad |
 |---|---|---|
 | Move | WASD / arrows | left stick |
-| Attack | J | X |
+| Attack | Left click or J | X |
 | Dash / dodge | Shift or Space | A |
 | Sprint | hold Shift while moving | hold A |
 | Interact | E | B |

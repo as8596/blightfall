@@ -478,6 +478,32 @@ func _test_project_configuration() -> void:
 	_check("dash is on shift", dodge_keys.has(KEY_SHIFT), "%s" % [dodge_keys])
 	_check("and still on space", dodge_keys.has(KEY_SPACE))
 
+	# You aim the swing with the cursor (`Player.aim_direction`), so the swing
+	# belongs on the button under the hand already holding the cursor. J stays —
+	# a keyboard-only player should not have to move their right hand — but left
+	# click is the one people will reach for first.
+	#
+	# Safe because every surface that wants a left click for its own purposes
+	# pauses the tree first: the dialogue box, the game menu and the pause menu
+	# all set `paused = true`, and the player's state machine does not run while
+	# paused. The HUD is not clickable at all. Without that, clicking a dialogue
+	# reply would also swing a sword.
+	var attack_mouse: Array[int] = []
+	var attack_keys: Array[int] = []
+	for event in InputMap.action_get_events(&"attack"):
+		var click := event as InputEventMouseButton
+		if click != null:
+			attack_mouse.append(click.button_index)
+		var pressed := event as InputEventKey
+		if pressed != null:
+			attack_keys.append(pressed.physical_keycode)
+	_check("attack is on left click", attack_mouse.has(MOUSE_BUTTON_LEFT), "%s" % [attack_mouse])
+	_check("and still on the keyboard", attack_keys.has(KEY_J), "%s" % [attack_keys])
+	# That the click-consuming surfaces pause is asserted where they are opened —
+	# `dialogue_test` checks `get_tree().paused` while a conversation is up, and
+	# the menu tests do the same. Restating it here would be a second copy of a
+	# fact rather than a second check of it.
+
 
 ## The UI font is a pixel font on a 16 units-per-em grid, so it only rasterises
 ## evenly at whole multiples of 16 — at 20 every fourth stem gains a pixel and at
