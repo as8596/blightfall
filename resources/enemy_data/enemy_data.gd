@@ -38,6 +38,22 @@ extends Resource
 @export var recover_time: float = 0.5
 ## Minimum gap between attacks.
 @export var attack_cooldown: float = 0.35
+
+## After an attack, back off and move around the target for this long before
+## committing again. Set both to zero for an enemy that simply re-engages —
+## a Thornmass does not circle.
+##
+## This is what stops a pack arriving in single file: separation pushes the
+## second and third enemy apart, chase pulls them straight back onto the same
+## line, and the fight becomes one enemy three times. Circling gives them
+## somewhere to be that is not behind the first one.
+@export var circle_time_min: float = 0.5
+@export var circle_time_max: float = 1.2
+## Held at this multiple of `attack_range`, which must stay above 1.0 or the
+## circle happens inside the range it is supposed to be waiting outside of.
+@export var circle_radius_scale: float = 1.35
+## Circling is a lope, not a sprint.
+@export var circle_speed_scale: float = 0.8
 ## Control loss when hit.
 @export var stagger_time: float = 0.14
 ## Push-apart radius so a pack doesn't stack into one rectangle.

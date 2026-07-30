@@ -43,7 +43,7 @@ func for_state(state: StringName) -> SpriteAnimation:
 	match state:
 		&"Idle":
 			return idle
-		&"Move", &"Chase":
+		&"Move", &"Chase", &"Circle":
 			return walk
 		&"Dodge":
 			return dodge

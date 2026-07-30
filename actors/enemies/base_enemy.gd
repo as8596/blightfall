@@ -85,6 +85,13 @@ func _apply_data() -> void:
 		body_shape.shape = body_rect
 		body_shape.position = Vector2(0, -data.body_size.x * 0.25)
 
+	# The bar has to know how tall the thing is to float above it, which is only
+	# known once the data is applied — so it is wired here rather than in the
+	# scene.
+	var bar := get_node_or_null("HealthBar") as EnemyHealthBar
+	if bar != null:
+		bar.watch(health, data.body_size.y)
+
 	hitbox.damage = data.contact_damage
 	hitbox.position = Vector2(0, -data.body_size.y * 0.5)
 	var hit_rect := hitbox_shape.shape as RectangleShape2D

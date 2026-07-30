@@ -21,5 +21,13 @@ func physics_update(delta: float) -> void:
 	_t += delta
 	# Slide to a stop rather than stopping dead, so the lunge has weight.
 	enemy.apply_motion(delta, Vector2.ZERO, slide_deceleration)
-	if _t >= data.recover_time:
+	if _t < data.recover_time:
+		return
+	# Back off and come around again rather than walking straight back in. An
+	# enemy that re-engages immediately turns every fight into a shoving match
+	# at contact range; one that gives ground reads as an animal that just
+	# missed. Enemies with no circle time configured go straight back to Chase.
+	if data.circle_time_max > 0.0:
+		state_machine.transition_to(&"Circle")
+	else:
 		state_machine.transition_to(&"Chase")

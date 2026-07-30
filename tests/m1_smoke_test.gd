@@ -243,6 +243,24 @@ func _check_near(label: String, actual: float, expected: float, tolerance: float
 ##
 ## Cheap to check and impossible to notice otherwise: a `_up` strip that is
 ## secretly the front view satisfies "facing north uses the up strip" perfectly.
+## Circling, in the data. The behaviour itself is a state machine transition
+## asserted by `_test_enemy_behaviour`; what this pins is that the numbers make
+## sense, because both of them have a way of being quietly wrong.
+func _check_circling() -> void:
+	var wolf: EnemyData = load("res://resources/enemy_data/forest_wolf.tres")
+	var villager: EnemyData = load("res://resources/enemy_data/blighted_villager.tres")
+	for data in [wolf, villager]:
+		if data.circle_time_max <= 0.0:
+			continue
+		# Below 1.0 the enemy circles *inside* its own attack range, which is
+		# not a circle — it is standing on top of you with extra steps, and it
+		# eats the recovery window the player is owed.
+		_check("%s circles outside its own reach" % data.display_name,
+			data.circle_radius_scale > 1.0, "%.2f" % data.circle_radius_scale)
+		_check("and does not circle forever", data.circle_time_max <= 2.0,
+			"%.2fs" % data.circle_time_max)
+
+
 ## A sprite that is not flashing must not be going through the flash shader.
 ##
 ## This is not tidiness. In the Compatibility renderer a canvas item carrying a
@@ -955,13 +973,36 @@ func _test_enemy_behaviour() -> void:
 		seen[state] = true
 		if state == &"Telegraph":
 			telegraph_ticks += 1
-		if seen.has(&"Recover"):
+		# Run a little past Recover now, to see where it goes next.
+		if seen.has(&"Circle"):
 			break
 
 	_check("enemy chases", seen.has(&"Chase"))
 	_check("enemy telegraphs before attacking", seen.has(&"Telegraph"))
 	_check("enemy lunges", seen.has(&"Lunge"))
 	_check("enemy recovers, giving the player a turn", seen.has(&"Recover"))
+	# ...and then gives ground rather than walking straight back in. Without
+	# this a pack arrives in single file: separation shoves the second and third
+	# apart, chase pulls them back onto the same line, and three wolves are one
+	# wolf three times.
+	_check("and then circles instead of re-engaging on the spot", seen.has(&"Circle"),
+		str(seen.keys()))
+
+	# The circle has to sit outside the reach it is waiting on, or it is not a
+	# retreat and the player's window closes early.
+	var circling := enemy.state_machine.get_node_or_null("Circle") as EnemyState
+	_check("the circle state exists", circling != null)
+	_check("and holds further out than the attack range",
+		enemy.data.attack_range * enemy.data.circle_radius_scale > enemy.data.attack_range)
+
+	# The bar appears when you hurt something, and not before.
+	var bar := enemy.get_node_or_null("HealthBar") as EnemyHealthBar
+	_check("an enemy carries a health bar", bar != null)
+	if bar != null:
+		_check("which stays hidden until the player earns it", not bar.is_showing())
+		enemy.health.take_damage(1, _player)
+		await _ticks(2)
+		_check("and shows once it is hurt", bar.is_showing())
 	_check_near("telegraph lasts 0.4s", float(telegraph_ticks) * TICK, 0.4, 0.03)
 	_check("player took a hit from the lunge", _player.health.current < hp_before,
 		"%d → %d" % [hp_before, _player.health.current])
@@ -1752,6 +1793,7 @@ func _test_design_rules() -> void:
 		is_equal_approx(combo.hit_1.hitstop, 0.05) and is_equal_approx(combo.hit_2.hitstop, 0.05)
 			and is_equal_approx(combo.hit_3.hitstop, 0.1))
 
+	_check_circling()
 	_check("telegraph is at least 0.4s", villager.telegraph_time >= 0.4,
 		"%.2fs" % villager.telegraph_time)
 	_check("telegraph changes colour", villager.telegraph_color != villager.base_color)
