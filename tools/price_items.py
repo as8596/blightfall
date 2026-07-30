@@ -31,9 +31,9 @@ out-pricing the sword.
 
 ## What is deliberately worth nothing
 
-Keys. `ItemData.is_tradeable()` refuses a zero, so a key cannot be sold, and it
-cannot be sold *by construction* rather than by a confirmation dialog. See GDD
-§688 for why none of this is allowed to become a second progression track.
+Keys. `ItemData.is_tradeable()` refuses a zero, so a key cannot be sold at all —
+by construction, rather than by a confirmation dialog nobody reads. Selling the
+thing that opens a door is a soft lock with a coin attached.
 """
 
 from __future__ import annotations

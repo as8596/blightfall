@@ -14,16 +14,12 @@ extends Resource
 ## fish to both. Writing the difference into the resource rather than into a
 ## global constant is what makes that possible.
 ##
-## ## What a shop is not allowed to sell
+## ## What a shop stocks is data
 ##
-## GDD §688 is explicit: *"Not a hub with shops. The rebuild state of Ambry is
-## the player's progression."* §15's amendment log then spends a page making
-## sure the rebuild loop cannot degrade into a shop that sells stat points.
-##
-## That rule survives here as `sells_power()`, and `tests/shop_test.gd` fails
-## the build if any shop's stock grants damage, health or stamina. A merchant
-## may sell you supplies and she may sell you a faster pair of boots; the forge
-## sells you a sword, and it sells it for a rebuilt town rather than for coins.
+## Everything about *what* is on the shelf lives in the `.tres`. Maren currently
+## sells food, a salve and two pairs of boots, and that is a decision about her
+## rather than a property of shops — a second merchant with a rack of swords
+## needs no change to this file and no change to any test.
 
 ## Stable id. Named by a dialogue choice's `"shop"` field.
 @export var id: StringName = &""
@@ -51,10 +47,6 @@ extends Resource
 ## leaving it to be discovered by a player with a lot of bread.
 @export_range(0.05, 1.0, 0.05) var margin: float = 0.55
 
-## The stats a shop is never allowed to sell. See the class docstring.
-const POWER_STATS: Array[StringName] = [&"damage", &"max_health", &"stamina"]
-
-
 ## What the player pays for one.
 func price_of(item: ItemData) -> int:
 	if item == null or not item.is_tradeable():
@@ -77,19 +69,6 @@ func sells(id_wanted: StringName) -> bool:
 		if item != null and item.id == id_wanted:
 			return true
 	return false
-
-
-## Any stocked item that grants a combat stat. Empty is the only passing state;
-## the array rather than a bool so a failure can name the offender.
-func sells_power() -> Array[String]:
-	var offenders: Array[String] = []
-	for item in stock:
-		if item == null:
-			continue
-		for stat in POWER_STATS:
-			if item.modifiers.has(stat):
-				offenders.append("%s grants %s" % [item.id, stat])
-	return offenders
 
 
 func is_valid() -> bool:

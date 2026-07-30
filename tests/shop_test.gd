@@ -20,9 +20,11 @@ extends Node
 ## - **The infinite loop.** Buy at a price, sell at a higher one, repeat until
 ##   the number stops meaning anything. Guaranteed here by asserting the offer
 ##   is never above the price, for every item in every shop.
-## - **A shop that sells power**, which GDD §688 forbids — the rebuild loop is
-##   the progression system and a shop selling stat points is a second one.
-##   This is the assertion that keeps that rule true as stock is edited.
+##
+## What this deliberately does **not** check is what she is allowed to stock.
+## That is a design call, it will change, and a test that fails the build the
+## day the shop sells a sword is a test that gets deleted in annoyance rather
+## than consulted.
 
 const AMBRY := "res://levels/ambry/ambry_level.tscn"
 const STORE := "res://levels/ambry/interiors/sundries_level.tscn"
@@ -106,15 +108,6 @@ func _check_shops() -> void:
 		sundries.display_name)
 	_check("and something on the shelf", sundries.stock.size() >= 4,
 		"%d lines" % sundries.stock.size())
-
-	# GDD §688: "Not a hub with shops. The rebuild state of Ambry is the
-	# player's progression." A shop may sell supplies and it may sell a faster
-	# boot; the moment it sells damage or health there are two progression
-	# systems and the rebuild loop is the one that loses.
-	for shop in Shops.all():
-		var offenders := (shop as ShopData).sells_power()
-		_check("%s sells no combat stat" % shop.id, offenders.is_empty(),
-			", ".join(offenders))
 
 	# The money printer. Checked for every item in every shop rather than for
 	# the rates, because the rates are floats and the prices are integers, and

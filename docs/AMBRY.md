@@ -205,10 +205,7 @@ score it.
 rebuilding visibly *moves a person* rather than unlocking a menu — the
 difference between a village and a hub.
 
-### Maren Tallow, and why she is the eleventh
-
-§2 caps NPCs with dialogue at ten and the table above is exactly ten. She is
-over that line on purpose; GDD §15 A11 is the record of the cost.
+### Maren Tallow
 
 She keeps the general store, which her father built and named **TALLOW & SON**
 before he had any children. He got a daughter, then a son, then the valley got

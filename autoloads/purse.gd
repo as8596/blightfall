@@ -7,24 +7,19 @@ extends Node
 ##
 ## ## Gold does not drop
 ##
-## GDD §15 A4 drops the *haul* where you fall, and `InventoryComponent`'s
-## docstring is clear about why: the haul is the thing the expedition loop is
-## about, and losing it is the risk that makes turning back a decision. Money is
-## not that. Dropping it too would mean every death costs you the run *and* the
-## errand you were saving for, which is the kind of double punishment that makes
-## players stop taking the interesting route.
+## The haul drops where you fall, because losing it is the risk that makes
+## turning back a decision. Money is not that. Dropping it too would mean every
+## death costs you the run *and* the errand you were saving for, which is the
+## kind of double punishment that makes players stop taking the interesting
+## route.
 ##
 ## So: a haul drops where you fall, a key does not, and neither does your purse.
 ##
-## ## It is not a second progression track
+## ## Small on purpose
 ##
-## GDD §688 is blunt — "Not a hub with shops. The *rebuild state of Ambry is*
-## the player's progression" — and §15's amendment log spends a page making sure
-## the rebuild loop can never degrade into a shop that sells stat points. This
-## exists to buy **supplies**: food, salves, the things an expedition consumes.
-## What enforces that is `ShopData.stock`, not this file, but it is the reason
-## this file is small and will stay small. There is no bank, no interest, no
-## second currency.
+## One number, added to and spent. No bank, no interest, no second currency, no
+## denominations. Every one of those is a system that has to be explained, and
+## none of them make the decision at the counter more interesting.
 
 ## Amount changed. UI listens here; nothing polls.
 signal changed(amount: int)

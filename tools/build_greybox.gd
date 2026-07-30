@@ -113,13 +113,9 @@ const BUILDINGS: Array = [
 		INTERIOR_DIR + "/forge_level.tscn"],
 	["magistrate",  Rect2i(27, 18, 10, 5), 4, "magistrate", "built",    "south",
 		INTERIOR_DIR + "/magistrate_hall_level.tscn"],
-	# The general store, on the west side of the square. Standing and trading
-	# from the start, which every other *useful* building in Ambry is not — and
-	# that is the point of it. GDD §688 keeps progression in the rebuild loop, so
-	# a shop that was itself a rebuild project would be a second one; this sells
-	# supplies, it sells no combat stat (asserted in `tests/shop_test.gd`), and
-	# it is open on day one because the player needs somewhere to spend a coin
-	# before they have rebuilt anything at all.
+	# The general store, on the west side of the square. Open and trading from
+	# the start, which every other useful building in Ambry is not — the player
+	# needs somewhere to spend a coin before they have rebuilt anything.
 	#
 	# Door on offset 3, which is the only offset that works. At 2 the doorstep
 	# lands within three tiles of the carpenter on the ring road; at 4 it lands

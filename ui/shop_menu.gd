@@ -196,10 +196,9 @@ func _fill_buy() -> void:
 
 ## The pack, read from `Hud`'s cache rather than off the player.
 ##
-## GDD §12 rule 1: there is no player singleton and UI listens rather than
-## fetches. `Hud` is what holds the last `Events.player_items_changed`, and
-## `GameMenu` draws its grid from exactly the same two arrays — so the shop and
-## the inventory can never disagree about what you are carrying.
+## `Hud` holds the last `Events.player_items_changed`, and `GameMenu` draws its
+## grid from exactly the same two arrays — so the shop and the inventory can
+## never disagree about what you are carrying.
 ##
 ## Fetching the player worked and was still wrong, and it announced itself the
 ## first time this was screenshotted: the harness parents the level under
