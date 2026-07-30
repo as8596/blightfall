@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="SkillData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/skills/skill_data.gd" id="1_skill"]
-[ext_resource type="Texture2D" path="res://art/icons/skills/edge.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://art/icons/skills/cleave.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_skill")
-id = &"edge"
-display_name = "Edge"
-description = "You have been swinging the same blade a long time. It knows the way now."
+id = &"cleave"
+display_name = "Cleave"
+description = "Less a technique than a decision about how hard to swing."
 icon = ExtResource("2_icon")
 cost = 1
-requires = &""
+requires = &"edge"
 branch = 0
-modifiers = {&"damage": 1}
+modifiers = {&"damage": 2}

@@ -15,6 +15,11 @@ extends Resource
 @export var display_name: String = ""
 @export_multiline var description: String = ""
 
+## Shown in the tree. The tree is read by shape before it is read by hovering,
+## so this is not decoration — it is what makes a branch legible without
+## pointing at every node in it.
+@export var icon: Texture2D
+
 ## Points this costs. Kept at 1 for now: a tree where everything costs one point
 ## is a tree about *choosing*, and a tree with prices is a tree about saving up.
 @export_range(1, 5) var cost: int = 1

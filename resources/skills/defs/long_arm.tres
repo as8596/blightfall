@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SkillData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/skills/skill_data.gd" id="1_skill"]
+[ext_resource type="Texture2D" path="res://art/icons/skills/long_arm.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_skill")
 id = &"long_arm"
 display_name = "Long Arm"
 description = "Reach is most of what keeps a wolf off you."
+icon = ExtResource("2_icon")
 cost = 1
 requires = &"edge"
 branch = 0

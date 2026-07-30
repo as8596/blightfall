@@ -83,6 +83,7 @@ var _skill_panels: Dictionary = {}
 var _skill_points: Label
 var _skill_detail: RichTextLabel
 var _skill_hovered: StringName = &""
+var _skill_canvases: Array = []
 var _hovered: int = -1
 var _pages: Dictionary = {}
 var _open: bool = false
@@ -798,16 +799,30 @@ func _build_inventory_page() -> Control:
 	return page
 
 
-## The tree. Three branches across, two deep, and what each one costs you.
+## The tree: three branches, drawn top to bottom, each forking once.
 ##
-## **Laid out as columns rather than as a graph** because that is what the data
-## is: one prerequisite per skill, so every path is a straight line down a
-## column and there is nothing a drawn edge would tell you that the stacking
-## does not. A node graph here would be decoration pretending to be information.
+## **Laid out and connected rather than listed.** A column of rows tells you
+## what a branch contains; it does not tell you that taking Edge opens two
+## different answers and you only have points for one. That choice is the whole
+## content of a skill tree, and it is a shape — so it is drawn as one, with a
+## line from each skill to the one it needs.
 ##
-## Each skill is a button that changes state rather than a list with a Buy
-## column — taken, available, and locked read as three different objects at a
-## glance, and the player never has to work out why a row is refusing them.
+## **Icons, because a tree is read by shape before it is read by hovering.**
+## Nine text rows are nine things to read one at a time. Nine silhouettes are a
+## picture of the branch you are considering, and the words arrive when you
+## point at one.
+##
+## Positions are computed from the data — depth is how many prerequisites deep a
+## skill sits, and siblings share a row — so adding a skill is a `.tres` and
+## nothing in here moves.
+const NODE := 52
+const NODE_GAP_X := 18
+const NODE_GAP_Y := 46
+## Least breathing room between an icon and its frame. Only a floor — the real
+## inset is whatever centring the largest whole-number scale leaves over.
+const ICON_INSET := 6
+
+
 func _build_skills_page() -> Control:
 	var page := VBoxContainer.new()
 	page.name = "Skills"
@@ -836,24 +851,18 @@ func _build_skills_page() -> Control:
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	page.add_child(columns)
 
-	# Group by branch. Read off the data rather than hard-coded, so adding a
-	# skill is a `.tres` and nothing here changes.
 	var branches: Dictionary = {}
 	for skill in Skills.all():
 		var entry: SkillData = skill
-		branches.get_or_add(entry.branch, []).append(entry)
+		if not branches.has(entry.branch):
+			branches[entry.branch] = []
+		(branches[entry.branch] as Array).append(entry)
 
 	for branch in [0, 1, 2]:
 		var column := _framed(SkillData.branch_name(branch))
-		_frame_of(column).custom_minimum_size = Vector2(236, 0)
 		_frame_of(column).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		columns.add_child(_frame_of(column))
-		for skill in branches.get(branch, []):
-			column.add_child(_build_skill_node(skill as SkillData))
-		# Push the nodes to the top so two-deep and three-deep columns line up.
-		var filler := Control.new()
-		filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		column.add_child(filler)
+		column.add_child(_build_branch(branches.get(branch, [])))
 
 	_skill_detail = _text_page("SkillDetail")
 	_skill_detail.custom_minimum_size = Vector2(0, 92)
@@ -861,35 +870,95 @@ func _build_skills_page() -> Control:
 	return page
 
 
+## One branch, as a laid-out tree inside its own drawing surface.
+##
+## Depth comes from the prerequisite chain rather than from an authored row
+## number, so a skill inserted in the middle pushes its descendants down on its
+## own and cannot end up drawn above the thing it requires.
+func _build_branch(skills: Array) -> Control:
+	var canvas := SkillBranch.new()
+	canvas.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var by_depth: Dictionary = {}
+	var depth_of: Dictionary = {}
+	for skill in skills:
+		var entry: SkillData = skill
+		var depth := 0
+		var walk := entry
+		while walk != null and walk.requires != &"":
+			depth += 1
+			walk = Skills.get_skill(walk.requires)
+			if depth > 8:
+				break                       # a cycle in the data; do not hang on it
+		depth_of[entry.id] = depth
+		if not by_depth.has(depth):
+			by_depth[depth] = []
+		(by_depth[depth] as Array).append(entry)
+
+	var deepest := 0
+	var widest := 1
+	for depth in by_depth:
+		deepest = maxi(deepest, int(depth))
+		widest = maxi(widest, (by_depth[depth] as Array).size())
+	var span := widest * NODE + (widest - 1) * NODE_GAP_X
+	canvas.custom_minimum_size = Vector2(span, (deepest + 1) * NODE + deepest * NODE_GAP_Y)
+
+	var centres: Dictionary = {}
+	for depth in by_depth:
+		var row: Array = by_depth[depth]
+		var row_width := row.size() * NODE + (row.size() - 1) * NODE_GAP_X
+		var left := (span - row_width) * 0.5
+		for i in row.size():
+			var entry: SkillData = row[i]
+			var at := Vector2(left + i * (NODE + NODE_GAP_X), int(depth) * (NODE + NODE_GAP_Y))
+			var node := _build_skill_node(entry)
+			node.position = at
+			canvas.add_child(node)
+			centres[entry.id] = at + Vector2(NODE, NODE) * 0.5
+
+	# Hand the geometry to the canvas so it can draw the joins. It owns nothing
+	# else — the nodes are real Controls and take their own clicks.
+	var links: Array = []
+	for skill in skills:
+		var entry: SkillData = skill
+		if entry.requires != &"" and centres.has(entry.requires) and centres.has(entry.id):
+			links.append([centres[entry.requires], centres[entry.id], entry.id])
+	canvas.links = links
+	_skill_canvases.append(canvas)
+	return canvas
+
+
 func _build_skill_node(skill: SkillData) -> Control:
 	var panel := Panel.new()
-	panel.custom_minimum_size = Vector2(0, 52)
+	panel.custom_minimum_size = Vector2(NODE, NODE)
+	panel.size = Vector2(NODE, NODE)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.tooltip_text = skill.description
 
-	var name_label := Label.new()
-	name_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	name_label.offset_left = 10.0
-	name_label.offset_top = 6.0
-	name_label.add_theme_font_override("font", DISPLAY)
-	name_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	name_label.text = skill.display_name
-	panel.add_child(name_label)
-
-	var effect := Label.new()
-	effect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	effect.offset_left = 10.0
-	effect.offset_top = 26.0
-	effect.add_theme_font_size_override("font_size", TypeScale.SMALL)
-	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	effect.text = _effect_line(skill)
-	panel.add_child(effect)
+	# The inset is derived, not chosen: a 32px icon drawn into a 36px box is
+	# resampled at 1.125x, and a pixel icon resampled at a fraction gets uneven
+	# rows exactly like a prop at a fractional `art_scale`. Take the largest
+	# whole multiple that fits and centre it, so the icon is always drawn 1:1 or
+	# 2:1 and never in between.
+	var icon := TextureRect.new()
+	var art := skill.icon.get_size() if skill.icon != null else Vector2(NODE, NODE)
+	var multiple := maxi(int(floorf(float(NODE - ICON_INSET * 2) / maxf(art.x, art.y))), 1)
+	var inset := roundf((NODE - maxf(art.x, art.y) * multiple) * 0.5)
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+	icon.offset_left = inset
+	icon.offset_top = inset
+	icon.offset_right = -inset
+	icon.offset_bottom = -inset
+	icon.texture = skill.icon
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(icon)
 
 	panel.gui_input.connect(_on_skill_input.bind(skill.id))
 	panel.mouse_entered.connect(_on_skill_hover.bind(skill.id, true))
 	panel.mouse_exited.connect(_on_skill_hover.bind(skill.id, false))
-	_skill_panels[skill.id] = {"panel": panel, "name": name_label, "effect": effect}
+	_skill_panels[skill.id] = {"panel": panel, "icon": icon}
 	return panel
 
 
@@ -927,8 +996,9 @@ func _on_skill_input(event: InputEvent, id: StringName) -> void:
 		Sfx.play(&"ui_move", -14.0)
 
 
-## Three states, three looks: taken is warm and filled, available is outlined
-## and bright, locked is dim and flat.
+## Three states, three looks: taken is warm and lit, available is outlined and
+## bright, locked is dim and flat. The icon dims with the frame, so a locked
+## branch reads as unlit rather than as missing.
 func _refresh_skills() -> void:
 	if _skill_points == null:
 		return
@@ -938,28 +1008,29 @@ func _refresh_skills() -> void:
 	for id in _skill_panels:
 		var parts: Dictionary = _skill_panels[id]
 		var panel: Panel = parts["panel"]
-		var skill := Skills.get_skill(id)
 		var taken := Skills.is_unlocked(id)
 		var open := Skills.can_unlock(id)
+		var pointed: bool = _skill_hovered == id
 
 		var box := StyleBoxFlat.new()
-		box.set_border_width_all(2)
-		box.set_content_margin_all(6)
+		box.set_border_width_all(3 if pointed else 2)
 		if taken:
-			box.bg_color = Color(0.20, 0.17, 0.11)
-			box.border_color = Color(0.72, 0.61, 0.39)
+			box.bg_color = Color(0.22, 0.18, 0.11)
+			box.border_color = Color(0.82, 0.69, 0.42)
 		elif open:
-			box.bg_color = Color(0.13, 0.12, 0.10)
-			box.border_color = Color(0.56, 0.48, 0.32)
+			box.bg_color = Color(0.14, 0.13, 0.11)
+			box.border_color = Color(0.60, 0.51, 0.34)
 		else:
 			box.bg_color = Color(0.10, 0.09, 0.09)
-			box.border_color = Color(0.26, 0.23, 0.20)
+			box.border_color = Color(0.24, 0.22, 0.19)
+		if pointed:
+			box.border_color = box.border_color.lightened(0.25)
 		panel.add_theme_stylebox_override("panel", box)
+		(parts["icon"] as TextureRect).modulate = (Color.WHITE if taken or open
+			else Color(0.44, 0.42, 0.40))
 
-		var bright := Color(0.90, 0.84, 0.70) if taken or open else Color(0.46, 0.43, 0.39)
-		(parts["name"] as Label).add_theme_color_override("font_color", bright)
-		(parts["effect"] as Label).add_theme_color_override("font_color",
-			Color(0.72, 0.66, 0.55) if taken or open else Color(0.38, 0.36, 0.33))
+	for canvas in _skill_canvases:
+		(canvas as SkillBranch).queue_redraw()
 
 	_skill_detail.text = _skill_detail_text()
 

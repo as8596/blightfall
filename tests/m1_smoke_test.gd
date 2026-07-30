@@ -1195,6 +1195,43 @@ func _test_skill_tree() -> void:
 	_check("every prerequisite names a skill that exists", broken.is_empty(),
 		", ".join(broken))
 
+	# The tab draws icons, so a skill without one is a blank frame in the tree.
+	# This is what a renamed def left behind: `recovery.tres` outlived its
+	# rename to `steady`, kept being scanned, and drew a tenth, icon-less node
+	# in a branch that should fork two ways. Nothing here talked about shape, so
+	# nothing caught it — every other assertion in this function asks `Skills`
+	# about one id it already knows the name of.
+	var iconless: Array[String] = []
+	var names: Dictionary = {}
+	var duplicate_names: Array[String] = []
+	var roots: Dictionary = {}
+	for skill in tree:
+		var entry: SkillData = skill
+		if entry.icon == null:
+			iconless.append(String(entry.id))
+		if names.has(entry.display_name):
+			duplicate_names.append("%s and %s are both '%s'"
+				% [names[entry.display_name], entry.id, entry.display_name])
+		names[entry.display_name] = String(entry.id)
+		if entry.requires == &"":
+			roots[entry.branch] = roots.get(entry.branch, 0) + 1
+	_check("every skill has an icon to draw", iconless.is_empty(),
+		", ".join(iconless))
+
+	# Two skills sharing a name is the signature of a def that was renamed by
+	# copy rather than by move — the old file is still there.
+	_check("no two skills share a display name", duplicate_names.is_empty(),
+		", ".join(duplicate_names))
+
+	# A branch is drawn top-down from a single root. Two roots in one branch
+	# would render as two unjoined trees stacked in one column.
+	var multi_rooted: Array[String] = []
+	for branch in roots:
+		if roots[branch] != 1:
+			multi_rooted.append("branch %d has %d roots" % [branch, roots[branch]])
+	_check("each branch grows from exactly one root", multi_rooted.is_empty(),
+		", ".join(multi_rooted))
+
 	# Nothing is free.
 	_check("a skill cannot be taken with no points", not Skills.can_unlock(&"edge"))
 	Skills.grant(1)

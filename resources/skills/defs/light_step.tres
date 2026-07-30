@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://resources/skills/skill_data.gd" id="1_skill"]
+[ext_resource type="Texture2D" path="res://art/icons/skills/light_step.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_skill")
+id = &"light_step"
+display_name = "Light Step"
+description = "You have found the parts of the ground that do not hold you."
+icon = ExtResource("2_icon")
+cost = 1
+requires = &"breath"
+branch = 2
+modifiers = {&"move_speed": 18}
