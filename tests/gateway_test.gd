@@ -163,6 +163,7 @@ func _run() -> void:
 	# Godot ever stopped building shapes for it, every wood in the zone would
 	# quietly become walkable and nothing else here would notice.
 	_check_canopy_blocks(valley)
+	await _check_the_valley_has_something_in_it(valley)
 
 	# The wood is not empty. Wolves are scattered by the builder through its
 	# seeded generator, so this is a fixed number rather than a lucky one.
@@ -181,6 +182,9 @@ func _run() -> void:
 		ambushes.is_empty(), ", ".join(ambushes))
 
 	# ...and out the other side, to prove the zone is a zone and not a cul-de-sac.
+	# What matters is that the satchel survives a transition, not what is in it —
+	# pinning a literal here broke the moment the valley had anything to pick up.
+	var carried := valley.player.inventory.total()
 	var onward := await _walk_until_scene_changes(&"move_down", ORCHARD, 900)
 	_check("walking south again reaches the orchard rows", onward,
 		get_tree().current_scene.scene_file_path)
@@ -188,8 +192,8 @@ func _run() -> void:
 		var orchard := get_tree().current_scene as Level
 		await _ticks(6)
 		_check("still carrying the haul two areas out",
-			orchard.player.inventory.total() == 4,
-			"%d units" % orchard.player.inventory.total())
+			orchard.player.inventory.total() == carried,
+			"%d units, had %d" % [orchard.player.inventory.total(), carried])
 		# Straight back the way we came. Two-way is asserted in the generator
 		# against the data; this asserts it against the game.
 		var home := await _walk_until_scene_changes(&"move_up", VALLEY, 900)
@@ -198,6 +202,48 @@ func _run() -> void:
 
 	_check_graph()
 	_finish()
+
+
+## The middle of the loop: there is something out here, you can see it, and
+## walking over it puts it in your satchel.
+##
+## Until this existed the carpenter's "timber and stone, valley's full of both"
+## was a lie and there was no reason to leave Ambry. Worth asserting all three
+## parts rather than just the count — a pickup that spawns, is invisible, and
+## cannot be collected passes a naive "are there pickups" check.
+func _check_the_valley_has_something_in_it(level: Level) -> void:
+	var loose := level.pickups()
+	_check("there is something to pick up in the valley road", loose.size() >= 3,
+		"%d" % loose.size())
+	if loose.is_empty():
+		return
+
+	var unseen: Array[String] = []
+	for item in loose:
+		var sprite := (item as Pickup).visual
+		if sprite == null or sprite.texture == null:
+			unseen.append(item.name)
+	_check("and you can see all of it", unseen.is_empty(), ", ".join(unseen))
+
+	# Walk onto one. Collected by touch, not by a button — materials are the
+	# routine currency of a run and a press per unit is a tax.
+	# Put the player back where they were afterwards. A check that moves the
+	# player as a side effect leaves every assertion after it standing somewhere
+	# else — which is exactly how the walk-south check failed the first time this
+	# ran.
+	var stood := level.player.global_position
+	var target: Pickup = loose[0]
+	var want: int = target.amount
+	var before := level.player.inventory.total()
+	level.player.global_position = target.global_position
+	await _ticks(6)
+	_check("walking over it collects it",
+		level.player.inventory.total() == before + want,
+		"%d -> %d, wanted +%d" % [before, level.player.inventory.total(), want])
+	_check("and it is gone from the world", level.pickups().size() == loose.size() - 1,
+		"%d left of %d" % [level.pickups().size(), loose.size()])
+	level.player.global_position = stood
+	await _ticks(4)
 
 
 ## A transparent canopy tile still stops a body.

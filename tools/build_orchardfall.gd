@@ -115,6 +115,35 @@ const THICKET_INLAND := 0.25     # ...and the chance of one anywhere else
 ## is a tree further back, which is the whole illusion.
 const THICKET_JITTER := Vector2(30.0, 44.0)
 
+## What the valley has lying in it, and how much of each area is worth combing.
+##
+## **This is the middle of the loop.** GDD §15 A4 makes the town the progression
+## system and the valley where its materials come from; the carpenter's own line
+## is "timber and stone, valley's full of both if you don't mind the walk". Until
+## these existed that line was a lie and the game had no reason to leave Ambry.
+##
+## Materials are placed by hand — well, by seed — and never dropped by enemies.
+## That is `world/pickup.gd`'s rule and the reason is worth repeating: the moment
+## a kill pays two timber, the optimal play is a kill loop and the game becomes
+## about the loop instead of about the valley.
+##
+## Timber comes off the treeline and stone off the rocks, so what you are looking
+## at tells you what you will find. A material lying in open grass reads as loot
+## spawn; the same material at the foot of a dead tree reads as a place.
+const HARVEST: Dictionary = {
+	"orchard_tree": [&"timber", 2],
+	"dead_tree": [&"timber", 2],
+	"rock": [&"stone", 2],
+	"ruin_wall": [&"ironwork", 1],
+}
+
+## Chance a given source tile has something at its foot, and the most any one
+## area may carry. The cap matters more than the rate: a 12-unit satchel means
+## an area worth 30 units is two trips, and two trips through the same six
+## screens is where a gathering game turns into a chore.
+const HARVEST_CHANCE := 0.16
+const HARVEST_CAP := 9
+
 ## Ground the undergrowth stays off. Paths first — a road with bushes growing
 ## down the middle of it is not a road, and the paths are the one thing in the
 ## zone that has to read as deliberate from across the screen. Water and floors
@@ -532,6 +561,7 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 	var layers: Array[TileMapLayer] = [ground, objects, canopy]
 	_plant_props(root, canopy, layers, size)
 	_add_wolves(root, area, layers)
+	_add_harvest(root, area, layers, size)
 	_assert_area(layers, area, overhead)
 
 	var map_path := "%s/%s.tscn" % [ZONE_DIR, id]
@@ -870,6 +900,52 @@ func _add_wolves(root: Node2D, area: Dictionary, layers: Array[TileMapLayer]) ->
 				{"enemy_id": "forest_wolf"})
 
 	print("  %s: %d wolves in %d packs" % [area["id"], pack.get_child_count(), placed.size()])
+
+
+## Scatter materials at the foot of the things they come from.
+##
+## Placed on a *walkable* neighbour of the source tile rather than on it: the
+## source is solid, and a pickup inside a tree is one you can see and never
+## reach. Walked over rather than interacted with, so the check that matters is
+## simply that the player can stand there.
+func _add_harvest(root: Node2D, area: Dictionary, layers: Array[TileMapLayer],
+		size: Vector2i) -> void:
+	var first: Array = area["exits"][0]
+	var arrival := _edge_cell(size, String(first[0]), int(first[1]), 2)
+	var reached := map.flood(layers, arrival, size)
+	if reached.is_empty():
+		return
+
+	var sources: Array[Vector2i] = []
+	for y in range(2, size.y - 2):
+		for x in range(2, size.x - 2):
+			if HARVEST.has(map.tile_at(layers, Vector2i(x, y))):
+				sources.append(Vector2i(x, y))
+	sources.sort()
+
+	var loose := map.group(root, "PickupMarkers")
+	var count := 0
+	for cell in sources:
+		if count >= HARVEST_CAP or _rng.randf() >= HARVEST_CHANCE:
+			continue
+		var spot := _beside(cell, reached)
+		if spot == cell:
+			continue
+		var entry: Array = HARVEST[map.tile_at(layers, cell)]
+		count += 1
+		map.marker(root, loose, "Harvest_%d_%d" % [spot.x, spot.y], spot, {
+			"material_id": String(entry[0]),
+			"amount": int(entry[1]),
+		})
+	print("  %s: %d things to pick up" % [area["id"], count])
+
+
+## A walkable cell next to `cell`, or `cell` itself when it is walled in.
+static func _beside(cell: Vector2i, reached: Dictionary) -> Vector2i:
+	for step in [Vector2i.DOWN, Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP]:
+		if reached.has(cell + step):
+			return cell + step
+	return cell
 
 
 static func _tile_distance(a: Vector2i, b: Vector2i) -> int:

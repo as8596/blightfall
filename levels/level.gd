@@ -44,6 +44,10 @@ const GATEWAY_SCENE: PackedScene = preload("res://world/gateway.tscn")
 ## tint and the conversation in `resources/dialogue/`.
 const NPC_SCENE: PackedScene = preload("res://world/npc.tscn")
 
+## ...and for what is lying on the ground. `PickupMarkers` carry a material id
+## and an amount.
+const PICKUP_SCENE: PackedScene = preload("res://world/pickup.tscn")
+
 ## ...and for the things that are not people. `EnemyMarkers` carry an
 ## `enemy_id`; the map says where and what, the scene says how it behaves.
 const ENEMY_SCENES: Dictionary = {
@@ -105,6 +109,7 @@ func _ready() -> void:
 	_spawn_gateways()
 	_spawn_npcs()
 	_spawn_enemies()
+	_spawn_pickups()
 
 
 ## Put the player on a named marker and point the camera at them.
@@ -218,6 +223,47 @@ func _spawn_npcs() -> void:
 		person.body_height = float(NPC_HEIGHTS.get(id, 96.0))
 		world.add_child(person)
 		person.global_position = marker.global_position
+
+
+## What is lying about in the world to be picked up.
+##
+## **This is the expedition.** GDD §15 A4 makes the town the progression system
+## and the valley the place its materials come from; the carpenter's own line is
+## "timber and stone, valley's full of both if you don't mind the walk". Until
+## these existed that was a lie, and the loop the whole game is built on — go
+## out, gather, come back, build — had no middle.
+##
+## Walked over rather than interacted with, deliberately: materials are the
+## routine currency of a run and a button press forty times is a tax, not a
+## decision. See `world/pickup.gd`.
+func _spawn_pickups() -> void:
+	var root := map.find_child("PickupMarkers", true, false) if map != null else null
+	if root == null:
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var id := StringName(marker.get_meta("material_id", ""))
+		if id == &"":
+			continue
+		var loose: Pickup = PICKUP_SCENE.instantiate()
+		loose.name = marker.name
+		loose.material_id = id
+		loose.amount = int(marker.get_meta("amount", 1))
+		world.add_child(loose)
+		loose.global_position = marker.global_position
+
+
+## Everything still lying about in this level.
+func pickups() -> Array:
+	var found: Array = []
+	if world == null:
+		return found
+	for child in world.get_children():
+		if child is Pickup:
+			found.append(child)
+	return found
 
 
 ## The things that are not people.

@@ -26,6 +26,19 @@ signal collected(id: StringName, amount: int)
 ## dies does not instantly re-absorb their own cache mid-death animation.
 @export var arm_delay: float = 0.0
 
+## What each material looks like lying on the ground.
+##
+## Assigned here rather than left to the scene, because a pickup is spawned from
+## a map marker that knows only an id — and the scene shipped with an empty
+## Sprite2D, which made every material in Orchardfall invisible. Collectable and
+## unseeable is worse than absent: the player concludes the valley is empty and
+## stops looking.
+const ICONS: Dictionary = {
+	&"timber": preload("res://art/sprites/props/material_timber.png"),
+	&"stone": preload("res://art/sprites/props/material_stone.png"),
+	&"ironwork": preload("res://art/sprites/props/material_ironwork.png"),
+}
+
 @onready var visual: Sprite2D = $Visual
 
 var _armed: bool = true
@@ -34,6 +47,11 @@ var _armed: bool = true
 func _ready() -> void:
 	monitoring = true
 	monitorable = false
+	if visual != null and visual.texture == null:
+		var icon: Texture2D = ICONS.get(material_id)
+		if icon == null:
+			push_warning("Pickup: nothing drawn for material '%s'." % material_id)
+		visual.texture = icon
 	body_entered.connect(_on_body_entered)
 	if arm_delay > 0.0:
 		_armed = false
