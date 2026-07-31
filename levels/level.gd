@@ -113,6 +113,7 @@ func _ready() -> void:
 	_spawn_gateways()
 	_spawn_npcs()
 	_spawn_enemies()
+	Events.enemy_died.connect(_on_enemy_died_here)
 	_spawn_pickups()
 
 	# Damage numbers are spawned here rather than by the hitbox, for the same
@@ -320,10 +321,38 @@ func _spawn_enemies() -> void:
 		if scene == null:
 			push_warning("Level %s: no scene for enemy '%s'." % [name, id])
 			continue
+		# Killed here before, and it stays killed. A cleared area that refills
+		# every time you step through a door is an area you cannot clear.
+		var here := scene_file_path
+		if EnemyMemory.is_dead(here, marker.name):
+			continue
+
 		var enemy: Node2D = scene.instantiate()
 		enemy.name = marker.name
 		world.add_child(enemy)
-		enemy.global_position = marker.global_position
+
+		# The marker is where an enemy *starts*, not where it is. Re-entering a
+		# level put every wolf back on its spawn at full health, which made a
+		# fight you were losing one you could walk away from.
+		var known := EnemyMemory.recall(here, marker.name)
+		enemy.global_position = known.get("position", marker.global_position)
+		var health: HealthComponent = enemy.get("health")
+		var carried := int(known.get("health", -1))
+		if health != null and carried > 0:
+			health.current = mini(carried, health.max_health)
+
+
+## Remember the survivors on the way out. `_exit_tree` rather than a doorway
+## hook, because every way out of a level ends here — a door, a gateway, a
+## death, or a load — and only one of them goes through `Doorway`.
+func _exit_tree() -> void:
+	if not is_safe and scene_file_path != "":
+		EnemyMemory.remember(scene_file_path, enemies())
+
+
+func _on_enemy_died_here(enemy: Node) -> void:
+	if enemy != null and scene_file_path != "":
+		EnemyMemory.killed(scene_file_path, enemy.name)
 
 
 ## Everything currently hunting in this level.

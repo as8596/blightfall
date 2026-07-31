@@ -111,6 +111,11 @@ func capture() -> Dictionary:
 func apply(data: Dictionary) -> void:
 	var entries: Dictionary = data.get("entries", {})
 	playtime = float(data.get("playtime", 0.0))
+	# The valley resets rather than resumes. `EnemyMemory` is per-session and
+	# deliberately not in the save (see its docstring), so loading has to clear
+	# it — otherwise a load would drop you into a saved position surrounded by
+	# the wounded and dead of whatever run you were on before.
+	EnemyMemory.forget_all()
 	for node in get_tree().get_nodes_in_group(GROUP):
 		if not _is_saveable(node):
 			continue

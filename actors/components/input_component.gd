@@ -58,7 +58,23 @@ func _process(delta: float) -> void:
 	intent.raw_move = raw
 	intent.move = snap_8(raw) if snap_to_8_directions else raw
 
-	if Input.is_action_just_pressed(&"attack"):
+	# **The click that closed a conversation must not also swing the sword.**
+	#
+	# Attack is the left mouse button and a dialogue is dismissed by clicking
+	# it, so the press that ends the conversation is still down on the frame the
+	# world starts running again — and the player takes a swing they never asked
+	# for, at whoever they were just talking to.
+	#
+	# The GUI consuming the click does not help: this polls `Input` directly,
+	# which is deliberate (GDD §12 rule 3 keeps `Input` out of the state
+	# machine, not out of here) and is not affected by a Control handling the
+	# event. `Dialogue.just_closed()` is the same lock that already stops the
+	# interact key reopening the conversation it just ended; this is the second
+	# thing that press must not do.
+	var swallow_attack := Dialogue.just_closed()
+	if swallow_attack:
+		_attack_buffer = 0.0
+	elif Input.is_action_just_pressed(&"attack"):
 		_attack_buffer = buffer_time
 	if Input.is_action_just_pressed(&"dodge"):
 		_dodge_buffer = buffer_time
@@ -71,7 +87,7 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed(&"hotbar_%d" % (slot + 1)):
 			_hotbar_pressed = slot
 			break
-	intent.attack_held = Input.is_action_pressed(&"attack")
+	intent.attack_held = Input.is_action_pressed(&"attack") and not swallow_attack
 	intent.dodge_held = Input.is_action_pressed(&"dodge")
 	# The right stick, read raw. A pad has no cursor, so aiming has to come from
 	# somewhere — and this is the only place in the player's code allowed to ask
