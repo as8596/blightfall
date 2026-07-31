@@ -21,14 +21,30 @@ const LAYER: int = 64
 
 const MARGIN: Vector2 = Vector2(28.0, 24.0)
 
-## Health is a bar, not a row of hearts (amends GDD §5's wording). It keeps one
-## tick per heart, though: "two hits left" is a decision you can make mid-fight
-## and "31%" is not, so the discreteness the hearts were carrying stays.
-const HEALTH_SIZE: Vector2 = Vector2(232.0, 18.0)
+## Health is a bar, not a row of hearts (amends GDD §5's wording), and it is one
+## unbroken bar — the per-heart ticks came off.
+##
+## They were there to keep the discreteness the hearts carried: "two hits left"
+## is a decision you can make mid-fight and "31%" is not. What they actually did
+## once the bar sat in a steel trough was cut it into six pieces and make the
+## whole thing read as six things rather than one, which is a worse answer to the
+## same question. The hover readout still gives the exact number to anyone who
+## wants it.
+##
+## **Sized against the trough art rather than against a drawn rectangle.** The
+## art is natively 326x38 and these numbers used to be 232x18, which is a
+## different shape entirely; at that size the steel was a sliver behind a slab of
+## red. The bar is the channel and `UiKit.trough_for` works the steel out from
+## it.
+## Width is the most it may take; the drawn width is whatever is free — see
+## `_bar_width`. Height comes off the trough art's own proportions rather than
+## being picked: `trough.png` is 326x38, so a bar of width w wants a trough of
+## w + 29 and a height of that over 8.58, half of which is the channel.
+const HEALTH_MAX_WIDTH: float = 420.0
+const HEALTH_SIZE: Vector2 = Vector2(HEALTH_MAX_WIDTH, 20.0)
 const HEALTH_FULL := Color(0.80, 0.28, 0.26)
 const HEALTH_LOW := Color(0.88, 0.46, 0.24)
 const HEALTH_BACK := Color(0.20, 0.16, 0.16, 0.85)
-const HEART_EDGE := Color(0.10, 0.08, 0.08, 0.9)
 
 ## Experience sits under health and is deliberately thin. It is the one bar on
 ## screen that never needs reading mid-fight — nothing about it changes a
@@ -36,12 +52,14 @@ const HEART_EDGE := Color(0.10, 0.08, 0.08, 0.9)
 ##
 ## Empty is the same neutral the other bars sit in; filled is gold, which is the
 ## only place gold appears on the HUD.
-const XP_SIZE: Vector2 = Vector2(232.0, 6.0)
+## Same width as health, always — two bars in a stack that do not line up read
+## as a mistake. Its own height, because it is the quiet one.
+const XP_SIZE: Vector2 = Vector2(HEALTH_MAX_WIDTH, 8.0)
 const XP_GAP: float = 6.0
 const XP_BACK := Color(0.20, 0.16, 0.16, 0.85)
 const XP_FILL := Color(0.85, 0.70, 0.28)
 
-const SATCHEL_SIZE: Vector2 = Vector2(148.0, 14.0)
+const SATCHEL_SIZE: Vector2 = Vector2(172.0, 14.0)
 const SATCHEL_BACK := Color(0.14, 0.12, 0.11, 0.85)
 const SATCHEL_FILL := Color(0.78, 0.60, 0.32)
 ## Full is the moment the run's central question — turn back, or one more room —
@@ -68,9 +86,6 @@ const SLOT_SELECTED := Color(0.95, 0.88, 0.70)
 ## Extra space between the numbered ten and the reserved potion pair.
 const POTION_GAP: float = 26.0
 
-## How far the steel trough stands out past the bar it holds. Small: the trough
-## is a rim around the bar, not a frame around a picture of one.
-const BAR_INSET: Vector2 = Vector2(4.0, 4.0)
 
 ## The weapon plate: what is in hand, and what is behind it.
 ##
@@ -235,14 +250,39 @@ func _process(delta: float) -> void:
 
 # --------------------------------------------------------------------- drawing
 
+## How wide the left-hand bars may be at this window size.
+##
+## **Measured against the hotbar rather than written down.** The hotbar is
+## centred, so the space to its left grows with the window — at 1280 there is
+## room for about 240px of bar, and at 1920 for well over twice that. A constant
+## would either waste the space on a big screen or, as it did on the first
+## attempt, run the health bar underneath the first hotbar slot on a small one.
+func _bar_width(screen: Vector2) -> float:
+	var slots: int = mini(slot_items.size(), ItemsComponent.HOTBAR_SLOTS)
+	var hotbar := 0.0
+	if slots > 0:
+		hotbar = slots * SLOT_SIZE + (slots - 1) * SLOT_GAP + POTION_GAP
+	var free := (screen.x - hotbar) * 0.5 - MARGIN.x - BAR_CLEARANCE \
+		- UiKit.TROUGH_CHANNEL_LEFT - UiKit.TROUGH_CHANNEL_RIGHT
+	return clampf(free, BAR_MIN_WIDTH, HEALTH_MAX_WIDTH)
+
+
+## Air between the end of the bars' steel and the first hotbar slot.
+const BAR_CLEARANCE: float = 16.0
+## ...and a floor, so a very narrow window makes the bar cramped rather than
+## making it vanish.
+const BAR_MIN_WIDTH: float = 150.0
+
+
 func _draw_hud() -> void:
 	var size := _canvas.size
+	var bar := _bar_width(size)
 	# Health first, then experience beneath it — so the stack still ends level
 	# with the satchel on the far side rather than hanging below it.
 	var xp_top := size.y - MARGIN.y - XP_SIZE.y
 	var health_top := xp_top - XP_GAP - HEALTH_SIZE.y
-	_draw_health(Vector2(MARGIN.x, health_top))
-	_draw_experience(Vector2(MARGIN.x, xp_top))
+	_draw_health(Vector2(MARGIN.x, health_top), bar)
+	_draw_experience(Vector2(MARGIN.x, xp_top), bar)
 	_draw_weapon(Vector2(MARGIN.x, health_top - WEAPON_GAP - WEAPON_SIZE))
 	_draw_hotbar(size)
 	var satchel := Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y)
@@ -256,25 +296,17 @@ func _draw_hud() -> void:
 ## One tick per heart container, so the bar still answers "how many more hits"
 ## at a glance. Turns warm below a quarter — the only moment the bar needs to
 ## raise its voice.
-func _draw_health(origin: Vector2) -> void:
+func _draw_health(origin: Vector2, width: float) -> void:
 	if max_health <= 0:
 		return
 	var ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
-	_health_rect = Rect2(origin, HEALTH_SIZE)
-	# The steel trough, drawn a little larger than the bar so the bar sits inside
-	# it. Three-sliced, or the domed caps stretch into ovals — see `UiKit`.
-	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
-		Rect2(origin - BAR_INSET, HEALTH_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
-	_canvas.draw_rect(Rect2(origin, HEALTH_SIZE), HEALTH_BACK)
+	_health_rect = Rect2(origin, Vector2(width, HEALTH_SIZE.y))
+	UiKit.trough(_canvas, _health_rect)
+	_canvas.draw_rect(_health_rect, HEALTH_BACK)
 	_canvas.draw_rect(
-		Rect2(origin, Vector2(HEALTH_SIZE.x * ratio, HEALTH_SIZE.y)),
+		Rect2(origin, Vector2(width * ratio, HEALTH_SIZE.y)),
 		HEALTH_LOW if ratio <= 0.25 else HEALTH_FULL
 	)
-	var step := HEALTH_SIZE.x / float(max_health)
-	for i in range(1, max_health):
-		var x := origin.x + step * i
-		_canvas.draw_line(Vector2(x, origin.y), Vector2(x, origin.y + HEALTH_SIZE.y),
-			HEART_EDGE, 2.0)
 
 	# On hover only. The bar's job is to be readable without reading — a number
 	# sitting on it permanently is a number the eye stops at every time it
@@ -283,8 +315,8 @@ func _draw_health(origin: Vector2) -> void:
 		return
 	var font := ThemeDB.fallback_font
 	var label := "%d / %d" % [health, max_health]
-	var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
-	var at := origin + Vector2((HEALTH_SIZE.x - width) * 0.5, -8.0)
+	var text := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+	var at := origin + Vector2((width - text) * 0.5, -8.0)
 	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
 		FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
 	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
@@ -293,19 +325,18 @@ func _draw_health(origin: Vector2) -> void:
 ## Thin, quiet, and mute until pointed at. No ticks either — a level is not a
 ## countable resource the way heart containers are, so dividing it up would
 ## imply a granularity that does not exist.
-func _draw_experience(origin: Vector2) -> void:
+func _draw_experience(origin: Vector2, width: float) -> void:
 	if xp_needed <= 0:
 		return
 	var ratio: float = clampf(float(xp) / float(xp_needed), 0.0, 1.0)
-	_xp_rect = Rect2(origin, XP_SIZE)
-	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
-		Rect2(origin - BAR_INSET, XP_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
-	_canvas.draw_rect(Rect2(origin, XP_SIZE), XP_BACK)
+	_xp_rect = Rect2(origin, Vector2(width, XP_SIZE.y))
+	UiKit.trough(_canvas, _xp_rect)
+	_canvas.draw_rect(_xp_rect, XP_BACK)
 	if ratio > 0.0:
-		# At least a pixel of gold once there is any progress at all. A bar six
+		# At least a pixel of gold once there is any progress at all. A bar eight
 		# pixels tall rounds the first few points away to nothing otherwise, and
 		# "I killed something and nothing moved" is the wrong feedback.
-		_canvas.draw_rect(Rect2(origin, Vector2(maxf(XP_SIZE.x * ratio, 1.0), XP_SIZE.y)), XP_FILL)
+		_canvas.draw_rect(Rect2(origin, Vector2(maxf(width * ratio, 1.0), XP_SIZE.y)), XP_FILL)
 
 
 ## The label that follows the pointer.
@@ -344,8 +375,7 @@ func _draw_satchel(origin: Vector2) -> void:
 		return
 	var ratio: float = clampf(float(carried) / float(capacity), 0.0, 1.0)
 	var full := carried >= capacity
-	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
-		Rect2(origin - BAR_INSET, SATCHEL_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
+	UiKit.trough(_canvas, Rect2(origin, SATCHEL_SIZE))
 	_canvas.draw_rect(Rect2(origin, SATCHEL_SIZE), SATCHEL_BACK)
 	_canvas.draw_rect(
 		Rect2(origin, Vector2(SATCHEL_SIZE.x * ratio, SATCHEL_SIZE.y)),

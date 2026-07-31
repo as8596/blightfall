@@ -178,3 +178,39 @@ static func three_slice_h(canvas: CanvasItem, texture: Texture2D, into: Rect2,
 	canvas.draw_texture_rect_region(texture,
 		Rect2(into.position + Vector2(cap, 0.0),
 			Vector2(into.size.x - cap * 2.0, into.size.y)), middle, modulate)
+
+
+## Where the recessed channel sits inside `trough.png`, measured off the art.
+##
+## **Horizontal is in pixels and vertical is a fraction**, and that asymmetry is
+## not an oversight — it is what `three_slice_h` does. The domed caps keep their
+## own size however wide the trough is drawn, so the channel starts a fixed
+## number of pixels in from each end. Vertically the whole thing stretches, so
+## the channel keeps its share.
+##
+## Getting this wrong is what put the first health bar *over* its trough instead
+## of in it: the bar was given an arbitrary four-pixel inset, the trough's rim is
+## thicker than that, and the fill covered the rim on all four sides.
+const TROUGH_CHANNEL_LEFT: float = 15.0
+const TROUGH_CHANNEL_RIGHT: float = 14.0
+const TROUGH_CHANNEL_TOP: float = 10.0 / 38.0
+const TROUGH_CHANNEL_HEIGHT: float = 19.0 / 38.0
+
+
+## The trough to draw so its channel lands exactly on `bar`.
+##
+## Callers size the *bar*, because the bar is the thing with a meaning — a
+## quarter of it is a quarter of your health. The steel around it is then
+## whatever it has to be for the two to line up, which is arithmetic nobody
+## should be doing at four call sites.
+static func trough_for(bar: Rect2) -> Rect2:
+	var height := bar.size.y / TROUGH_CHANNEL_HEIGHT
+	return Rect2(
+		bar.position - Vector2(TROUGH_CHANNEL_LEFT, height * TROUGH_CHANNEL_TOP),
+		Vector2(bar.size.x + TROUGH_CHANNEL_LEFT + TROUGH_CHANNEL_RIGHT, height))
+
+
+## Draw the steel trough around `bar`, and nothing else. The bar itself is the
+## caller's business — this only ever puts the frame around it.
+static func trough(canvas: CanvasItem, bar: Rect2) -> void:
+	three_slice_h(canvas, TROUGH, trough_for(bar), TROUGH_CAP)
