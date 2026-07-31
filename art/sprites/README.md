@@ -142,6 +142,25 @@ UI surface, not world art — exempt from the saturation advisory in
 `check_colour.py`, because a bright gemstone in an inventory slot is not
 competing with anything for the player's eye.
 
+## Tiles
+
+```
+art/source/tiles/<sheet>.png   what arrived, untouched
+art/tiles/<greybox name>.png   a 64x64 override
+```
+
+A file in `art/tiles/` named for a greybox tile replaces that tile's flat colour
+in the atlas — `tools/gen_greybox_tileset.py` looks for one before it draws.
+
+**The atlas is the seam, not a new layer.** Ground art went in as a TileMapLayer
+over the greybox because terrain has its own tileset and its own blend tiles. A
+wall has neither: it is one tile, in one cell, that stops you. Swapping the
+picture inside the atlas keeps the same tile in the same cell with the same
+collision polygon, so every assertion in `build_greybox.gd` still measures what
+it measured and y-sorting never enters into it.
+
+`tools/import_stone_tiles.py` cuts the current set out of its source sheet.
+
 ## UI plates and frames
 
 ```

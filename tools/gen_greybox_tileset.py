@@ -21,13 +21,31 @@ from __future__ import annotations
 
 import os
 import struct
+import sys
 import zlib
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from check_colour import read_png  # noqa: E402
 
 TILE = 64
 COLS = 4
-OUT = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "art", "tilesets", "greybox_64.png"
-)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "art", "tilesets", "greybox_64.png")
+
+# Real art, where there is any. A file named for a tile in `art/tiles/` is used
+# instead of the flat colour that tile would otherwise get.
+#
+# **The atlas is the seam, not a new layer.** Ground art went in as a TileMapLayer
+# drawn over the greybox, which was right there: terrain has its own tileset with
+# its own 47 blend tiles and nothing to do with the grey squares underneath. A
+# wall has none of that — it is one tile, in one cell, that stops you. Swapping
+# the picture inside the atlas means the same tile stays in the same cell with
+# the same collision polygon, every assertion in `build_greybox.gd` still measures
+# what it measured, and y-sorting is untouched. A second layer at `Z_OBJECTS`
+# would have had to sort against the player as one unit, which is the bug the
+# roofs in Ambry already cost an afternoon to.
+ART = os.path.join(ROOT, "art", "tiles")
 
 # name, base colour, pattern, solid
 TILES = [
@@ -90,6 +108,23 @@ SOLID = {name for name, _c, _p, solid in TILES if solid}
 
 def shade(colour, factor):
     return tuple(max(0, min(255, int(c * factor))) for c in colour)
+
+
+def art_tile(name):
+    """A 64x64 override from `art/tiles/`, as rows of RGB, or None.
+
+    Alpha is dropped rather than composited: the atlas is opaque by construction
+    and a tile with a hole in it would show the tile behind it in the sheet,
+    which is a different tile entirely.
+    """
+    path = os.path.join(ART, "%s.png" % name)
+    if not os.path.exists(path):
+        return None
+    width, height, pixels = read_png(path)
+    if (width, height) != (TILE, TILE):
+        print("  %s is %dx%d, not %dx%d — ignored" % (name, width, height, TILE, TILE))
+        return None
+    return [[pixels[y * width + x][:3] for x in range(width)] for y in range(height)]
 
 
 def draw_tile(base, pattern):
@@ -181,8 +216,13 @@ def main() -> None:
     width, height = COLS * TILE, rows * TILE
     sheet = [[(0, 0, 0, 0)] * width for _ in range(height)]
 
+    swapped = []
     for index, (_name, base, pattern, _solid) in enumerate(TILES):
-        tile = draw_tile(base, pattern)
+        tile = art_tile(_name)
+        if tile is None:
+            tile = draw_tile(base, pattern)
+        else:
+            swapped.append(_name)
         ox, oy = (index % COLS) * TILE, (index // COLS) * TILE
         for y in range(TILE):
             for x in range(TILE):
@@ -203,6 +243,7 @@ def main() -> None:
         )
 
     print(f"{OUT}  {width}x{height}  {len(TILES)} tiles, {rows} rows")
+    print("  real art: %s" % (", ".join(swapped) if swapped else "none — all greybox"))
     for index, (name, _c, pattern, solid) in enumerate(TILES):
         print("  (%d,%d)  %-6s %-14s %s"
               % (index % COLS, index // COLS, "SOLID" if solid else "", name, pattern))
