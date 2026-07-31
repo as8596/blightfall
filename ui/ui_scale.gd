@@ -27,23 +27,52 @@ const STEP := 0.5
 ## default, a 720p one gets 1×.
 const BASE_HEIGHT := 720.0
 
+## Assigning this is *the player choosing*, which is why it saves and stops
+## following the window. Everything internal goes through `_set_factor` instead.
+##
+## **These used to be the same path, and it was a real bug.** `_restore()` set
+## `factor = suggested()` when there was no saved setting — which ran this
+## setter, which marked the scale as chosen and wrote it to disk. At boot the
+## window is still the project's default 720 tall, so the guess was always 1.0.
+## Every first launch therefore saved `ui_scale=1.0` as though it had been
+## picked deliberately, and every launch after that was pinned to 1× on a
+## monitor of any size, with the interface laid out in a box far bigger than it
+## was designed for.
 var factor: float = 1.0:
 	set(value):
-		# Snapped before clamping so a stored 1.37 from a hand-edited config
-		# lands on a step rather than being honoured.
-		var clamped: float = clampf(snappedf(value, STEP), MIN_FACTOR, MAX_FACTOR)
-		_chosen = true
-		if is_equal_approx(clamped, factor):
-			return
-		factor = clamped
-		_apply()
-		_save()
-		changed.emit(factor)
+		_set_factor(value, true)
+	get:
+		return _factor
+
+## The real storage. `factor` is a façade over it so that writing to `factor`
+## can mean "the player picked this" while the internals still have a way to
+## move the number without that claim.
+var _factor: float = 1.0
 
 ## False until the player touches the setting. Until then the scale follows the
 ## window, so booting fullscreen on a 1440p monitor does not hand somebody a
 ## 1x interface and expect them to find the menu that fixes it.
 var _chosen: bool = false
+
+
+## `chosen` is what separates a preference from a guess: only a preference is
+## written to disk, and only a preference stops the window being followed.
+func _set_factor(value: float, chosen: bool) -> void:
+	# Snapped before clamping so a stored 1.37 from a hand-edited config lands
+	# on a step rather than being honoured.
+	var clamped: float = clampf(snappedf(value, STEP), MIN_FACTOR, MAX_FACTOR)
+	if chosen:
+		_chosen = true
+	if is_equal_approx(clamped, _factor):
+		if chosen:
+			_save()
+		return
+	_factor = clamped
+	_apply()
+	if _chosen:
+		_save()
+	changed.emit(_factor)
+
 
 var _layers: Array = []
 
@@ -128,21 +157,19 @@ func _on_window_changed() -> void:
 
 
 func _follow_window() -> void:
-	var wanted := suggested()
-	if is_equal_approx(wanted, factor):
-		return
-	factor = wanted
-	_chosen = false
-	changed.emit(factor)
+	_set_factor(suggested(), false)
 
 
 func _restore() -> void:
 	var stored := _load()
 	if stored > 0.0:
-		factor = stored
-	else:
-		factor = suggested()
-		_chosen = false
+		_set_factor(stored, true)
+		return
+	# A guess, not a choice: no save, and the window keeps being followed. At
+	# this point the window is often still the project's default size, so this
+	# number is usually wrong and is meant to be corrected by the first
+	# `set_content_rect` — which cannot happen if it has been written to disk.
+	_set_factor(suggested(), false)
 
 
 ## The saved factor, or 0 if the player has never chosen one.
