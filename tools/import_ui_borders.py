@@ -123,6 +123,27 @@ FILES = {
 ## The frame is the only one with runes on it; the rest is plain steel.
 STRIP_RUNES = {"element_1.png"}
 
+## How much of each corner of the frame is ornament that must survive intact.
+## The gem setting is about 34px with a tab hanging off it; 48 clears both.
+FRAME_CORNER = 48
+
+## The frame, again, with every edge flattened to a repeating cross-section —
+## written alongside the ornate original rather than instead of it.
+##
+## **This is what makes a nine-patch possible.** The edges as drawn are a
+## composition, not a pattern: a diagonal seam a third of the way along, a
+## flourish leading into a gem at the exact centre of each side. Stretch that to
+## fit a 1153px inventory and the seam smears and the gem turns into a stripe.
+## Measured, only twelve of the frame's 424 top-band columns are identical to
+## each other — there is no repeat to tile.
+##
+## So each edge is replaced, outside its corners, by the one cross-section that
+## *does* repeat: the flat steel between the ornaments. The corner gems survive
+## because the corners are never touched. The mid-edge gems do not, and that is
+## the trade — a frame that fits every panel, against four studs that only ever
+## sat correctly at one size.
+FLATTEN_EDGES = {"element_1.png": "panel.png"}
+
 
 def is_accent(pixel) -> bool:
 	r, g, b, a = pixel
@@ -226,6 +247,56 @@ def warm(pixels):
 	return out
 
 
+def _band_slice(pixels, width, height, edge):
+	"""The most repeated cross-section of one edge, and how thick that edge is.
+
+	Found rather than written down: the bands are 29-30px and are not all the
+	same, and a number typed here would be wrong the first time somebody swaps
+	the art for a different set.
+	"""
+	cx, cy = width // 2, height // 2
+	if edge in ("top", "bottom"):
+		y = cy
+		while 0 < y < height and pixels[y * width + cx][3] == 0:
+			y = y - 1 if edge == "top" else y + 1
+		thickness = y + 1 if edge == "top" else height - y
+		rows = range(thickness) if edge == "top" else range(height - thickness, height)
+		slices = [tuple(pixels[r * width + x] for r in rows) for x in range(width)]
+	else:
+		x = cx
+		while 0 < x < width and pixels[cy * width + x][3] == 0:
+			x = x - 1 if edge == "left" else x + 1
+		thickness = x + 1 if edge == "left" else width - x
+		cols = range(thickness) if edge == "left" else range(width - thickness, width)
+		slices = [tuple(pixels[y * width + c] for c in cols) for y in range(height)]
+	# **Skip the empty ones.** A frame has a few columns of transparent padding
+	# past each corner, and on two of the four edges no two steel slices are
+	# byte-identical — so the padding won the vote and those edges were flattened
+	# to nothing at all. Only a slice with something in it can be the band.
+	drawn = [s for s in slices if any(p[3] != 0 for p in s)]
+	return Counter(drawn or slices).most_common(1)[0][0], thickness
+
+
+def flatten_edges(pixels, width, height):
+	"""Replace each edge, outside its corners, with its own repeating slice."""
+	out = list(pixels)
+	for edge in ("top", "bottom", "left", "right"):
+		slice_, thickness = _band_slice(pixels, width, height, edge)
+		if edge in ("top", "bottom"):
+			rows = list(range(thickness)) if edge == "top" \
+				else list(range(height - thickness, height))
+			for x in range(FRAME_CORNER, width - FRAME_CORNER):
+				for i, row in enumerate(rows):
+					out[row * width + x] = slice_[i]
+		else:
+			cols = list(range(thickness)) if edge == "left" \
+				else list(range(width - thickness, width))
+			for y in range(FRAME_CORNER, height - FRAME_CORNER):
+				for i, col in enumerate(cols):
+					out[y * width + col] = slice_[i]
+	return out
+
+
 def main() -> None:
 	os.makedirs(OUT, exist_ok=True)
 	for source, target in FILES.items():
@@ -240,6 +311,11 @@ def main() -> None:
 			note = "  (%d rune px out, %d gems kept)" % (stripped, gems)
 		write_png(os.path.join(OUT, target), width, height, warm(pixels))
 		print("  %-12s %dx%d%s" % (target, width, height, note))
+		if source in FLATTEN_EDGES:
+			flat = flatten_edges(pixels, width, height)
+			write_png(os.path.join(OUT, FLATTEN_EDGES[source]), width, height, warm(flat))
+			print("  %-12s %dx%d  (edges flattened, %dpx corners kept)"
+				% (FLATTEN_EDGES[source], width, height, FRAME_CORNER))
 
 
 if __name__ == "__main__":

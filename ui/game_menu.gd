@@ -57,17 +57,23 @@ const DISPLAY: Font = preload("res://art/fonts/ui_display.tres")
 
 ## Inventory metrics, in one place because they are a budget rather than a
 ## preference: the window is 1280 wide, the hotbar is twelve slots across, and a
-## column either side of it has to fit in what is left. At 62px — the size before
-## the character and detail columns arrived — twelve slots plus two columns came
-## to 1354 and the right-hand pane fell off the screen.
+## column either side of it has to fit in what is left.
 ##
-##     12 * 50 + 11 * 5 + 24  =  679   the grid
-##     200 + 12 + 679 + 12 + 250 = 1153   the row
-##     1153 + 2 * 40 = 1233 < 1280        with the page margins
-const SLOT := 50
-const GAP := 5
-const COLUMN_LEFT := 200
-const COLUMN_RIGHT := 250
+## **Recomputed when the panels grew steel frames.** A drawn border cost 12px a
+## side; the frame art's band is 26 and it is on all three panels, which is 168
+## more pixels of chrome across the row. The numbers below were 50/5/200/250 and
+## the right-hand pane went off the edge of the screen — the same failure as the
+## first time, from the opposite direction.
+##
+##     1280 - 2 * 40                    = 1200   page, less its margins
+##     1200 - 2 * 12                    = 1176   less the gaps between panels
+##     1176 - 3 * 2 * 29                = 1002   less each panel's steel
+##     12 * 44 + 11 * 4                  =  572   the grid
+##     190 + 572 + 240                   = 1002   exactly, with nothing spare
+const SLOT := 44
+const GAP := 4
+const COLUMN_LEFT := 190
+const COLUMN_RIGHT := 240
 const PAGE_MARGIN := 40.0
 
 var _detail: RichTextLabel
@@ -726,6 +732,10 @@ func _build_inventory_page() -> Control:
 
 	columns.add_child(_frame_of(_build_character_column()))
 
+	# The grid's own width, which is what the middle panel is sized by.
+	var grid_width := float(ItemsComponent.HOTBAR_SLOTS * SLOT
+		+ (ItemsComponent.HOTBAR_SLOTS - 1) * GAP)
+
 	var centre := _framed("Carried")
 	centre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_frame_of(centre).size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -807,6 +817,14 @@ func _build_inventory_page() -> Control:
 	_satchel = Label.new()
 	_satchel.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_satchel.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
+	# **Wrapped, and clamped to the grid's width.** This line carries a sentence
+	# when the satchel is empty, and a Label sizes itself to its longest line — so
+	# left alone it made the middle panel 127px wider than the grid it exists to
+	# hold, and pushed the detail column off the screen. The grid is what decides
+	# how wide this panel is; the caption fits inside that or it wraps.
+	_satchel.custom_minimum_size = Vector2(grid_width, 0)
+	_satchel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_satchel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	centre.add_child(_satchel)
 
 	columns.add_child(_frame_of(_build_detail_column()))

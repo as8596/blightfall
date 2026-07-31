@@ -620,6 +620,7 @@ func _build() -> void:
 	footer.add_child(_total)
 
 	_confirm = Button.new()
+	UiKit.dress_button(_confirm)
 	_confirm.custom_minimum_size = Vector2(190, 34)
 	_confirm.add_theme_font_size_override("font_size", TypeScale.SMALL)
 	_confirm.pressed.connect(_on_confirm)

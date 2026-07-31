@@ -157,6 +157,7 @@ func _button(column: VBoxContainer, text: String, action: Callable) -> Button:
 	button.text = text
 	button.custom_minimum_size = Vector2(288, 46)
 	button.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	UiKit.dress_button(button)
 	button.pressed.connect(action)
 	column.add_child(button)
 	_buttons.append(button)

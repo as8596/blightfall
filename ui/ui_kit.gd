@@ -31,7 +31,7 @@ const PANEL_EDGE := Color(0.30, 0.25, 0.19)
 ## project has one weight (`art/fonts/README.md`).
 static func framed(title: String, tip: String = "") -> VBoxContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", frame(PANEL_FILL, PANEL_EDGE, 12))
+	panel.add_theme_stylebox_override("panel", panel_box())
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
@@ -214,3 +214,89 @@ static func trough_for(bar: Rect2) -> Rect2:
 ## caller's business — this only ever puts the frame around it.
 static func trough(canvas: CanvasItem, bar: Rect2) -> void:
 	three_slice_h(canvas, TROUGH, trough_for(bar), TROUGH_CAP)
+
+
+# ----------------------------------------------------------- panels and buttons
+
+const PANEL_FRAME: Texture2D = preload("res://art/ui/panel.png")
+const BUTTON_PLATE: Texture2D = preload("res://art/ui/button.png")
+
+## Where the panel frame's corner ornaments end. Must match `FRAME_CORNER` in
+## `tools/import_ui_borders.py` — that is the tool's promise about what it left
+## untouched, and this is the code cashing it in.
+const PANEL_CORNER: int = 48
+
+## The rounded caps on the button plate, and enough of its top and bottom to
+## keep the corners from being stretched into ramps.
+const BUTTON_CAP_X: int = 34
+const BUTTON_CAP_Y: int = 20
+
+
+## The steel frame, as a nine-patch, with `pad` pixels of breathing room inside.
+##
+## **The middle of the art is transparent**, so this frames whatever is behind it
+## rather than covering it. That is deliberate: every one of these sits on the
+## menu's own scrim, and a panel that painted its own dark rectangle would put a
+## second, slightly different dark on top of the first.
+static func panel_box(pad: int = 3) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = PANEL_FRAME
+	box.texture_margin_left = PANEL_CORNER
+	box.texture_margin_right = PANEL_CORNER
+	box.texture_margin_top = PANEL_CORNER
+	box.texture_margin_bottom = PANEL_CORNER
+	# Inside the steel, not inside the texture. The band is 29px of which the
+	# outer few are bevel and shadow, so 26 clears the part that reads as metal
+	# and `pad` is breathing room on top.
+	#
+	# **This is a budget, not a preference.** Every panel spends twice this on
+	# width, and there are three of them across the inventory — the first go at
+	# 14px of padding put the right-hand column off the side of the screen. See
+	# the arithmetic in `ui/game_menu.gd`.
+	var inset := 26 + pad
+	box.content_margin_left = inset
+	box.content_margin_right = inset
+	# More at the top: the band is thickest there, and a heading set to the same
+	# inset as the sides came out resting on the steel rather than under it.
+	box.content_margin_top = inset + 14
+	box.content_margin_bottom = inset
+	return box
+
+
+## The button plate. `tint` is how the three states are told apart — the art has
+## one plate and recolouring it is cheaper and steadier than three near-identical
+## textures that can drift apart.
+static func button_box(tint: Color = Color.WHITE) -> StyleBoxTexture:
+	var box := StyleBoxTexture.new()
+	box.texture = BUTTON_PLATE
+	box.texture_margin_left = BUTTON_CAP_X
+	box.texture_margin_right = BUTTON_CAP_X
+	box.texture_margin_top = BUTTON_CAP_Y
+	box.texture_margin_bottom = BUTTON_CAP_Y
+	box.content_margin_left = 20
+	box.content_margin_right = 20
+	box.content_margin_top = 8
+	box.content_margin_bottom = 8
+	box.modulate_color = tint
+	return box
+
+
+## Dress a `Button` in the plate, in all four states it can be in.
+##
+## One call rather than eight lines at each of the five places a button is made.
+## The states are the same plate at different brightness: normal, a lift on
+## hover, a press that goes *darker* because a pressed plate is one you have
+## pushed into its recess, and a disabled one that loses its colour rather than
+## just its edge.
+static func dress_button(button: Button) -> void:
+	button.add_theme_stylebox_override("normal", button_box())
+	button.add_theme_stylebox_override("hover", button_box(Color(1.18, 1.16, 1.10)))
+	button.add_theme_stylebox_override("pressed", button_box(Color(0.78, 0.76, 0.72)))
+	button.add_theme_stylebox_override("focus", button_box(Color(1.10, 1.08, 1.04)))
+	button.add_theme_stylebox_override("disabled", button_box(Color(0.62, 0.60, 0.58, 0.75)))
+	button.add_theme_color_override("font_color", BODY_TEXT)
+	button.add_theme_color_override("font_hover_color", Color(1, 0.98, 0.92))
+	button.add_theme_color_override("font_disabled_color", Color(0.55, 0.52, 0.48))
+
+
+const BODY_TEXT := Color(0.92, 0.87, 0.77)

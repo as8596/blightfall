@@ -241,6 +241,7 @@ func _build() -> void:
 		button.text = entry[0]
 		button.custom_minimum_size = Vector2(280, 44)
 		button.add_theme_font_size_override("font_size", TypeScale.SMALL)
+		UiKit.dress_button(button)
 		button.pressed.connect(entry[1])
 		column.add_child(button)
 		_buttons.append(button)
