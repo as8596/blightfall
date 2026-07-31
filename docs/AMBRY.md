@@ -362,6 +362,7 @@ build script now refuses to place anything opaque over a walkable cell.
 | Interact verb | **Built** — `world/interactable.gd`, `actors/components/interactor_component.gd`, bound to E |
 | Fade transitions | **Built** — `autoloads/screen_fade.gd`, `autoloads/transition.gd` |
 | Dying | **Built** — reloads the last save, or restarts the level if there isn't one |
+| Saving at a waystone | **Built** — two in Ambry, one in Orchardfall. `world/shrine.gd` writes the save; the HUD says whether it landed. The reachable one is south of the wall, on the road below the market |
 | Prompts on anything but doors | **Not built.** The base class is there; nothing else uses it yet |
 | Rebuild transaction (spend → change state) | **Not built** |
 | Dialogue | **Not built.** NPCs are markers |

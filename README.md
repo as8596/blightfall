@@ -73,7 +73,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 322 assertions over the M1 systems and Ambry
+# headless self-check — 326 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials

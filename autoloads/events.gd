@@ -115,6 +115,14 @@ signal village_built(id: StringName)
 ## fast-travel network can key on it — see `world/shrine.gd`.
 signal shrine_lit(id: StringName)
 
+## A save was written, or was not. `detail` carries the reason when it failed.
+##
+## On the bus rather than returned to the caller, because the thing that needs
+## to know is the HUD and the thing that knows is a waystone in the world — and
+## a save point that fails silently is worse than one that was never there. The
+## player walks away believing they are safe.
+signal game_saved(ok: bool, detail: String)
+
 ## Requested by hitboxes, consumed by the camera rig. Keeps camera logic out of
 ## the player (GDD §12, rule 4).
 signal screen_shake_requested(amount: float, duration: float)

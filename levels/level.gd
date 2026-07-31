@@ -44,6 +44,15 @@ const GATEWAY_SCENE: PackedScene = preload("res://world/gateway.tscn")
 ## tint and the conversation in `resources/dialogue/`.
 const NPC_SCENE: PackedScene = preload("res://world/npc.tscn")
 
+## ...and for the waystones. Same marker-to-node route as the doors and the
+## villagers, for the same reason: the map builders run under `--script`, which
+## registers no autoloads, and `Shrine` cannot compile there — it announces
+## itself on `Events` when it is lit. So the map carries a marker and this makes
+## it real.
+const SHRINE_SCENE: PackedScene = preload("res://world/shrine.tscn")
+const SHRINE_DORMANT: Texture2D = preload("res://art/sprites/props/shrine_dormant.png")
+const SHRINE_LIT: Texture2D = preload("res://art/sprites/props/shrine_lit.png")
+
 ## ...and for what is lying on the ground. `PickupMarkers` carry a material id
 ## and an amount.
 const PICKUP_SCENE: PackedScene = preload("res://world/pickup.tscn")
@@ -115,6 +124,7 @@ func _ready() -> void:
 	_spawn_doorways()
 	_spawn_gateways()
 	_spawn_npcs()
+	_spawn_shrines()
 	_spawn_enemies()
 	Events.enemy_died.connect(_on_enemy_died_here)
 	_spawn_pickups()
@@ -200,6 +210,28 @@ func _spawn_doorways() -> void:
 		# be in window space and collide with nothing.
 		world.add_child(door)
 		door.global_position = marker.global_position
+
+
+## The save points. Same shape as `_spawn_doorways` again.
+##
+## Into `world` rather than onto this node, so they y-sort against the player
+## and against everything else standing on the ground — a stone the player can
+## never walk behind is a stone painted on the floor.
+func _spawn_shrines() -> void:
+	var root := map.find_child("Shrines", true, false) if map != null else null
+	if root == null:
+		return
+	for child in root.get_children():
+		var marker := child as Marker2D
+		if marker == null:
+			continue
+		var stone: Shrine = SHRINE_SCENE.instantiate()
+		stone.name = marker.name
+		stone.id = StringName(marker.get_meta("shrine_id", marker.name))
+		stone.dormant = SHRINE_DORMANT
+		stone.kindled = SHRINE_LIT
+		world.add_child(stone)
+		stone.global_position = marker.global_position
 
 
 ## The walk-into edges. Same shape as `_spawn_doorways`, different verb — see

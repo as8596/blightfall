@@ -551,7 +551,16 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 			objects.erase_cell(cell)
 			canopy.erase_cell(cell)
 
+	# The waystone is a real object, not a coloured square, so it is held back
+	# here and written as a marker once `root` exists — `Level._spawn_shrines`
+	# makes it real. This tool runs under `--script`, which registers no
+	# autoloads, and `Shrine` cannot compile there because lighting one
+	# announces itself on `Events`.
+	var waystones: Array[Vector2i] = []
 	for feature in area.get("features", []):
+		if String(feature[0]) == "shrine":
+			waystones.append(feature[1] as Vector2i)
+			continue
 		map.put(objects, feature[1], String(feature[0]))
 	for bridge in area.get("bridges", []):
 		map.fill(ground, bridge, "bridge")
@@ -578,6 +587,17 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 		layer.owner = root
 
 	_add_markers(root, area)
+
+	if not waystones.is_empty():
+		var stones := map.group(root, "Shrines")
+		for i in waystones.size():
+			var marker := Marker2D.new()
+			marker.name = "Shrine_%s_%d" % [id, i]
+			marker.position = GreyboxMap.centre(waystones[i])
+			marker.set_meta("shrine_id", "%s_waystone" % id)
+			stones.add_child(marker)
+			marker.owner = root
+		print("  %s: %d waystone(s) marked" % [id, waystones.size()])
 
 	var layers: Array[TileMapLayer] = [ground, objects, canopy]
 	_plant_props(root, canopy, layers, size)

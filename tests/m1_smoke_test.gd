@@ -228,6 +228,34 @@ func _test_world_objects() -> void:
 	_check("a shrine can be un-lit by a load", not shrine.is_lit)
 	shrine.load_data(state)
 	_check("and a saved shrine comes back lit", shrine.is_lit)
+
+	# **And resting actually writes a save.**
+	#
+	# Everything above this line passed for the whole of M1 while `interact()`
+	# did not touch `SaveGame` at all. Its own docstring said "lighting it is the
+	# save"; it lit, it persisted its own lit-ness, it announced itself, and
+	# eleven assertions agreed — all of them about the lighting.
+	#
+	# The difference is asking the disk. A flag on a node is not a save file, and
+	# the only check that can tell them apart is one that reads the file.
+	# Its own slot, well clear of the three a player can use and of the one the
+	# save round-trip further down borrows.
+	const REST_SLOT := 8
+	SaveGame.delete_save(REST_SLOT)
+	var was_slot := SaveGame.current_slot
+	SaveGame.current_slot = REST_SLOT
+	var reported: Array = []
+	var saw := func(ok: bool, detail: String) -> void: reported.append([ok, detail])
+	Events.game_saved.connect(saw)
+	shrine.interact(_player)
+	await _ticks(2)
+	Events.game_saved.disconnect(saw)
+	SaveGame.current_slot = was_slot
+	_check("resting at a waystone writes a save to disk",
+		SaveGame.has_save(REST_SLOT), SaveGame.last_error())
+	_check("and says so on the bus, so the HUD can tell the player",
+		reported.size() == 1 and bool(reported[0][0]), str(reported))
+	SaveGame.delete_save(REST_SLOT)
 	shrine.queue_free()
 
 
@@ -1588,6 +1616,34 @@ func _test_village() -> void:
 	_check("the village is full of places", plots.size() + pois.size() >= 20,
 		"%d plots + %d pois" % [plots.size(), pois.size()])
 
+	# **A waystone the player can actually walk to.**
+	#
+	# The other half of the shrine's M1: the node worked and appeared in no
+	# level, so there was no save point in the game at all. Ambry's own shrine
+	# POI is north of the wall — sealed until the largest rebuild project in the
+	# game — so "the village has a shrine" would have passed while the player
+	# still had nowhere to save.
+	#
+	# This asks for one on the near side, which is the thing that actually
+	# matters.
+	# The wall sits on tile rows 14-15, so anything below row 16 is the half the
+	# player starts in. In pixels, because that is what a live node reports.
+	const WALL_BOTTOM_PX := 16 * 64
+	var stones: Array[Shrine] = []
+	_collect_shrines(level, stones)
+	_check("the village has waystones standing in it", stones.size() >= 2,
+		"%d" % stones.size())
+	var reachable := stones.filter(func(s: Shrine) -> bool:
+		return s.global_position.y > float(WALL_BOTTOM_PX))
+	_check("and at least one is south of the wall, where the player starts",
+		not reachable.is_empty(),
+		", ".join(stones.map(func(s: Shrine) -> String:
+			return "%s@%.0f" % [s.id, s.global_position.y])))
+	for stone in stones:
+		if String(stone.id).is_empty():
+			_check("every waystone has a save id", false, stone.name)
+			break
+
 	var districts := {}
 	for entry in plots + pois:
 		var district := String(entry.get("district", ""))
@@ -2037,3 +2093,14 @@ static func _string_literals(line: String) -> Array[String]:
 			inside = true
 			start = i + 1
 	return out
+
+
+## Every `Shrine` under `root`, however deep. Walked rather than fetched from a
+## group: what is being checked is that the level *builds* them, and a group
+## membership would be satisfied by one left over from an earlier test.
+static func _collect_shrines(root: Node, into: Array[Shrine]) -> void:
+	var stone := root as Shrine
+	if stone != null:
+		into.append(stone)
+	for child in root.get_children():
+		_collect_shrines(child, into)

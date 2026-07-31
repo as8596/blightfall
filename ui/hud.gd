@@ -151,6 +151,7 @@ func _ready() -> void:
 		materials = contents)
 	Events.player_weapon_changed.connect(_on_weapon)
 	Events.player_leveled.connect(_on_leveled)
+	Events.game_saved.connect(_on_saved)
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
 	# whatever is underneath it — so it cannot be told by `gui_input`.
@@ -358,7 +359,12 @@ const BANNER_FADE: float = 0.6
 const BANNER_BACK := Color(0.09, 0.08, 0.07, 0.94)
 const BANNER_EDGE := Color(0.72, 0.61, 0.39)
 
-var _banner_level: int = 0
+## The banner is a list of lines and a timer, not a level number.
+##
+## It was `_banner_level` until the waystone wanted the same box to say it had
+## saved. Two banners drawn two ways, competing for the same patch of screen,
+## is how you end up with one covering the other.
+var _banner_lines: Array[String] = []
 var _banner_left: float = 0.0
 
 
@@ -370,7 +376,35 @@ var _banner_left: float = 0.0
 ## unspent behind a tab the player has no reason to open. The banner exists to
 ## name the reward and say where it is.
 func _on_leveled(level: int) -> void:
-	_banner_level = level
+	var points := Skills.points()
+	_show_banner([
+		"Level %d" % level,
+		"+%d skill point%s" % [Skills.POINTS_PER_LEVEL,
+			"" if Skills.POINTS_PER_LEVEL == 1 else "s"],
+		# ASCII only. The body face has no em-dash and substitutes something
+		# else entirely — it drew as "u-grave" the first time this ran.
+		#
+		# And "Tab", not a letter: the skills tree has no direct key of its own,
+		# and the obvious guess is K, which is the tool button.
+		"%d unspent - Tab to spend" % points if points > 0 else "",
+	])
+
+
+## Rested at a waystone. Says whether the save actually landed, because a save
+## point that quietly failed is worse than one that was never there — the player
+## walks away believing they are safe.
+func _on_saved(ok: bool, detail: String) -> void:
+	if ok:
+		_show_banner(["Rested", "Your progress is saved"])
+	else:
+		_show_banner(["Could not save", detail if detail != "" else "unknown error"])
+
+
+func _show_banner(lines: Array) -> void:
+	_banner_lines.clear()
+	for line in lines:
+		if String(line) != "":
+			_banner_lines.append(String(line))
 	_banner_left = BANNER_TIME
 	_canvas.queue_redraw()
 
@@ -378,23 +412,12 @@ func _on_leveled(level: int) -> void:
 ## Centred, high, and gone in a few seconds. Not a modal: levelling up in the
 ## middle of a fight should not be a thing you have to dismiss.
 func _draw_level_banner(screen: Vector2) -> void:
-	if _banner_left <= 0.0 or _banner_level <= 0:
+	if _banner_left <= 0.0 or _banner_lines.is_empty():
 		return
 	var font := ThemeDB.fallback_font
 	var alpha: float = clampf(_banner_left / BANNER_FADE, 0.0, 1.0)
 
-	var points := Skills.points()
-	var lines := [
-		"Level %d" % _banner_level,
-		"+%d skill point%s" % [Skills.POINTS_PER_LEVEL,
-			"" if Skills.POINTS_PER_LEVEL == 1 else "s"],
-		# ASCII only. The body face has no em-dash and the fallback substitutes
-		# something else entirely — it drew as "ù" the first time this ran.
-		#
-		# And "Tab", not a letter: the skills tree has no direct key of its own,
-		# and the obvious guess is K, which is the tool button.
-		"%d unspent - Tab to spend" % points if points > 0 else "",
-	]
+	var lines := _banner_lines
 	var width := 0.0
 	for line in lines:
 		if line != "":

@@ -134,6 +134,18 @@ const BUILDINGS: Array = [
 	["archive",     Rect2i(15, 6, 8, 5),  3, "archive",     "ruined",   "north", ""],
 ]
 
+## Waystones, as id and the cell the stone stands on. The player walks up from
+## the south, which is the POI cell listed below it.
+##
+## A real object rather than a tile: `world/shrine.gd` is the save point, and a
+## save point drawn as a coloured square on the objects layer is a save point
+## nobody walks up to. It had no art at all until `tools/gen_shrine.py`, which is
+## why it spent M1 finished, tested, and never once placed in a level.
+const SHRINES: Array = [
+	["ambry_waystone", Vector2i(20, 33)],
+	["ambry_old_stone", Vector2i(38, 9)],
+]
+
 ## Permanent points of interest: id, cell, note, district.
 ##
 ## The cell is where the player **stands**, not where the object is — a marker
@@ -155,6 +167,11 @@ const POIS: Array = [
 	["breach",     Vector2i(23, 16), "rebuild: opens the north",      "wall"],
 	["graves",     Vector2i(9, 9),   "the Liar is here",              "north"],
 	["shrine",     Vector2i(38, 10), "older than the town",           "north"],
+	# The reachable one. The old stone is behind the wall and stays there — it is
+	# older than Ambry and the town grew away from it — but a save point the
+	# player cannot reach until the largest rebuild in the game is not a save
+	# point, so the town keeps a second, newer waystone on the road south.
+	["waystone",   Vector2i(20, 34), "somewhere to stop",             "south"],
 	["north_road", Vector2i(23, 5),  "the short way to Orchardfall",  "north"],
 ]
 
@@ -444,7 +461,9 @@ func _build_village(tileset: TileSet) -> void:
 		_put(objects, cell, "fence")
 	for cell in LEAN_TOS:
 		_put(objects, cell, "tent")
-	_fill(objects, Rect2i(38, 8, 2, 2), "shrine")
+	# The old stone used to be a 2x2 greybox square here. It is a `Shrine` node
+	# now — see `_place_shrines` — and two of them on the same cells would be one
+	# drawn on top of the other.
 
 	for entry in BUILDINGS:
 		_place_building(ground, objects, overhead, entry)
@@ -465,8 +484,10 @@ func _build_village(tileset: TileSet) -> void:
 	_add_markers(root)
 
 	var layers: Array[TileMapLayer] = [ground, objects, overhead]
-	# After the markers, so the grove sorts among the props rather than under
-	# them, and after `layers` exists so it can ask what is solid.
+	_place_shrines(root)
+	# After the markers and the shrines, so the grove sorts among the props
+	# rather than under them, and after `layers` exists so it can ask what is
+	# solid.
 	_scatter_undergrowth(root, ground, layers)
 	_assert_road_clear(layers)
 	_assert_layout(layers, overhead)
@@ -1027,7 +1048,7 @@ func _scatter_undergrowth(root: Node2D, ground: TileMapLayer,
 			var cell := Vector2i(x, y)
 			if _solid_at(layers, cell) or _is_trodden(ground, cell):
 				continue
-			if _near_trodden(ground, cell):
+			if _near_trodden(ground, cell) or _near_shrine(cell):
 				continue
 			# Rolled after the exclusions rather than before, so ruling out the
 			# roads thins the planting instead of shifting every later roll and
@@ -1047,6 +1068,35 @@ func _scatter_undergrowth(root: Node2D, ground: TileMapLayer,
 			prop.position = _centre(cell)
 			planted += 1
 	print("undergrowth: %d bushes (north thick, south kept)" % planted)
+
+
+## Mark where the waystones stand. `Level._spawn_shrines` turns these into live
+## nodes, the same way it does doorways, gateways and villagers.
+##
+## **Markers rather than the nodes themselves**, and not by preference. This tool
+## runs under `--script`, which registers no autoloads, so preloading
+## `world/shrine.tscn` here fails to compile the moment that script mentions
+## `Events` — which it must, because lighting one announces itself. Keeping the
+## map as data sidesteps that entirely and matches what the rest of the map
+## already does.
+func _place_shrines(root: Node2D) -> void:
+	var stones := _group(root, "Shrines")
+	for entry in SHRINES:
+		var marker := Marker2D.new()
+		marker.name = "Shrine_%s" % String(entry[0])
+		marker.position = _centre(entry[1] as Vector2i)
+		marker.set_meta("shrine_id", String(entry[0]))
+		stones.add_child(marker)
+		marker.owner = root
+	print("waystones: %d marked" % SHRINES.size())
+
+
+## A bush in front of a waystone is a bush over the prompt you walk up to press.
+func _near_shrine(cell: Vector2i) -> bool:
+	for entry in SHRINES:
+		if (cell - (entry[1] as Vector2i)).length() <= 2.0:
+			return true
+	return false
 
 
 func _is_trodden(ground: TileMapLayer, cell: Vector2i) -> bool:

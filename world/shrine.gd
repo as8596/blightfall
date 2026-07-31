@@ -73,8 +73,14 @@ func can_interact(actor: Node) -> bool:
 	return super(actor)
 
 
-## Lighting it is the save. Resting at a shrine that is already lit still saves —
+## Resting writes the save. Resting at one that is already lit writes it again —
 ## that is most of what a save point is for after the first visit.
+##
+## **This did not actually save until long after the docstring said it did.** It
+## lit, it persisted its own lit-ness, it announced itself, and eleven assertions
+## passed — all of them about the lighting. Nothing called `SaveGame`. The lesson
+## is in `tests/m1_smoke_test.gd`: the check that would have caught it asserts
+## the file on disk changed, not that the node's flag flipped.
 func interact(actor: Node) -> void:
 	if not can_interact(actor):
 		return
@@ -82,9 +88,11 @@ func interact(actor: Node) -> void:
 	if not is_lit:
 		is_lit = true
 		_refresh()
-		prompt = "Rest"
 		lit.emit(id)
 		Events.shrine_lit.emit(id)
+	var ok := SaveGame.save_slot(SaveGame.current_slot)
+	Sfx.play(&"ui_select" if ok else &"ui_deny", -4.0)
+	Events.game_saved.emit(ok, SaveGame.last_error())
 
 
 func save_id() -> StringName:
