@@ -34,25 +34,36 @@ const SOURCES: Array = [
 ## Where in a tile each peering bit is sampled, as a fraction of the tile.
 ## Corners are pulled in from the very edge so a one-pixel outline does not
 ## decide a whole bit.
+## Where each peering bit is sampled, as a fraction of the tile.
+##
+## **Four corners, not eight neighbours**, and the count is what told me so.
+## Sampling all eight produced 14 distinct masks out of 192 tiles, and 14 is
+## suspiciously close to 16 — which is 2^4, every arrangement of four corners.
+## 192 is 12 x 16. This art is a **four-corner Wang set** with twelve variants
+## of each tile, not the 47-tile blob set that `MATCH_CORNERS_AND_SIDES`
+## expects, and asking it for side bits was asking a question the tiles do not
+## answer.
+##
+## Chasing that as a sampling problem cost two passes — probes moved inward,
+## then hard against the edges — and neither moved the number, because the
+## information was never missing. It was never there.
 const PROBES := {
-	# The top three sit lower than their opposites on purpose. This art hangs
-	# grass *upward* out of its own cell — a tuft drawn at the top of a tile
-	# belongs to the tile below it — so a probe at y=0.12 reads the neighbour's
-	# overhang and calls it grass. That misread every top bit and showed up as
-	# battlements along the upper edge of a filled region.
-	TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER: Vector2(0.16, 0.34),
-	TileSet.CELL_NEIGHBOR_TOP_SIDE: Vector2(0.50, 0.30),
-	TileSet.CELL_NEIGHBOR_TOP_RIGHT_CORNER: Vector2(0.84, 0.34),
-	TileSet.CELL_NEIGHBOR_RIGHT_SIDE: Vector2(0.88, 0.50),
-	TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER: Vector2(0.84, 0.84),
-	TileSet.CELL_NEIGHBOR_BOTTOM_SIDE: Vector2(0.50, 0.88),
-	TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_CORNER: Vector2(0.16, 0.84),
-	TileSet.CELL_NEIGHBOR_LEFT_SIDE: Vector2(0.12, 0.50),
+	TileSet.CELL_NEIGHBOR_TOP_LEFT_CORNER: Vector2(0.06, 0.06),
+	TileSet.CELL_NEIGHBOR_TOP_RIGHT_CORNER: Vector2(0.94, 0.06),
+	TileSet.CELL_NEIGHBOR_BOTTOM_RIGHT_CORNER: Vector2(0.94, 0.94),
+	TileSet.CELL_NEIGHBOR_BOTTOM_LEFT_CORNER: Vector2(0.06, 0.94),
 }
 
-## A probe averages this many pixels square, so a speck of flower or foam does
-## not flip a bit that the surrounding acre disagrees with.
-const PATCH := 9
+## A probe averages this many pixels square. Small: at 9 a corner probe bled
+## into the side next to it, so the two bits stopped being able to disagree —
+## which is half of how the mask count collapsed.
+const PATCH := 5
+
+## Every arrangement of four corners is 2^4 = 16. Not asserted as an equality,
+## because an export need not draw all of them, but a build landing far short is
+## a build whose bits are not carrying information — worth failing over rather
+## than discovering in a screenshot three weeks later.
+const MASKS_EXPECTED := 14
 
 
 func _init() -> void:
@@ -77,7 +88,7 @@ func _build(png_path: String, out_path: String, set_name: String, names: Array) 
 	var tileset := TileSet.new()
 	tileset.tile_size = Vector2i(TILE, TILE)
 	tileset.add_terrain_set()
-	tileset.set_terrain_set_mode(0, TileSet.TERRAIN_MODE_MATCH_CORNERS_AND_SIDES)
+	tileset.set_terrain_set_mode(0, TileSet.TERRAIN_MODE_MATCH_CORNERS)
 	for i in names.size():
 		tileset.add_terrain(0, i)
 		tileset.set_terrain_name(0, i, String(names[i]))
@@ -88,6 +99,7 @@ func _build(png_path: String, out_path: String, set_name: String, names: Array) 
 	source.texture_region_size = Vector2i(TILE, TILE)
 
 	var counts := [0, 0]
+	var masks := {}
 	for y in rows:
 		for x in cols:
 			var at := Vector2i(x, y)
@@ -97,9 +109,12 @@ func _build(png_path: String, out_path: String, set_name: String, names: Array) 
 			data.terrain_set = 0
 			data.terrain = centre
 			counts[centre] += 1
+			var signature := str(centre)
 			for bit in PROBES:
-				data.set_terrain_peering_bit(bit,
-					_classify(_patch(image, at, PROBES[bit]), centres))
+				var side := _classify(_patch(image, at, PROBES[bit]), centres)
+				data.set_terrain_peering_bit(bit, side)
+				signature += ",%d" % side
+			masks[signature] = true
 
 	@warning_ignore("return_value_discarded")
 	tileset.add_source(source, 0)
@@ -111,6 +126,12 @@ func _build(png_path: String, out_path: String, set_name: String, names: Array) 
 		% [out_path.get_file(), cols, rows, set_name, ", ".join(names),
 			centres[0].to_html(false), centres[1].to_html(false)])
 	print("    tile centres: %d %s, %d %s" % [counts[0], names[0], counts[1], names[1]])
+	# **The check that should have come first.** Notching in a render is a
+	# symptom; this is the disease, and it is one number.
+	print("    distinct masks: %d of ~%d wanted" % [masks.size(), MASKS_EXPECTED])
+	if masks.size() < MASKS_EXPECTED:
+		push_error("build_terrain_tileset: only %d distinct masks in %s — the peering bits are not discriminating between tiles."
+			% [masks.size(), out_path.get_file()])
 
 
 ## The average colour of a small patch, which is what a probe actually reads.
