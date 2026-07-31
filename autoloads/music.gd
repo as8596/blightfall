@@ -9,7 +9,9 @@ extends Node
 ## available (`fade` of 0) and is the right call for a hard scene break; a
 ## crossfade is the right call for everything else.
 
-const BUS := "Master"
+## Its own bus, so the music slider moves music and nothing else. Created by
+## `AudioMix`, which is registered ahead of this.
+const BUS := "Music"
 const DEFAULT_FADE: float = 1.2
 
 ## Tracks by id, so callers name a piece of music rather than a file path.

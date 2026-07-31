@@ -21,6 +21,9 @@ config/icon="res://icon.svg"
 Events="*res://autoloads/events.gd"
 Rng="*res://autoloads/rng.gd"
 HitStop="*res://autoloads/hit_stop.gd"
+; Before Sfx and Music: it creates the buses they play into, and a player
+; assigned to a bus that does not exist yet falls back to Master.
+AudioMix="*res://autoloads/audio_mix.gd"
 Sfx="*res://autoloads/sfx.gd"
 DebugSettings="*res://autoloads/debug_settings.gd"
 SaveGame="*res://systems/save/save_game.gd"

@@ -101,8 +101,22 @@ func suggested() -> float:
 
 ## A UI layer and the Control filling it. Both are needed: the layer carries the
 ## scale, the Control has to be resized or its anchors point at the wrong edges.
-func register(layer: CanvasLayer, root: Control = null) -> void:
-	_layers.append({"layer": layer, "root": root})
+## `menu` layers ignore the player's scale setting and follow the window
+## instead.
+##
+## **The setting is for the HUD.** Somebody who turns the interface down to 1x
+## is asking for less of the screen covered *while playing* — hearts, hotbar,
+## satchel. A menu is the opposite situation: the world is paused, the screen is
+## theirs, and shrinking a wall of text because the health bar was in the way is
+## answering a question nobody asked. So menus take `suggested()`, which is what
+## the window says rather than what the slider says.
+##
+## Note this is a *fit*, not a fixed 2x. The menus are laid out against a
+## 1280x720 box — the inventory's twelve slots plus two columns come to 1153px —
+## so pinning them to 2x would push that off the side of any window under
+## 2560 wide. On a 1440p screen the fit is 2x; below that it is whatever fits.
+func register(layer: CanvasLayer, root: Control = null, menu: bool = false) -> void:
+	_layers.append({"layer": layer, "root": root, "menu": menu})
 	_apply()
 
 
@@ -138,14 +152,15 @@ func _apply() -> void:
 		var root = entry["root"]
 		if not is_instance_valid(layer):
 			continue
-		layer.scale = Vector2(factor, factor)
+		var used: float = suggested() if entry.get("menu", false) else factor
+		layer.scale = Vector2(used, used)
 		# The layer's offset is a translation in window pixels, applied outside
 		# the scale — so it moves the whole layer onto the picture without the
 		# children having to know anything about letterboxing.
 		layer.offset = area.position.floor()
 		if is_instance_valid(root):
 			root.position = Vector2.ZERO
-			root.size = (area.size / factor).floor()
+			root.size = (area.size / used).floor()
 
 
 # ------------------------------------------------------------------ storage

@@ -120,12 +120,51 @@ func _on_ui_scale_changed(_to: float) -> void:
 	_refresh()
 
 
+## One labelled slider, wired straight at the bus.
+##
+## No apply button and no confirmation: audio is the one setting where the
+## feedback *is* the change, so hearing it move is the whole interface.
+func _volume_row(bus: String) -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+
+	var label := Label.new()
+	label.text = bus
+	label.custom_minimum_size = Vector2(96, 32)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	row.add_child(label)
+
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.05
+	slider.value = AudioMix.volume(bus)
+	slider.custom_minimum_size = Vector2(180, 32)
+	slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(slider)
+
+	var readout := Label.new()
+	readout.custom_minimum_size = Vector2(56, 32)
+	readout.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	readout.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	readout.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	readout.text = "%d%%" % roundi(slider.value * 100.0)
+	row.add_child(readout)
+
+	slider.value_changed.connect(func(level: float) -> void:
+		AudioMix.set_volume(bus, level)
+		readout.text = "%d%%" % roundi(level * 100.0))
+	return row
+
+
 func _build() -> void:
 	_root = Control.new()
 	_root.name = "PauseMenu"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
-	UiScale.register(self, _root)
+	UiScale.register(self, _root, true)
 
 	var scrim := ColorRect.new()
 	scrim.color = Color(0.04, 0.04, 0.05, 0.72)
@@ -181,6 +220,12 @@ func _build() -> void:
 	# one is an autoload and never dies, so it was safe — but the pattern is not,
 	# and one of the two places it appeared was a real crash.
 	UiScale.changed.connect(_on_ui_scale_changed)
+
+	# Volumes. Sliders rather than a pair of buttons like the scale, because a
+	# level is a position on a range and the scale is a short list of steps —
+	# and because nobody wants to press "-" eleven times to mute the music.
+	for bus in AudioMix.BUSES:
+		column.add_child(_volume_row(bus))
 
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 12)

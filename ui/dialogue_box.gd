@@ -697,7 +697,7 @@ func _build() -> void:
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
-	UiScale.register(self, _root)
+	UiScale.register(self, _root, true)
 
 	_panel = Panel.new()
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)

@@ -68,6 +68,10 @@ var _pointer: Vector2 = Vector2.INF
 ## `--shop=<id>` opens that shop's window, and `--gold=N` sets the purse first —
 ## the shelf looks completely different at 0 gold, where every row is dimmed,
 ## and both states are worth being able to shoot.
+## `--pause` opens the pause menu, which is otherwise unreachable without a
+## keyboard and is where the settings live.
+var _pause: bool = false
+
 var _shop: String = ""
 var _gold: int = -1
 
@@ -112,6 +116,8 @@ func _capture() -> void:
 			_pull_enemies_close = true
 		elif arg.begins_with("--menu="):
 			_menu = arg.trim_prefix("--menu=")
+		elif arg.begins_with("--pause"):
+			_pause = true
 		elif arg.begins_with("--shop="):
 			_shop = arg.trim_prefix("--shop=")
 		elif arg.begins_with("--gold="):
@@ -249,6 +255,11 @@ func _capture() -> void:
 				@warning_ignore("return_value_discarded")
 				player.inventory.add(StringName(parts[0]), parts[1].to_int())
 		await _wait_ticks(2)
+
+	if _pause:
+		PauseMenu.open()
+		for i in 8:
+			await get_tree().process_frame
 
 	if _shop != "":
 		# Straight to the window rather than through her conversation: what a

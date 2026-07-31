@@ -430,7 +430,7 @@ func _build() -> void:
 	_root.name = "GameMenu"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
-	UiScale.register(self, _root)
+	UiScale.register(self, _root, true)
 
 	var scrim := ColorRect.new()
 	scrim.color = Color(0.05, 0.04, 0.04, 0.86)

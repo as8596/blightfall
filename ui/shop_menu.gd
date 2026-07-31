@@ -529,7 +529,7 @@ func _build() -> void:
 	_root.name = "ShopMenu"
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
-	UiScale.register(self, _root)
+	UiScale.register(self, _root, true)
 
 	var scrim := ColorRect.new()
 	scrim.color = BACK

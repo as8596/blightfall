@@ -36,7 +36,9 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for i in POOL_SIZE:
 		var player := AudioStreamPlayer.new()
-		player.bus = &"Master"
+		# Its own bus, so the effects slider moves effects and nothing else.
+		# Created by `AudioMix`, which is registered ahead of this.
+		player.bus = &"Sfx"
 		# Hitstop sets time_scale to 0; audio should keep playing through it.
 		player.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(player)
