@@ -128,6 +128,141 @@ func sell_material(shop: ShopData, sack: InventoryComponent, id: StringName,
 	return ""
 
 
+# ------------------------------------------------------------------ carts
+
+## Why the cart cannot be settled, or "" if it can.
+func why_not_settle(shop: ShopData, cart: ShopCart, pack: ItemsComponent,
+		sack: InventoryComponent) -> String:
+	if shop == null or cart == null or cart.is_empty():
+		return "Nothing in the cart."
+
+	# Do you still have what you promised? The world can change under an open
+	# window — a quest turn-in consumes materials, and the cart would not know.
+	for id in cart.sell_materials:
+		if sack == null or sack.count_of(id) < int(cart.sell_materials[id]):
+			return "You no longer have that much %s." % Materials.name_of(id).to_lower()
+	for id in cart.sell_items:
+		var held := 0
+		if pack != null:
+			for slot in pack.items.size():
+				var item := pack.item_at(slot)
+				if item != null and item.id == id:
+					held += pack.count_at(slot)
+		if held < int(cart.sell_items[id]):
+			return "You no longer have that."
+
+	# **Net, not gross.** The whole point of a cart is that selling the haul
+	# pays for the stew in the same breath, so an order that could never be
+	# afforded one line at a time is fine as long as it balances.
+	if Purse.amount() + cart.credit(shop) < cart.cost(shop):
+		return "Not enough gold."
+
+	if not _fits(cart, pack):
+		return "No room in your pack."
+	return ""
+
+
+## Do the whole trade, or none of it.
+##
+## Order matters and is not arbitrary: **sells first**, because they free both
+## slots and gold that the buys may depend on. Everything is validated before
+## anything moves, so a refusal leaves the player exactly as they were.
+func settle(shop: ShopData, cart: ShopCart, pack: ItemsComponent,
+		sack: InventoryComponent) -> String:
+	var refusal := why_not_settle(shop, cart, pack, sack)
+	if refusal != "":
+		return refusal
+
+	var credit := cart.credit(shop)
+	var cost := cart.cost(shop)
+
+	for id in cart.sell_materials:
+		var amount := int(cart.sell_materials[id])
+		@warning_ignore("return_value_discarded")
+		sack.remove(id, amount)
+		Events.traded.emit(id, -amount, shop.offer_for_material(id) * amount)
+	for id in cart.sell_items:
+		var amount := int(cart.sell_items[id])
+		_take(pack, id, amount)
+		Events.traded.emit(id, -amount, shop.offer_for(Items.get_item(id)) * amount)
+
+	@warning_ignore("return_value_discarded")
+	Purse.add(credit - cost)
+
+	for id in cart.buys:
+		var amount := int(cart.buys[id])
+		var item := Items.get_item(id)
+		@warning_ignore("return_value_discarded")
+		pack.add(item, amount)
+		Events.traded.emit(id, amount, -shop.price_of(item) * amount)
+
+	Sfx.play(&"ui_select", -4.0)
+	cart.clear()
+	return ""
+
+
+## Whether the buys fit once the sells have made room.
+##
+## Simulated on a copy rather than reasoned about, because the real rule is
+## "stacks fill before slots open" and getting that subtly wrong is how a trade
+## eats an item. The copy is two small arrays; the pack is forty-two slots.
+func _fits(cart: ShopCart, pack: ItemsComponent) -> bool:
+	if pack == null:
+		return true
+	var ids: Array[StringName] = []
+	var counts: Array[int] = []
+	for slot in pack.items.size():
+		var item := pack.item_at(slot)
+		ids.append(item.id if item != null else &"")
+		counts.append(pack.count_at(slot) if item != null else 0)
+
+	for id in cart.sell_items:
+		var owed := int(cart.sell_items[id])
+		for i in ids.size():
+			if owed <= 0:
+				break
+			if ids[i] != id:
+				continue
+			var taken := mini(owed, counts[i])
+			counts[i] -= taken
+			owed -= taken
+			if counts[i] <= 0:
+				ids[i] = &""
+
+	for id in cart.buys:
+		var item := Items.get_item(id)
+		if item == null:
+			return false
+		var owed := int(cart.buys[id])
+		for i in ids.size():
+			if owed <= 0:
+				break
+			if ids[i] == id and counts[i] < item.stack_size:
+				var room := mini(owed, item.stack_size - counts[i])
+				counts[i] += room
+				owed -= room
+		for i in ids.size():
+			if owed <= 0:
+				break
+			if ids[i] == &"":
+				ids[i] = id
+				counts[i] = mini(owed, item.stack_size)
+				owed -= counts[i]
+		if owed > 0:
+			return false
+	return true
+
+
+static func _take(pack: ItemsComponent, id: StringName, amount: int) -> void:
+	var owed := amount
+	for slot in pack.items.size():
+		if owed <= 0:
+			return
+		var item := pack.item_at(slot)
+		if item != null and item.id == id:
+			owed -= pack.remove(slot, owed)
+
+
 ## Slots' worth of space for this specific item, counting part-filled stacks.
 static func _room_for(pack: ItemsComponent, item: ItemData) -> int:
 	var room := 0

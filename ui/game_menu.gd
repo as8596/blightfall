@@ -306,31 +306,7 @@ func _detail_text() -> String:
 	var item := _item_in(slot)
 	if item == null:
 		return "\n  " + _aside("Nothing in that slot.")
-
-	var kinds := ["Consumable", "Tool", "Key", "Gear"]
-	var kind: String = kinds[item.kind] if item.kind < kinds.size() else "?"
-	var lines := [
-		"",
-		"  %s    %s" % [_named(item.display_name), _kind(kind)],
-	]
-	if item.heals > 0:
-		lines.append("  Restores %d health." % item.heals)
-	if item.kind == ItemData.Kind.TOOL:
-		lines.append("  Used with the tool key.")
-	if item.kind == ItemData.Kind.KEY:
-		lines.append("  Not something you use. It opens something.")
-	if item.stack_size > 1:
-		lines.append("  Stacks to %d." % item.stack_size)
-	if item.is_equippable():
-		lines.append("  Worn in the %s slot." % ItemData.slot_name(item.slot).to_lower())
-	for stat in item.modifiers:
-		var delta: int = int(item.modifiers[stat])
-		lines.append("  %s %s%d" % [String(stat).capitalize().replace("_", " "),
-			"+" if delta >= 0 else "", delta])
-	if not item.description.is_empty():
-		lines.append("")
-		lines.append("  " + _aside(item.description))
-	return "\n".join(lines)
+	return UiKit.item_detail(item)
 
 
 ## Name, picture and prose all come from the same slot, so they can never

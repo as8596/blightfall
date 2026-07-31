@@ -55,8 +55,124 @@ func _run() -> void:
 	_check_purse()
 	await _check_trading()
 	await _check_materials()
+	await _check_the_cart()
 	await _check_the_room()
 	_finish()
+
+
+## The cart: assembling a whole trade, then settling it in one go.
+##
+## The failure modes here are worse than the one-at-a-time version's, because a
+## cart can be half-applied in more ways:
+##
+## - **Selling the same stack twice.** The "yours" column has to show what is
+##   left *after* the cart, or four timber can be added to it eight times.
+## - **A trade that only balances as a whole.** Selling the haul must pay for
+##   the stew in the same breath, so affordability is net and not per-line.
+## - **Settling against a world that moved.** The window can be open while a
+##   quest turn-in eats the materials the cart promised.
+func _check_the_cart() -> void:
+	print("\nThe cart")
+	var level := get_tree().current_scene as Level
+	if level == null:
+		return
+	var shop := Shops.get_shop(&"sundries")
+	var pack: ItemsComponent = level.player.items
+	var sack: InventoryComponent = level.player.inventory
+	for slot in pack.items.size():
+		if pack.item_at(slot) != null:
+			@warning_ignore("return_value_discarded")
+			pack.remove(slot, pack.count_at(slot))
+	sack.clear()
+
+	var cart := ShopCart.new()
+	_check("a new cart is empty", cart.is_empty())
+	_check("and settling it is refused",
+		Shops.settle(shop, cart, pack, sack) != "")
+
+	# Selling the same stack twice is the bug the "left after cart" rule exists
+	# to stop. The UI shows this number, so the number is what gets asserted.
+	@warning_ignore("return_value_discarded")
+	sack.add(&"timber", 6)
+	_check("all six are available at first", cart.left_of(&"timber", 6) == 6)
+	cart.add_sell_material(&"timber", 4)
+	_check("four in the cart leaves two", cart.left_of(&"timber", 6) == 2,
+		"%d" % cart.left_of(&"timber", 6))
+	cart.add_sell_material(&"timber", 2)
+	_check("and six leaves none", cart.left_of(&"timber", 6) == 0)
+	cart.add_sell_material(&"timber", -6)
+	_check("taking them back restores it", cart.left_of(&"timber", 6) == 6)
+	_check("and an empty line disappears", not cart.sell_materials.has(&"timber"))
+
+	# The trade that only works as a whole. Six timber at 3 is 18; a stew is 35.
+	# Neither buying nor selling alone gets there from zero gold.
+	Purse.set_amount(20)
+	var stew := Items.get_item(&"hearty_stew")
+	cart.add_buy(&"hearty_stew", 1)
+	_check("the stew alone is unaffordable",
+		Shops.why_not_settle(shop, cart, pack, sack) == "Not enough gold.",
+		Shops.why_not_settle(shop, cart, pack, sack))
+	cart.add_sell_material(&"timber", 6)
+	_check("but selling the timber pays for it",
+		Shops.why_not_settle(shop, cart, pack, sack) == "",
+		Shops.why_not_settle(shop, cart, pack, sack))
+
+	var expected := Purse.amount() - cart.net(shop)
+	_check("settling succeeds", Shops.settle(shop, cart, pack, sack) == "")
+	_check("the timber is gone", sack.count_of(&"timber") == 0,
+		"%d" % sack.count_of(&"timber"))
+	_check("the stew arrived", _held(pack, &"hearty_stew") == 1)
+	_check("and the money is right", Purse.amount() == expected,
+		"%d, expected %d" % [Purse.amount(), expected])
+	_check("the cart is emptied by settling", cart.is_empty())
+
+	# Settling against a world that moved: the cart promises materials that are
+	# gone by the time Confirm is pressed.
+	@warning_ignore("return_value_discarded")
+	sack.add(&"stone", 3)
+	var stale := ShopCart.new()
+	stale.add_sell_material(&"stone", 3)
+	@warning_ignore("return_value_discarded")
+	sack.remove(&"stone", 2)
+	_check("a cart promising what you no longer have is refused",
+		Shops.settle(shop, stale, pack, sack) != "")
+	_check("and nothing was paid for it", sack.count_of(&"stone") == 1,
+		"%d" % sack.count_of(&"stone"))
+
+	# A full pack refuses buys, before any money moves.
+	#
+	# The pack is emptied first on purpose. Left as it was, it still held one
+	# hearty stew — and a stew stacks to three, so there was room for the one
+	# being bought and the sale went through. That was the test being wrong
+	# rather than the code, and it is worth the two lines to make "full"
+	# actually mean full.
+	for slot in pack.items.size():
+		if pack.item_at(slot) != null:
+			@warning_ignore("return_value_discarded")
+			pack.remove(slot, pack.count_at(slot))
+	var filler := Items.get_item(&"worn_sword")
+	for slot in pack.items.size():
+		@warning_ignore("return_value_discarded")
+		pack.add(filler, 1)
+
+	var full := ShopCart.new()
+	full.add_buy(&"hearty_stew", 1)
+	Purse.set_amount(500)
+	var gold_before := Purse.amount()
+	# Captured, not called twice: `settle` has side effects, and evaluating it
+	# once for the assertion and again for the failure detail would settle it.
+	var stopped := Shops.settle(shop, full, pack, sack)
+	_check("a full pack refuses the cart", stopped == "No room in your pack.", stopped)
+	_check("and the gold stays put", Purse.amount() == gold_before)
+
+	# ...but selling something out of that same full pack makes room for it,
+	# which is the whole reason sells are applied before buys.
+	full.add_sell_item(&"worn_sword", 1)
+	_check("selling from a full pack makes room in the same trade",
+		Shops.why_not_settle(shop, full, pack, sack) == "",
+		Shops.why_not_settle(shop, full, pack, sack))
+	_check("and it settles", Shops.settle(shop, full, pack, sack) == "")
+	_check("the stew is in the pack", _held(pack, &"hearty_stew") >= 1)
 
 
 ## Selling the haul. **This is the only source of income in the game**, so it is

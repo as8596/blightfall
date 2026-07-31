@@ -56,6 +56,72 @@ static func frame_of(column: Control) -> Control:
 	return column.get_meta(&"frame", column)
 
 
+# ------------------------------------------------------------ item detail
+
+## Colours for the BBCode helpers below. Hex strings rather than `Color`,
+## because `[color=...]` takes text.
+const KEY := "b79a63"      ## labels and item names — warm, a step up from body
+const ASIDE := "8a8378"    ## flavour text, parentheticals, "nothing here"
+const KIND := "6e695f"     ## the category aside, dimmer than even flavour
+const DISPLAY_PATH := "res://art/fonts/ui_display.tres"
+
+
+## An item's name, in the display face. `[font]` takes a path rather than a
+## resource, which is why that is a string constant and not `DISPLAY`.
+static func named(text: String) -> String:
+	return "[font=%s][color=%s]%s[/color][/font]" % [DISPLAY_PATH, KEY, text]
+
+
+static func aside(text: String) -> String:
+	return "[color=%s]%s[/color]" % [ASIDE, text]
+
+
+## The item's category, set apart from its name.
+##
+## **`[i]` is not available and would do nothing.** `art/fonts/ui_theme.tres`
+## points italics at the regular face on purpose: Godot has no italic to use, so
+## it shears the glyphs, and a sheared pixel font stops having whole-pixel
+## strokes — the one thing the whole font depends on.
+##
+## So the two axes that do exist carry it: an asterisk to mark it as an aside
+## rather than part of the name, and a dimmer colour than even flavour text.
+static func kind(text: String) -> String:
+	return "[color=%s]*%s[/color]" % [KIND, text]
+
+
+## Everything worth knowing about an item, as BBCode.
+##
+## Shared so the shop and the inventory cannot describe the same loaf
+## differently — which they already would have, because the shop needed this
+## and the only copy lived on `GameMenu` behind an underscore.
+static func item_detail(item: ItemData, extra: String = "") -> String:
+	if item == null:
+		return "\n  " + aside("Nothing there.")
+	const KINDS := ["Consumable", "Tool", "Key", "Gear"]
+	var label: String = KINDS[item.kind] if item.kind < KINDS.size() else "?"
+	var lines: Array[String] = ["", "  %s    %s" % [named(item.display_name), kind(label)]]
+	if extra != "":
+		lines.append("  " + extra)
+	if item.heals > 0:
+		lines.append("  Restores %d health." % item.heals)
+	if item.kind == ItemData.Kind.TOOL:
+		lines.append("  Used with the tool key.")
+	if item.kind == ItemData.Kind.KEY:
+		lines.append("  Not something you use. It opens something.")
+	if item.stack_size > 1:
+		lines.append("  Stacks to %d." % item.stack_size)
+	if item.is_equippable():
+		lines.append("  Worn in the %s slot." % ItemData.slot_name(item.slot).to_lower())
+	for stat in item.modifiers:
+		var delta: int = int(item.modifiers[stat])
+		lines.append("  %s %s%d" % [String(stat).capitalize().replace("_", " "),
+			"+" if delta >= 0 else "", delta])
+	if not item.description.is_empty():
+		lines.append("")
+		lines.append("  " + aside(item.description))
+	return "\n".join(lines)
+
+
 static func frame(fill: Color, edge: Color, pad: int = 0, width: int = 2) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = fill
