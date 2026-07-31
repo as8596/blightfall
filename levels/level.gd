@@ -125,6 +125,11 @@ func _ready() -> void:
 	# would vanish with it the moment that thing died.
 	Events.hit_landed.connect(_on_hit_landed)
 
+	# Whatever this place sounds like. Asked for here rather than pushed by
+	# whoever changed the scene, because the level is the only thing that knows
+	# which one it is.
+	Music.play_for_scene(scene_file_path)
+
 
 ## Put the player on a named marker and point the camera at them.
 ##

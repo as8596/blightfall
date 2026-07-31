@@ -13,8 +13,26 @@ const BUS := "Master"
 const DEFAULT_FADE: float = 1.2
 
 ## Tracks by id, so callers name a piece of music rather than a file path.
+##
+## MP3 rather than WAV: the first track shipped as a 27MB wav, which is most of
+## a repository for three minutes of music. These five together are under 14MB.
 const TRACKS := {
-	&"main_menu": "res://audio/music/the_beginning.wav",
+	# Held for the prologue chapter and deliberately not used anywhere else —
+	# it is the first thing the game plays and should not be worn out on a menu.
+	&"prologue": "res://audio/music/the_beginning.mp3",
+	&"ambry_day": "res://audio/music/ambry_day.mp3",
+	&"ambry_night": "res://audio/music/ambry_night.mp3",
+	&"market": "res://audio/music/market.mp3",
+	&"wilds": "res://audio/music/the_wilds.mp3",
+}
+
+## Which track a level asks for, by scene path fragment. Matched on a substring
+## so every Orchardfall area gets the valley's music without listing six scenes,
+## and so a new area is silent-by-omission rather than silent-by-bug.
+const BY_SCENE := {
+	"levels/ambry/interiors/sundries": &"market",
+	"levels/ambry": &"ambry_day",
+	"levels/orchardfall": &"wilds",
 }
 
 var current: StringName = &""
@@ -59,6 +77,21 @@ func play(id: StringName, fade: float = DEFAULT_FADE, volume_db: float = -6.0) -
 	incoming.play()
 	current = id
 	_crossfade(outgoing, incoming, volume_db, fade)
+
+
+## Play whatever suits a scene, and do nothing if it is already playing.
+##
+## Called on every level change. The "already playing" check is the whole point:
+## walking from one Orchardfall area to the next must not restart the valley
+## theme, or the music resets every time you cross an edge and never gets past
+## its first bar.
+func play_for_scene(scene_path: String, fade: float = DEFAULT_FADE) -> void:
+	for fragment in BY_SCENE:
+		if scene_path.contains(fragment):
+			var wanted: StringName = BY_SCENE[fragment]
+			if current != wanted:
+				play(wanted, fade)
+			return
 
 
 func stop(fade: float = DEFAULT_FADE) -> void:

@@ -29,7 +29,10 @@ var _scale_label: Label
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
-	Music.play(&"main_menu")
+	# The village theme, not the prologue's. "The Beginning" is held for the
+	# opening chapter — playing it over a title screen spends it before the game
+	# has started.
+	Music.play(&"ambry_day")
 	# Whatever the last scene did to the tree, a title screen is not paused and
 	# has no HUD over it.
 	get_tree().paused = false
