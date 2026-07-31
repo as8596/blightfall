@@ -130,3 +130,51 @@ static func frame(fill: Color, edge: Color, pad: int = 0, width: int = 2) -> Sty
 	if pad > 0:
 		box.set_content_margin_all(pad)
 	return box
+
+
+# ---------------------------------------------------------------- steel plates
+#
+# The imported border set (`tools/import_ui_borders.py`), drawn in immediate
+# mode. The HUD paints itself with `draw_*` calls rather than assembling
+# Controls, so a `NinePatchRect` node is no use to it — these do the same job
+# as a function.
+
+const SLOT_PLATE: Texture2D = preload("res://art/ui/slot.png")
+const TROUGH: Texture2D = preload("res://art/ui/trough.png")
+const KEY_E: Texture2D = preload("res://art/ui/key_e.png")
+
+## How much of each end of `trough.png` is the rounded cap rather than the
+## stretchable middle. Measured off the art: the cap is the domed end and the
+## bar is uniform between them.
+const TROUGH_CAP: float = 16.0
+
+
+## Draw `texture` into `into`, stretching only the middle and leaving `cap`
+## pixels at each end at their own size.
+##
+## **Not a plain `draw_texture_rect`.** Stretching a 326px bar down to 232 pulls
+## the domed caps into ovals, and stretching it up to 1100 for a shop row turns
+## them into slugs. A three-slice keeps the ends the shape they were drawn and
+## puts every pixel of the difference into the flat middle, which is the part
+## that has nothing to lose.
+static func three_slice_h(canvas: CanvasItem, texture: Texture2D, into: Rect2,
+		cap: float, modulate: Color = Color.WHITE) -> void:
+	if texture == null:
+		return
+	var source := texture.get_size()
+	# A target narrower than its own two caps has no middle to stretch; draw it
+	# whole rather than drawing the caps overlapping each other.
+	if into.size.x <= cap * 2.0 or source.x <= cap * 2.0:
+		canvas.draw_texture_rect(texture, into, false, modulate)
+		return
+	var left := Rect2(Vector2.ZERO, Vector2(cap, source.y))
+	var right := Rect2(Vector2(source.x - cap, 0.0), Vector2(cap, source.y))
+	var middle := Rect2(Vector2(cap, 0.0), Vector2(source.x - cap * 2.0, source.y))
+	canvas.draw_texture_rect_region(texture,
+		Rect2(into.position, Vector2(cap, into.size.y)), left, modulate)
+	canvas.draw_texture_rect_region(texture,
+		Rect2(into.position + Vector2(into.size.x - cap, 0.0),
+			Vector2(cap, into.size.y)), right, modulate)
+	canvas.draw_texture_rect_region(texture,
+		Rect2(into.position + Vector2(cap, 0.0),
+			Vector2(into.size.x - cap * 2.0, into.size.y)), middle, modulate)

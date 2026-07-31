@@ -68,6 +68,10 @@ const SLOT_SELECTED := Color(0.95, 0.88, 0.70)
 ## Extra space between the numbered ten and the reserved potion pair.
 const POTION_GAP: float = 26.0
 
+## How far the steel trough stands out past the bar it holds. Small: the trough
+## is a rim around the bar, not a frame around a picture of one.
+const BAR_INSET: Vector2 = Vector2(4.0, 4.0)
+
 ## The weapon plate: what is in hand, and what is behind it.
 ##
 ## **Above the health bar rather than beside the hotbar.** "What am I holding"
@@ -257,7 +261,10 @@ func _draw_health(origin: Vector2) -> void:
 		return
 	var ratio: float = clampf(float(health) / float(max_health), 0.0, 1.0)
 	_health_rect = Rect2(origin, HEALTH_SIZE)
-	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), HEALTH_SIZE + Vector2(4, 4)), HEART_EDGE)
+	# The steel trough, drawn a little larger than the bar so the bar sits inside
+	# it. Three-sliced, or the domed caps stretch into ovals — see `UiKit`.
+	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
+		Rect2(origin - BAR_INSET, HEALTH_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
 	_canvas.draw_rect(Rect2(origin, HEALTH_SIZE), HEALTH_BACK)
 	_canvas.draw_rect(
 		Rect2(origin, Vector2(HEALTH_SIZE.x * ratio, HEALTH_SIZE.y)),
@@ -291,7 +298,8 @@ func _draw_experience(origin: Vector2) -> void:
 		return
 	var ratio: float = clampf(float(xp) / float(xp_needed), 0.0, 1.0)
 	_xp_rect = Rect2(origin, XP_SIZE)
-	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), XP_SIZE + Vector2(4, 4)), HEART_EDGE)
+	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
+		Rect2(origin - BAR_INSET, XP_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
 	_canvas.draw_rect(Rect2(origin, XP_SIZE), XP_BACK)
 	if ratio > 0.0:
 		# At least a pixel of gold once there is any progress at all. A bar six
@@ -336,7 +344,8 @@ func _draw_satchel(origin: Vector2) -> void:
 		return
 	var ratio: float = clampf(float(carried) / float(capacity), 0.0, 1.0)
 	var full := carried >= capacity
-	_canvas.draw_rect(Rect2(origin - Vector2(2, 2), SATCHEL_SIZE + Vector2(4, 4)), HEART_EDGE)
+	UiKit.three_slice_h(_canvas, UiKit.TROUGH,
+		Rect2(origin - BAR_INSET, SATCHEL_SIZE + BAR_INSET * 2.0), UiKit.TROUGH_CAP)
 	_canvas.draw_rect(Rect2(origin, SATCHEL_SIZE), SATCHEL_BACK)
 	_canvas.draw_rect(
 		Rect2(origin, Vector2(SATCHEL_SIZE.x * ratio, SATCHEL_SIZE.y)),
@@ -461,8 +470,8 @@ func _draw_weapon(origin: Vector2) -> void:
 	var box := Rect2(origin, Vector2(WEAPON_SIZE, WEAPON_SIZE))
 	var bow := weapon_slot == int(ItemData.Slot.RANGED)
 	var dry := bow and quiver <= 0
-	_canvas.draw_rect(box, WEAPON_BACK)
-	_canvas.draw_rect(box, WEAPON_DRY if dry else WEAPON_EDGE, false, 2.0)
+	_canvas.draw_texture_rect(UiKit.SLOT_PLATE, box, false,
+		WEAPON_DRY if dry else Color.WHITE)
 
 	if weapon_item.icon != null:
 		var pad := 5.0
@@ -530,14 +539,20 @@ func _draw_hotbar(screen: Vector2) -> void:
 		var shift: float = POTION_GAP if ItemsComponent.is_potion_slot(i) else 0.0
 		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP) + shift, 0.0)
 		var box := Rect2(at, Vector2(SLOT_SIZE, SLOT_SIZE))
-		_canvas.draw_rect(box, SLOT_BACK)
 		var chosen := i == selected
-		var edge: Color = SLOT_REFUSED if _refused.has(i) else (SLOT_SELECTED if chosen else SLOT_EDGE)
+		# The steel plate replaces the drawn box and its border. Tinted rather
+		# than outlined for the two states that matter: a plate with a rectangle
+		# stamped over it is a plate wearing the old widget.
+		var tint := Color.WHITE
+		if _refused.has(i):
+			tint = SLOT_REFUSED
+		elif chosen:
+			tint = SLOT_SELECTED
+		_canvas.draw_texture_rect(UiKit.SLOT_PLATE, box, false, tint)
 		if chosen:
-			# Grown outward rather than recoloured alone, so the selection is
-			# legible at a glance and in a screenshot with no colour at all.
-			_canvas.draw_rect(box.grow(3.0), edge, false, 3.0)
-		_canvas.draw_rect(box, edge, false, 2.0)
+			# ...and the selection still grows outward as well as brightening, so
+			# it is legible in a screenshot with no colour at all.
+			_canvas.draw_rect(box.grow(3.0), SLOT_SELECTED, false, 2.0)
 
 		var item: ItemData = slot_items[i] if slot_items[i] is ItemData else null
 		if item != null and item.icon != null:

@@ -141,3 +141,19 @@ art/icons/items/<consumables|gear|keys|materials>/<name>.png
 UI surface, not world art — exempt from the saturation advisory in
 `check_colour.py`, because a bright gemstone in an inventory slot is not
 competing with anything for the player's eye.
+
+## UI plates and frames
+
+```
+art/source/ui/<set>/    what arrived, untouched
+art/ui/<name>.png       what the game uses
+```
+
+Imported through `tools/import_ui_borders.py` rather than dropped straight in,
+because a bought UI set arrives in somebody else's palette — the first one was
+214 degrees of hue away from this game's. The tool rotates it onto one warm hue,
+caps saturation so the gems stop shouting, and strips decoration that cannot
+tile. Its docstring is the long version.
+
+The source stays in the repo so the numbers can be changed later. Nothing edits
+`art/ui/` by hand.

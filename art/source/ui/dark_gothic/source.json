@@ -1,0 +1,76 @@
+{
+  "ui_assets": [
+    {
+      "id": "0f59997e-c61b-470d-9b4e-552264edd2f5",
+      "name": null,
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "template",
+      "file": "dark_gothic_ornate_steel_borders/dark_gothic_ornate_steel_borders.png",
+      "size": {
+        "width": 512,
+        "height": 512
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    },
+    {
+      "id": "81d16e2b-958e-48c8-8759-3d72b23ca506",
+      "name": "element 1",
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "element",
+      "file": "dark_gothic_ornate_steel_borders/elements/element_1.png",
+      "size": {
+        "width": 424,
+        "height": 326
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    },
+    {
+      "id": "ac55aa34-03d9-4da3-8ed3-630ccdf14faf",
+      "name": "element 2",
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "element",
+      "file": "dark_gothic_ornate_steel_borders/elements/element_2.png",
+      "size": {
+        "width": 216,
+        "height": 72
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    },
+    {
+      "id": "dc2548b4-8cd8-449e-8518-aea9df8b3249",
+      "name": "E",
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "element",
+      "file": "dark_gothic_ornate_steel_borders/elements/E.png",
+      "size": {
+        "width": 72,
+        "height": 72
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    },
+    {
+      "id": "34e4cd60-a350-4fa8-be01-9c3707f60d6d",
+      "name": "element 4",
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "element",
+      "file": "dark_gothic_ornate_steel_borders/elements/element_4.png",
+      "size": {
+        "width": 326,
+        "height": 38
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    },
+    {
+      "id": "3fd3132a-ac21-4225-a66b-f3865a246c3e",
+      "name": "element 5",
+      "prompt": "dark gothic ornate steel borders",
+      "kind": "element",
+      "file": "dark_gothic_ornate_steel_borders/elements/element_5.png",
+      "size": {
+        "width": 72,
+        "height": 72
+      },
+      "group_id": "0f59997e-c61b-470d-9b4e-552264edd2f5"
+    }
+  ]
+}
