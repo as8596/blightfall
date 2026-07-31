@@ -353,6 +353,8 @@ build script now refuses to place anything opaque over a walkable cell.
 | | State |
 |---|---|
 | Layout, tiles, collision | **Built** — `levels/ambry/ambry.tscn`, 48×42 |
+| Ground art over the greybox | **Built** — grass/dirt terrain painted in `_paint_terrain`. Walls, roofs and fences are still greybox: there is no art for them |
+| Undergrowth, thick north of the wall | **Built** — `_scatter_undergrowth`. Density is per district, so the abandoned half reads as abandoned before anything says so |
 | Two districts, north sealed | **Built** — asserted both ways in `tools/build_greybox.gd` |
 | Building plots with id, state, district, project cost | **Built** — `Level.building_plots()` |
 | POIs and NPC markers | **Built** — `Level.points_of_interest()`, `npc_markers()`, all ten placed |

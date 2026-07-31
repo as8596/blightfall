@@ -449,16 +449,25 @@ func _build_village(tileset: TileSet) -> void:
 	for entry in BUILDINGS:
 		_place_building(ground, objects, overhead, entry)
 
+	# Real ground art, drawn over the greybox `Ground`. See `_paint_terrain`.
+	var terrain := _paint_terrain(ground)
+
 	var root := Node2D.new()
 	root.name = "Ambry"
 	root.y_sort_enabled = true
-	for layer in [ground, objects, overhead]:
+	# Terrain after Ground and before Objects: same z as the greybox it covers,
+	# later in the child order so it draws over it, and still under everything
+	# that stands on the ground.
+	for layer in [ground, terrain, objects, overhead]:
 		root.add_child(layer)
 		layer.owner = root
 
 	_add_markers(root)
 
 	var layers: Array[TileMapLayer] = [ground, objects, overhead]
+	# After the markers, so the grove sorts among the props rather than under
+	# them, and after `layers` exists so it can ask what is solid.
+	_scatter_undergrowth(root, ground, layers)
 	_assert_road_clear(layers)
 	_assert_layout(layers, overhead)
 
@@ -945,6 +954,143 @@ func _group(root: Node2D, group_name: String) -> Node2D:
 
 static func _centre(cell: Vector2i) -> Vector2:
 	return Vector2(cell) * TILE + Vector2(TILE, TILE) * 0.5
+
+
+## Draw the real ground over the greybox, exactly as `build_orchardfall` does.
+##
+## **The greybox layer stays.** It is what every assertion in this file measures
+## and what the game collides against; this is a picture laid over it at the same
+## z and later in the child order. So "the north district is sealed" and "the
+## road from the gate is clear" still mean what they meant, and the art on top is
+## free to be any shape it likes.
+##
+## Terrain 0 is grass and terrain 1 is dirt in every file
+## `tools/build_terrain_tileset.gd` writes, so this does not have to ask.
+##
+## ## What becomes dirt, and two judgement calls
+##
+## Everything walked on and nothing built on. The roads, the square, the hearth,
+## the empty and ruined plots — bare ground the player crosses.
+##
+## **Floorboards are deliberately not in the list**, and the first attempt had
+## them. A building's floor is under its own roof and never seen, so painting it
+## dirt looks like it costs nothing — except the terrain resolver blends the
+## *edges* of a dirt field, and those edges are outside the walls. Every building
+## in the village came out sitting in a ragged puddle of sand. Grass under a roof
+## is invisible; a puddle around it is not.
+##
+## **The allotment is the other call.** In the greybox it is a slightly different
+## green from the yard, which makes it a place. Painted as grass it becomes the
+## same grass as the lawn either side and stops existing, so it goes to dirt and
+## reads as tilled ground — which is what an allotment is. That trades its
+## greenness for its being there at all.
+const TERRAIN_GRASS_DIRT: TileSet = preload("res://resources/tilesets/grass_dirt.tres")
+const TRODDEN: Array = ["dirt_path", "cobble", "hearth", "garden",
+	"plot_empty", "plot_ruined"]
+
+
+## Undergrowth, and the one thing in Ambry that is allowed to say what happened.
+##
+## **Density is a fact about the district, not a constant.** South of the wall
+## people live: someone pulls the weeds, and a bush is an occasional thing at the
+## foot of a fence. North of the wall nobody has been for years, so it comes in
+## thick. Same scatter, one number different, and the village tells you which
+## half is still being looked after before it tells you anything else.
+##
+## Pure decoration — no tile, no collision, no effect on anything the assertions
+## in this file measure. It sits on grass the player could already walk across.
+const PROP_SCENE: PackedScene = preload("res://world/prop.tscn")
+const UNDERGROWTH: Array = ["sage_bush", "hedge_shrub", "round_hedge",
+	"thorn_bush", "cypress_shrub"]
+const UNDERGROWTH_SOUTH := 0.09
+const UNDERGROWTH_NORTH := 0.22
+## Fixed, so re-running this is a no-op and the village a player knows stays the
+## village they know.
+const SCATTER_SEED := 0xA3B71E
+
+
+## Tiles a bush may not stand on or beside.
+##
+## Beside matters as much as on: a bush drawn on the grass next to a doorstep is
+## a bush drawn *over* the doorstep, because the art is a tile and a half wide
+## and the door prompt is where the player has to stand. The `doorsteps: clear`
+## assertion already refuses to let a villager block a door; this is the same
+## rule for scenery, enforced by staying a tile away from anything trodden.
+func _scatter_undergrowth(root: Node2D, ground: TileMapLayer,
+		layers: Array[TileMapLayer]) -> void:
+	var grove := _group(root, "Undergrowth")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = SCATTER_SEED
+	var planted := 0
+	for y in range(1, MAP_H - 1):
+		for x in range(1, MAP_W - 1):
+			var cell := Vector2i(x, y)
+			if _solid_at(layers, cell) or _is_trodden(ground, cell):
+				continue
+			if _near_trodden(ground, cell):
+				continue
+			# Rolled after the exclusions rather than before, so ruling out the
+			# roads thins the planting instead of shifting every later roll and
+			# rearranging the whole village.
+			var density: float = UNDERGROWTH_NORTH if y < WALL_ROW else UNDERGROWTH_SOUTH
+			if rng.randf() >= density:
+				continue
+			var prop: Prop = PROP_SCENE.instantiate()
+			prop.name = "Bush_%d_%d" % [cell.x, cell.y]
+			prop.texture = load("res://art/sprites/props/%s.png"
+				% String(UNDERGROWTH[rng.randi_range(0, UNDERGROWTH.size() - 1)]))
+			prop.solid = false
+			prop.footprint = Vector2(2, 2)
+			prop.flip = rng.randf() < 0.5
+			grove.add_child(prop)
+			prop.owner = root
+			prop.position = _centre(cell)
+			planted += 1
+	print("undergrowth: %d bushes (north thick, south kept)" % planted)
+
+
+func _is_trodden(ground: TileMapLayer, cell: Vector2i) -> bool:
+	var atlas := ground.get_cell_atlas_coords(cell)
+	if atlas == Vector2i(-1, -1):
+		return false
+	var index: int = atlas.y * ATLAS_COLS + atlas.x
+	if index >= TILES.size():
+		return false
+	return String(TILES[index][0]) in TRODDEN
+
+
+func _near_trodden(ground: TileMapLayer, cell: Vector2i) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if _is_trodden(ground, cell + Vector2i(dx, dy)):
+				return true
+	return false
+
+
+func _paint_terrain(ground: TileMapLayer) -> TileMapLayer:
+	var terrain := _new_layer("Terrain", TERRAIN_GRASS_DIRT, Z_GROUND)
+	var grass: Array[Vector2i] = []
+	var dirt: Array[Vector2i] = []
+	for y in MAP_H:
+		for x in MAP_W:
+			var cell := Vector2i(x, y)
+			var atlas := ground.get_cell_atlas_coords(cell)
+			if atlas == Vector2i(-1, -1):
+				continue
+			var index: int = atlas.y * ATLAS_COLS + atlas.x
+			if index >= TILES.size():
+				continue
+			if String(TILES[index][0]) in TRODDEN:
+				dirt.append(cell)
+			else:
+				grass.append(cell)
+	# Grass first, then dirt over it: `set_cells_terrain_connect` only resolves
+	# the edges of what it is given, so painting the larger field first and the
+	# paths into it is what makes the joins come out right.
+	terrain.set_cells_terrain_connect(grass, 0, 0, false)
+	terrain.set_cells_terrain_connect(dirt, 0, 1, false)
+	print("terrain: %d grass, %d dirt of %d cells" % [grass.size(), dirt.size(), MAP_W * MAP_H])
+	return terrain
 
 
 func _new_layer(layer_name: String, tileset: TileSet, z: int) -> TileMapLayer:

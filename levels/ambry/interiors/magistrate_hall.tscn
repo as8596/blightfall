@@ -63,46 +63,46 @@ texture_region_size = Vector2i(64, 64)
 3:8/0 = 0
 3:8/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
 
-[sub_resource type="TileSet" id="TileSet_tk3om"]
+[sub_resource type="TileSet" id="TileSet_725nc"]
 tile_size = Vector2i(64, 64)
 physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
 sources/0 = SubResource("TileSetAtlasSource_31u30")
 
-[node name="MagistrateHall" type="Node2D" unique_id=53574891]
+[node name="MagistrateHall" type="Node2D" unique_id=1825673499]
 y_sort_enabled = true
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=1709085378]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=1932315276]
 z_index = -1
 tile_map_data = PackedByteArray("AAAAAAAAAAADAAAAAAABAAAAAAADAAAAAAACAAAAAAADAAAAAAADAAAAAAADAAAAAAAEAAAAAAADAAAAAAAFAAAAAAADAAAAAAAGAAAAAAADAAAAAAAHAAAAAAADAAAAAAAIAAAAAAADAAAAAAAJAAAAAAADAAAAAAAKAAAAAAADAAAAAAAAAAEAAAADAAAAAAABAAEAAAADAAAAAAACAAEAAAADAAAAAAADAAEAAAADAAAAAAAEAAEAAAADAAAAAAAFAAEAAAADAAAAAAAGAAEAAAADAAAAAAAHAAEAAAADAAAAAAAIAAEAAAADAAAAAAAJAAEAAAADAAAAAAAKAAEAAAADAAAAAAAAAAIAAAADAAAAAAABAAIAAAADAAAAAAACAAIAAAADAAAAAAADAAIAAAADAAAAAAAEAAIAAAADAAAAAAAFAAIAAAADAAAAAAAGAAIAAAADAAAAAAAHAAIAAAADAAAAAAAIAAIAAAADAAAAAAAJAAIAAAADAAAAAAAKAAIAAAADAAAAAAAAAAMAAAADAAAAAAABAAMAAAADAAAAAAACAAMAAAADAAAAAAADAAMAAAADAAAAAAAEAAMAAAADAAAAAAAFAAMAAAADAAAAAAAGAAMAAAADAAAAAAAHAAMAAAADAAAAAAAIAAMAAAADAAAAAAAJAAMAAAADAAAAAAAKAAMAAAADAAAAAAAAAAQAAAADAAAAAAABAAQAAAADAAAAAAACAAQAAAADAAAAAAADAAQAAAADAAAAAAAEAAQAAAADAAAAAAAFAAQAAAADAAAAAAAGAAQAAAADAAAAAAAHAAQAAAADAAAAAAAIAAQAAAADAAAAAAAJAAQAAAADAAAAAAAKAAQAAAADAAAAAAAAAAUAAAADAAAAAAABAAUAAAADAAAAAAACAAUAAAADAAAAAAADAAUAAAADAAAAAAAEAAUAAAADAAAAAAAFAAUAAAADAAAAAAAGAAUAAAADAAAAAAAHAAUAAAADAAAAAAAIAAUAAAADAAAAAAAJAAUAAAADAAAAAAAKAAUAAAADAAAAAAAAAAYAAAADAAAAAAABAAYAAAADAAAAAAACAAYAAAADAAAAAAADAAYAAAADAAAAAAAEAAYAAAADAAAAAAAFAAYAAAADAAAAAAAGAAYAAAADAAAAAAAHAAYAAAADAAAAAAAIAAYAAAADAAAAAAAJAAYAAAADAAAAAAAKAAYAAAADAAAAAAA=")
-tile_set = SubResource("TileSet_tk3om")
+tile_set = SubResource("TileSet_725nc")
 
-[node name="Objects" type="TileMapLayer" parent="." unique_id=696667539]
+[node name="Objects" type="TileMapLayer" parent="." unique_id=418601367]
 y_sort_enabled = true
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAEAAAAAAAYAAAAAAAEAAAABAAAAAAAAAAEAAAABAAYAAAAAAAEAAAACAAAAAAABAAIAAAACAAYAAAAAAAEAAAADAAAAAAAAAAEAAAADAAYAAAAAAAEAAAAEAAAAAAAAAAEAAAAEAAYAAAAAAAEAAAAFAAAAAAAAAAEAAAAFAAYAAAAAAAIAAAAGAAAAAAAAAAEAAAAGAAYAAAAAAAEAAAAHAAAAAAAAAAEAAAAHAAYAAAAAAAEAAAAIAAAAAAABAAIAAAAIAAYAAAAAAAEAAAAJAAAAAAAAAAEAAAAJAAYAAAAAAAEAAAAKAAAAAAAAAAEAAAAKAAYAAAAAAAEAAAAAAAEAAAAAAAEAAAAKAAEAAAAAAAEAAAAAAAIAAAAAAAEAAAAKAAIAAAAAAAEAAAAAAAMAAAAAAAEAAAAKAAMAAAAAAAEAAAAAAAQAAAAAAAEAAAAKAAQAAAAAAAEAAAAAAAUAAAAAAAEAAAAKAAUAAAAAAAEAAAAFAAIAAAAAAAYAAAA=")
-tile_set = SubResource("TileSet_tk3om")
+tile_set = SubResource("TileSet_725nc")
 
-[node name="PointsOfInterest" type="Node2D" parent="." unique_id=1193845029]
+[node name="PointsOfInterest" type="Node2D" parent="." unique_id=141707425]
 
-[node name="Poi_ledger" type="Marker2D" parent="PointsOfInterest" unique_id=1990286113]
+[node name="Poi_ledger" type="Marker2D" parent="PointsOfInterest" unique_id=210768772]
 position = Vector2(352, 224)
 metadata/poi_id = "ledger"
 metadata/note = "your name, wrongly, still open on the desk"
 metadata/district = "interior"
 
-[node name="NpcMarkers" type="Node2D" parent="." unique_id=37844790]
+[node name="NpcMarkers" type="Node2D" parent="." unique_id=1457436994]
 
-[node name="Npc_magistrate" type="Marker2D" parent="NpcMarkers" unique_id=2083487560]
+[node name="Npc_magistrate" type="Marker2D" parent="NpcMarkers" unique_id=338696019]
 position = Vector2(352, 224)
 metadata/npc_id = "magistrate"
 
-[node name="Doorways" type="Node2D" parent="." unique_id=1414731165]
+[node name="Doorways" type="Node2D" parent="." unique_id=1247266554]
 
-[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=95723126]
+[node name="Doorway_out" type="Marker2D" parent="Doorways" unique_id=1042146056]
 position = Vector2(352, 416)
 metadata/target_scene = "res://levels/ambry/ambry_level.tscn"
 metadata/target_spawn = "Door_magistrate"
 metadata/prompt = "Leave"
 
-[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=834595157]
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1520317748]
 position = Vector2(352, 288)
