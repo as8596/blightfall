@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="RangedWeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/combat/ranged_weapon_data.gd" id="1_ranged"]
+
+[resource]
+script = ExtResource("1_ranged")
+draw_time = 0.78
+damage = 11
+snap_damage_scale = 0.28
+arrow_speed = 1060.0
+snap_speed_scale = 0.4
+range_px = 940.0
+max_spread = 0.16
+recovery = 0.22
+draw_move_scale = 0.38
+ammo_id = &"arrow"
+knockback_distance = 9.0
+hitstop = 0.06
+draw_sfx = &"bow_draw"
+loose_sfx = &"bow_loose"
+impact_sfx = &"impact_heavy"

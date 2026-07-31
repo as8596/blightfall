@@ -73,7 +73,7 @@ diff. What those settings do is explained in
 [`docs/M1-NOTES.md`](docs/M1-NOTES.md#project-settings).
 
 ```
-# headless self-check — 238 assertions over the M1 systems and Ambry
+# headless self-check — 322 assertions over the M1 systems and Ambry
 godot --headless --path . tests/m1_smoke_test.tscn
 
 # opens a door with the interact key and comes back out, carrying materials
@@ -90,6 +90,9 @@ godot --headless --path . tests/death_test.tscn
 
 # money, prices, and every way a trade can go wrong
 godot --headless --path . tests/shop_test.tscn
+
+# the bow: the weapon toggle, the draw, and an arrow crossing a room into a wolf
+godot --headless --path . tests/ranged_test.tscn
 
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
@@ -110,6 +113,9 @@ godot --path . tests/font_sheet.tscn -- --shot=/tmp/font.png
 
 # capture a frame (needs a display; xvfb-run works)
 godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --attack=6
+
+# ...or a frame with the bow drawn and an arrow in the air
+godot --path . tests/screenshot.tscn -- --shot=/tmp/bow.png --near --bow=45 --loose
 ```
 
 ## Controls
@@ -122,6 +128,7 @@ godot --path . tests/screenshot.tscn -- --shot=/tmp/frame.png --near --boxes --a
 | Sprint | hold Shift while moving | hold A |
 | Interact | E | B |
 | Use selected item | K | Y |
+| Swap sword / bow | Q | left shoulder |
 | Pause menu | Escape | Start |
 | Character menu | Tab | Select |
 | Character / Inventory / Map | C / I / M | — |

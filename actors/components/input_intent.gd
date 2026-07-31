@@ -21,6 +21,11 @@ var tool_buffered: bool = false
 ## it a frame before you finish walking into range still opens the door.
 var interact_buffered: bool = false
 
+## True while a weapon swap sits in the buffer. Buffered like the rest: the swap
+## is something you press *while* backing out of a swing, and an unbuffered one
+## would be eaten by the recovery frames you pressed it during.
+var swap_buffered: bool = false
+
 ## Held state, for future charge attacks.
 var attack_held: bool = false
 

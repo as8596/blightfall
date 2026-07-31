@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wwqiu5f0d5ep"
-path="res://.godot/imported/medieval_bow_2.png-d4248cdcaef8ce0a7befff78009e8ea8.ctex"
+uid="uid://cokeujsuxf3sd"
+path="res://.godot/imported/arrow_flight.png-1ef0dee11076f1982b4d2c8910dea876.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/parked/medieval_bow_2.png"
-dest_files=["res://.godot/imported/medieval_bow_2.png-d4248cdcaef8ce0a7befff78009e8ea8.ctex"]
+source_file="res://art/sprites/props/arrow_flight.png"
+dest_files=["res://.godot/imported/arrow_flight.png-1ef0dee11076f1982b4d2c8910dea876.ctex"]
 
 [params]
 

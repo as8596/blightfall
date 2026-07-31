@@ -278,10 +278,10 @@ func _refresh_total() -> void:
 	_confirm.disabled = refusal != ""
 	_confirm.text = "Settle up" if refusal == "" else refusal
 	if net > 0:
-		_total.text = "You pay %d   ·   %d left" % [net, after]
+		_total.text = "You pay %d   |   %d left" % [net, after]
 		_total.add_theme_color_override("font_color", GOLD if refusal == "" else REFUSED)
 	elif net < 0:
-		_total.text = "She pays %d   ·   %d after" % [-net, after]
+		_total.text = "She pays %d   |   %d after" % [-net, after]
 		_total.add_theme_color_override("font_color", CREDIT)
 	else:
 		_total.text = "An even trade"

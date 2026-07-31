@@ -552,6 +552,8 @@ func _test_type_scale() -> void:
 		widths.append(w)
 	_check("every size in the scale renders", dead.is_empty(), ", ".join(dead))
 
+	await _drawn_text_is_ascii()
+
 	# Ordered and distinct. A scale with two steps that measure the same is a
 	# scale with a step nobody can see, which is how 16 and 20 would look if the
 	# font ever went back to snapping onto a grid.
@@ -561,7 +563,6 @@ func _test_type_scale() -> void:
 			muddled.append("%d is not wider than %d" % [TypeScale.ALL[i], TypeScale.ALL[i - 1]])
 	_check("and each is visibly bigger than the last", muddled.is_empty(),
 		", ".join(muddled))
-
 	# The step this whole change was made for. Under the old scale there was
 	# nothing between body and heading, so a sub-heading had to be the same size
 	# as the sentence under it.
@@ -1308,6 +1309,27 @@ func _test_equipment() -> void:
 			edible += 1
 	_check("every item in the library is usable and has an icon", broken.is_empty(),
 		", ".join(broken))
+
+	# **And every def on disk actually made it into the library.**
+	#
+	# The check above iterates what loaded, so it is structurally blind to a def
+	# that did not — `Items._scan` pushes a warning and skips it, and a warning
+	# in a headless run is a line nobody reads. `wolf_fang` sat like that for two
+	# commits: its `.tres` pointed at an icon filename that the art import had
+	# spelled differently, so the resource failed to parse, the item vanished,
+	# and the wolf's loot table quietly referenced something that did not exist.
+	#
+	# Counting the files is the only way to see a hole where an item should be.
+	var on_disk := 0
+	var defs := DirAccess.open("res://resources/items/defs")
+	if defs != null:
+		for file in defs.get_files():
+			var trimmed := file.trim_suffix(".remap")
+			if trimmed.ends_with(".tres") or trimmed.ends_with(".res"):
+				on_disk += 1
+	_check("and no item def failed to load on the way in",
+		on_disk > 0 and Items.count() == on_disk,
+		"%d on disk, %d in the library" % [on_disk, Items.count()])
 	_check("and there is a decent spread of things to eat", edible >= 20, "%d" % edible)
 	# GDD §5: 6 hearts to start. A single meal that fills the bar is not a
 	# decision, so nothing may heal more than half of it.
@@ -1739,12 +1761,21 @@ func _test_village() -> void:
 	# The inventory grid describes what you point at, and falls back to the
 	# selected slot so the pane is never blank on a pad.
 	level.player.items.add(Items.get_item(&"stew"), 2)
+	# Found rather than assumed. This asserted slot 1 until the starting kit
+	# gained a second entry and pushed the stew along one — the check is about
+	# hovering describing what is there, not about where the kit happens to put
+	# things.
+	var stew_slot := -1
+	for i in level.player.items.items.size():
+		if level.player.items.item_at(i) != null and level.player.items.item_at(i).id == &"stew":
+			stew_slot = i
+			break
 	GameMenu.open()
 	await _ticks(1)
-	GameMenu._on_slot_hover(1, true)
+	GameMenu._on_slot_hover(stew_slot, true)
 	_check("hovering a slot describes it", GameMenu._detail.text.contains("Meat stew"),
-		GameMenu._detail.text.strip_edges().substr(0, 40))
-	GameMenu._on_slot_hover(1, false)
+		"slot %d: %s" % [stew_slot, GameMenu._detail.text.strip_edges().substr(0, 40)])
+	GameMenu._on_slot_hover(stew_slot, false)
 	level.player.items.select(0)
 	GameMenu._on_slot_hover(-1, false)
 	_check("and with nothing hovered it falls back to the selected slot",
@@ -1935,3 +1966,74 @@ func _test_design_rules() -> void:
 		total += combo.step(hits % 3).damage
 		hits += 1
 	_check("killable in ≤5 hits at matched gear", hits <= 5, "%d hits" % hits)
+
+
+## **Nothing drawn on screen may contain a character above ASCII.**
+##
+## The body font is Perfect DOS VGA 437, and it is a CP437 face wearing CP1252
+## labels: glyph id is the CP1252 byte minus one, and the picture at that index
+## is whatever CP437 draws there. So the cmap cheerfully reports U+2014 as
+## present — and renders it as `ù`, because CP437 0x97 is `ù`. Middle dot comes
+## out as a piece of box-drawing. The font does not fail; it substitutes, which
+## is much worse, because it never says a word about it.
+##
+## This shipped twice before it got a check: an em-dash in the level-up banner,
+## and then an em-dash and two middle dots in the inventory and the shop. Both
+## were found by looking at a screenshot, which is not a method.
+##
+## Scoped to `ui/`, which is exactly the layer that draws things. Tools and tests
+## print to a console in whatever font the terminal has and are none of this
+## check's business. Comments are skipped: this is about what the player sees.
+func _drawn_text_is_ascii() -> void:
+	var offenders: Array[String] = []
+	var scanned := 0
+	var dir := DirAccess.open("res://ui")
+	if dir == null:
+		# Source is not readable from an exported build. Nothing to check rather
+		# than a failure — this runs from the repo, which is where it matters.
+		_check("the drawn strings could be read", true, "no res://ui to scan")
+		return
+	for file in dir.get_files():
+		if not file.ends_with(".gd"):
+			continue
+		var handle := FileAccess.open("res://ui/%s" % file, FileAccess.READ)
+		if handle == null:
+			continue
+		var line_number := 0
+		while not handle.eof_reached():
+			var line := handle.get_line()
+			line_number += 1
+			var trimmed := line.strip_edges()
+			if trimmed.begins_with("#"):
+				continue
+			for literal in _string_literals(line):
+				scanned += 1
+				for i in literal.length():
+					if literal.unicode_at(i) > 0x7E:
+						offenders.append("%s:%d %s" % [file, line_number,
+							literal.substr(0, 32)])
+						break
+		handle.close()
+	_check("every string the UI draws is ASCII, which is all the font has",
+		offenders.is_empty(), "; ".join(offenders))
+	_check("and there were strings to check", scanned > 50, "%d literals" % scanned)
+
+
+## Double-quoted literals in one line of GDScript. Crude on purpose: it does not
+## understand escapes or `"""`, and a false positive here costs one apostrophe.
+static func _string_literals(line: String) -> Array[String]:
+	var out: Array[String] = []
+	var inside := false
+	var start := 0
+	for i in line.length():
+		if line.unicode_at(i) != 0x22:
+			continue
+		if i > 0 and line.unicode_at(i - 1) == 0x5C:
+			continue
+		if inside:
+			out.append(line.substr(start, i - start))
+			inside = false
+		else:
+			inside = true
+			start = i + 1
+	return out

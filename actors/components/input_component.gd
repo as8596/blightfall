@@ -27,6 +27,7 @@ var _attack_buffer: float = 0.0
 var _dodge_buffer: float = 0.0
 var _tool_buffer: float = 0.0
 var _interact_buffer: float = 0.0
+var _swap_buffer: float = 0.0
 
 ## Which hotbar slot was pressed this frame, or -1. Deliberately unbuffered:
 ## eating is not a combat verb, and a queued meal that fires half a second after
@@ -44,6 +45,7 @@ func _process(delta: float) -> void:
 	_dodge_buffer = maxf(_dodge_buffer - delta, 0.0)
 	_tool_buffer = maxf(_tool_buffer - delta, 0.0)
 	_interact_buffer = maxf(_interact_buffer - delta, 0.0)
+	_swap_buffer = maxf(_swap_buffer - delta, 0.0)
 
 	if not enabled:
 		intent.move = Vector2.ZERO
@@ -82,6 +84,8 @@ func _process(delta: float) -> void:
 		_tool_buffer = buffer_time
 	if Input.is_action_just_pressed(&"interact"):
 		_interact_buffer = buffer_time
+	if Input.is_action_just_pressed(&"swap_weapon"):
+		_swap_buffer = buffer_time
 	_hotbar_pressed = -1
 	for slot in HOTBAR_SLOTS:
 		if Input.is_action_just_pressed(&"hotbar_%d" % (slot + 1)):
@@ -105,6 +109,7 @@ func _refresh_flags() -> void:
 	intent.dodge_buffered = _dodge_buffer > 0.0
 	intent.tool_buffered = _tool_buffer > 0.0
 	intent.interact_buffered = _interact_buffer > 0.0
+	intent.swap_buffered = _swap_buffer > 0.0
 
 
 ## Take the buffered attack, if there is one. Returns true once per press.
@@ -140,6 +145,14 @@ func consume_interact() -> bool:
 	return true
 
 
+func consume_swap() -> bool:
+	if _swap_buffer <= 0.0:
+		return false
+	_swap_buffer = 0.0
+	intent.swap_buffered = false
+	return true
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not enabled:
 		return
@@ -169,6 +182,7 @@ func clear_buffers() -> void:
 	_dodge_buffer = 0.0
 	_tool_buffer = 0.0
 	_interact_buffer = 0.0
+	_swap_buffer = 0.0
 	_refresh_flags()
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3]
+[gd_scene load_steps=35 format=3]
 
 [ext_resource type="Script" path="res://actors/player/player.gd" id="1_player"]
 [ext_resource type="Resource" path="res://resources/combat/player_combo.tres" id="2_combo"]
@@ -29,6 +29,10 @@
 [ext_resource type="Script" path="res://actors/player/states/player_dodge_state.gd" id="14_dodge"]
 [ext_resource type="Script" path="res://actors/player/states/player_hurt_state.gd" id="15_hurt"]
 [ext_resource type="Script" path="res://actors/player/states/player_dead_state.gd" id="16_dead"]
+[ext_resource type="Script" path="res://actors/player/states/player_draw_state.gd" id="30_draw"]
+[ext_resource type="PackedScene" path="res://world/arrow.tscn" id="31_arrow"]
+[ext_resource type="Resource" path="res://resources/items/defs/hunting_bow.tres" id="32_bow"]
+[ext_resource type="Resource" path="res://resources/items/defs/arrow.tres" id="33_ammo"]
 
 [sub_resource type="RectangleShape2D" id="Rect_body"]
 size = Vector2(48, 32)
@@ -49,6 +53,7 @@ collision_mask = 1
 motion_mode = 1
 script = ExtResource("1_player")
 combo = ExtResource("2_combo")
+arrow_scene = ExtResource("31_arrow")
 haul_cache_scene = ExtResource("19_cache")
 
 [node name="Visual" type="Sprite2D" parent="."]
@@ -120,12 +125,13 @@ script = ExtResource("27_xp")
 
 [node name="EquipmentComponent" type="Node" parent="."]
 script = ExtResource("28_equip")
-starting_gear = Array[Resource("res://resources/items/item_data.gd")]([ExtResource("29_sword")])
+starting_gear = Array[Resource("res://resources/items/item_data.gd")]([ExtResource("29_sword"), ExtResource("32_bow")])
 
 [node name="ItemsComponent" type="Node" parent="."]
 script = ExtResource("23_items")
 slots = 42
-starting_items = Array[Resource("res://resources/items/item_data.gd")]([ExtResource("24_bread")])
+starting_items = Array[Resource("res://resources/items/item_data.gd")]([ExtResource("24_bread"), ExtResource("33_ammo")])
+starting_counts = Array[int]([1, 15])
 
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("10_machine")
@@ -139,6 +145,9 @@ script = ExtResource("12_move")
 
 [node name="Attack" type="Node" parent="StateMachine"]
 script = ExtResource("13_attack")
+
+[node name="Draw" type="Node" parent="StateMachine"]
+script = ExtResource("30_draw")
 
 [node name="Dodge" type="Node" parent="StateMachine"]
 script = ExtResource("14_dodge")

@@ -146,6 +146,32 @@ SOUNDS = {
         tone(0.09, 380, 620, attack=0.08, decay=14.0, gain=0.3),
         noise_burst(0.04, decay=30.0, low_pass=2.0, gain=0.1),
     ),
+    # Refusal. A short fall, where `ui_select` is a short rise — the pair has to
+    # be tellable apart with the music up and without looking, because "that did
+    # not work" is the whole message.
+    "ui_deny.wav": lambda: tone(0.11, 300, 170, attack=0.06, decay=13.0, gain=0.28),
+    # ---- the bow
+    #
+    # The draw is the sound that has to carry information: it plays at full
+    # draw, and it is how the player knows the shot is ready without watching a
+    # meter. So it rises and it is nearly clean — everything else in this bank
+    # is noise, and a tone cuts through a fight.
+    "bow_draw.wav": lambda: mix(
+        tone(0.13, 240, 430, attack=0.18, decay=7.0, gain=0.26),
+        noise_burst(0.1, attack=0.4, decay=16.0, low_pass=4.0, gain=0.09),
+    ),
+    # The loose is the opposite: mostly air, over in a blink, and pitched well
+    # above the sword's swing so a bow never sounds like a blade.
+    "bow_loose.wav": lambda: mix(
+        noise_burst(0.07, attack=0.05, decay=30.0, low_pass=1.25, gain=0.34),
+        tone(0.05, 900, 380, decay=28.0, gain=0.16),
+    ),
+    # An arrow into a wall or into the dirt: dry, wooden, no body under it. The
+    # sound of a shot that missed, which the player should be able to hear.
+    "arrow_miss.wav": lambda: mix(
+        noise_burst(0.05, decay=34.0, low_pass=1.8, gain=0.24),
+        tone(0.045, 520, 260, decay=30.0, gain=0.14),
+    ),
 }
 
 

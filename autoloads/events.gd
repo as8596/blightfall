@@ -48,6 +48,15 @@ signal player_equipment_changed(worn: Dictionary)
 ## Which hotbar slot the tool verb will use.
 signal player_hotbar_selected(slot: int)
 
+## Which weapon is in hand, what it is, and how many arrows are behind it.
+##
+## Separate from `player_equipment_changed` because they answer different
+## questions: that one fires when what you are *wearing* changes, and this one
+## fires when you press the swap key or spend an arrow — neither of which moves
+## anything between slots. A HUD that watched only the first would show a full
+## quiver all the way down to empty.
+signal player_weapon_changed(slot: int, weapon: ItemData, ammo: int)
+
 ## A slot was pressed and nothing happened. The HUD flashes it.
 signal player_item_refused(slot: int)
 

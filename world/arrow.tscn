@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://world/arrow.gd" id="1_arrow"]
+[ext_resource type="Texture2D" path="res://art/sprites/props/arrow_flight.png" id="2_arrow_art"]
+
+[sub_resource type="RectangleShape2D" id="Rect_arrow"]
+size = Vector2(16, 6)
+
+[node name="Arrow" type="Area2D"]
+collision_layer = 4
+collision_mask = 65
+script = ExtResource("1_arrow")
+one_hit_per_target = true
+impact_sfx = &"impact_light"
+
+[node name="Visual" type="Sprite2D" parent="."]
+texture = ExtResource("2_arrow_art")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(6, 0)
+shape = SubResource("Rect_arrow")

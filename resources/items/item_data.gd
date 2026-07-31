@@ -25,6 +25,13 @@ enum Kind {
 	## inserted, so the `kind = 0/1/2` already written into every `.tres` still
 	## means what it meant.
 	GEAR,
+	## Spent by a weapon rather than by you. Arrows.
+	##
+	## Not `CONSUMABLE`, and the difference is the hotbar: a consumable is
+	## something the tool verb can use, and an arrow used by hand does nothing.
+	## Giving ammo its own kind is what keeps it off the bar and out of
+	## `is_quick_usable`, without a special case anywhere that reads a kind.
+	AMMO,
 }
 
 ## Where this goes when it is worn rather than carried. `NONE` is everything
@@ -40,12 +47,21 @@ enum Slot {
 	## Boots. Appended rather than slotted in next to ARMOUR, so every `slot = n`
 	## already written into a `.tres` still means what it meant.
 	BOOTS,
+	## The bow. Its own slot rather than sharing `WEAPON`, because the player
+	## carries a sword *and* a bow and swaps between them with a keypress — one
+	## slot would make that swap a trip to the menu, which is not a thing anyone
+	## does mid-fight. Appended, same reason as BOOTS.
+	RANGED,
 }
 
 ## The worn slots, in the order they are shown. One list, because there were
 ## three copies of it and a fourth slot would have been three edits and a bug in
 ## whichever one got missed.
-const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT]
+const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.RANGED, Slot.ARMOUR, Slot.BOOTS,
+	Slot.TOOL_SLOT]
+
+## The two the swap key toggles between, in the order it cycles them.
+const HAND_SLOTS: Array = [Slot.WEAPON, Slot.RANGED]
 
 @export var id: StringName = &""
 @export var display_name: String = ""
@@ -81,6 +97,11 @@ const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT
 ## good. See `EquipmentComponent`.
 @export var modifiers: Dictionary = {}
 
+## What this fires, if it fires anything. Null for everything that is not a bow,
+## which is everything but two of them — see `RangedWeaponData` for why the
+## numbers live over there rather than as nine more exports on this.
+@export var ranged: RangedWeaponData
+
 @export_group("Consumable")
 ## Hearts restored. GDD §5 gives the player 6 to start and 12 at most, so this
 ## is in whole hearts rather than a percentage — "two hearts" is a thing you can
@@ -90,6 +111,18 @@ const EQUIP_SLOTS: Array = [Slot.WEAPON, Slot.ARMOUR, Slot.BOOTS, Slot.TOOL_SLOT
 
 func is_equippable() -> bool:
 	return slot != Slot.NONE
+
+
+## Whether this is a bow: something the draw state can put in the player's hands.
+##
+## Asks for the data rather than for the slot, so a bow with no `ranged` block on
+## it is inert instead of being a weapon that silently fires nothing.
+func is_ranged() -> bool:
+	return slot == Slot.RANGED and ranged != null
+
+
+func is_ammo() -> bool:
+	return kind == Kind.AMMO
 
 
 ## Whether this can be bought or sold at all.
@@ -105,6 +138,7 @@ func is_tradeable() -> bool:
 static func slot_name(which: Slot) -> String:
 	match which:
 		Slot.WEAPON: return "Weapon"
+		Slot.RANGED: return "Bow"
 		Slot.ARMOUR: return "Armour"
 		Slot.TOOL_SLOT: return "Tool"
 		Slot.BOOTS: return "Boots"

@@ -22,6 +22,13 @@ const STREAMS: Dictionary = {
 	&"voice_c": preload("res://audio/sfx/voice_c.wav"),
 	&"ui_move": preload("res://audio/sfx/ui_move.wav"),
 	&"ui_select": preload("res://audio/sfx/ui_select.wav"),
+	&"ui_deny": preload("res://audio/sfx/ui_deny.wav"),
+	# The bow. `bow_draw` plays at full draw, not at the start of one — it is the
+	# cue that the shot is ready, and a cue that fires when you begin tells you
+	# nothing you did not already know.
+	&"bow_draw": preload("res://audio/sfx/bow_draw.wav"),
+	&"bow_loose": preload("res://audio/sfx/bow_loose.wav"),
+	&"arrow_miss": preload("res://audio/sfx/arrow_miss.wav"),
 }
 
 ## The voice blips, in cycle order. Named here rather than built from a prefix

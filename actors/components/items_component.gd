@@ -45,6 +45,14 @@ static func is_potion_slot(slot: int) -> bool:
 ## Filled from the inspector for a starting kit.
 @export var starting_items: Array[ItemData] = []
 
+## How many of each of those. Short or empty means one apiece, which is what
+## every entry meant before this existed.
+##
+## A parallel array rather than a list of pairs, matching `items`/`counts` below
+## — and it exists because arrows arrived: listing a stackable fifteen times to
+## start with fifteen of them is not a kit, it is a mistake waiting to be made.
+@export var starting_counts: Array[int] = []
+
 ## Parallel arrays rather than an array of dictionaries: a slot is an item and a
 ## count, and every read site wants one or the other.
 var items: Array[ItemData] = []
@@ -58,9 +66,13 @@ var selected: int = 0
 func _ready() -> void:
 	items.resize(slots)
 	counts.resize(slots)
-	for item in starting_items:
-		if item != null:
-			add(item)
+	for i in starting_items.size():
+		var item := starting_items[i]
+		if item == null:
+			continue
+		var amount: int = starting_counts[i] if i < starting_counts.size() else 1
+		@warning_ignore("return_value_discarded")
+		add(item, maxi(amount, 1))
 
 
 ## Point at `slot`, wrapping. Wrapping rather than clamping because the wheel
@@ -116,6 +128,47 @@ func is_empty() -> bool:
 	for item in items:
 		if item != null:
 			return false
+	return true
+
+
+## How many of `id` are carried, across every slot holding it.
+##
+## By id rather than by slot, because ammo is spent by a weapon and the weapon
+## has no idea which slot the arrows ended up in — nor should it, since a partial
+## stack and a full one are two slots holding the same thing.
+func count_of(id: StringName) -> int:
+	var total := 0
+	for i in items.size():
+		if items[i] != null and items[i].id == id:
+			total += counts[i]
+	return total
+
+
+## Spend `amount` of `id`, drawing from the smallest stacks first. Returns false
+## and takes nothing if there are not that many.
+##
+## **All or nothing.** A shot that consumed the last two of the three arrows it
+## needed and then failed would be a shot that cost the player ammunition and
+## gave them nothing, which is the sort of thing that gets noticed a week later
+## as "arrows disappear sometimes".
+##
+## Smallest first because the alternative leaves a trail of one-arrow stacks
+## across the pack, each one occupying a slot.
+func take(id: StringName, amount: int = 1) -> bool:
+	if amount <= 0:
+		return true
+	if count_of(id) < amount:
+		return false
+	var order: Array[int] = []
+	for i in items.size():
+		if items[i] != null and items[i].id == id:
+			order.append(i)
+	order.sort_custom(func(a: int, b: int) -> bool: return counts[a] < counts[b])
+	var left := amount
+	for slot in order:
+		if left <= 0:
+			break
+		left -= remove(slot, mini(counts[slot], left))
 	return true
 
 

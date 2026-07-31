@@ -103,7 +103,28 @@ TRADE_GOODS = {
     "rags": 3,
 }
 
-KIND_CONSUMABLE, KIND_TOOL, KIND_KEY, KIND_GEAR = 0, 1, 2, 3
+KIND_CONSUMABLE, KIND_TOOL, KIND_KEY, KIND_GEAR, KIND_AMMO = 0, 1, 2, 3, 4
+
+SLOT_RANGED = 5
+
+# **Bows are priced off what they shoot, not off what they wear.** A bow grants
+# no stat modifiers at all, so the gear rule above would floor every one of them
+# at GEAR_FLOOR and a recurve would cost the same as a hood.
+#
+# Damage at a full draw is the number that matters, and the two knobs either side
+# of it pull in opposite directions: reach is worth paying for, and a long draw
+# is worth paying *less* for, because time spent standing still is the price the
+# player pays every shot. Those two roughly cancel on a well-made bow, which is
+# the point — a bow that is only better because it is slower should not cost
+# more.
+BOW_PER_DAMAGE = 13
+BOW_PER_100_RANGE = 9
+BOW_PER_DRAW_SECOND = -40
+
+# What one arrow is worth. Deliberately small and deliberately not free: at three
+# gold a quiver of forty is a meal and a half, which is enough to be a decision
+# before a long trip and not enough to be a tax on every fight.
+AMMO_VALUE = 3
 
 
 def field(text, name, default=""):
@@ -120,10 +141,38 @@ def modifiers_of(text):
             for m in re.finditer(r'&"(\w+)"\s*:\s*(-?\d+)', hit.group(1))}
 
 
+def bow_price(text):
+    """Read the bow's own numbers out of the `RangedWeaponData` it points at."""
+    hit = re.search(r'^ranged = ExtResource\("[^"]+"\)$', text, re.M)
+    if not hit:
+        return None
+    path = re.search(r'path="res://(resources/combat/[^"]+)"[^\n]*id="3_ranged"', text)
+    if not path:
+        return None
+    full = os.path.join(ROOT, path.group(1))
+    if not os.path.exists(full):
+        return None
+    with open(full, encoding="utf-8") as handle:
+        bow = handle.read()
+    damage = float(field(bow, "damage", "0") or 0)
+    reach = float(field(bow, "range_px", "0") or 0)
+    draw = float(field(bow, "draw_time", "0") or 0)
+    total = (damage * BOW_PER_DAMAGE
+             + reach / 100.0 * BOW_PER_100_RANGE
+             + draw * BOW_PER_DRAW_SECOND)
+    return max(int(round(total)), GEAR_FLOOR)
+
+
 def price_of(item_id, text):
     kind = int(field(text, "kind", "0") or 0)
     if kind == KIND_KEY:
         return 0
+    if kind == KIND_AMMO:
+        return AMMO_VALUE
+    if int(field(text, "slot", "0") or 0) == SLOT_RANGED:
+        priced = bow_price(text)
+        if priced is not None:
+            return priced
     if kind == KIND_GEAR:
         # Negative modifiers are a real cost and are allowed to pull the price
         # down — a hood that slows you is worth less than one that does not.

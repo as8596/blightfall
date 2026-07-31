@@ -68,6 +68,21 @@ const SLOT_SELECTED := Color(0.95, 0.88, 0.70)
 ## Extra space between the numbered ten and the reserved potion pair.
 const POTION_GAP: float = 26.0
 
+## The weapon plate: what is in hand, and what is behind it.
+##
+## **Above the health bar rather than beside the hotbar.** "What am I holding"
+## is the same kind of question as "how hurt am I" — something you check between
+## fights and glance at during one — and the left margin is where that stack
+## already lives. Next to the hotbar it would read as a thirteenth slot, which
+## it is not: nothing selects it and nothing goes in it.
+const WEAPON_SIZE: float = 46.0
+const WEAPON_GAP: float = 8.0
+const WEAPON_BACK := Color(0.13, 0.11, 0.10, 0.82)
+const WEAPON_EDGE := Color(0.42, 0.35, 0.26)
+## The edge turns warm when the quiver is empty, which is the one state where
+## pressing attack does nothing and the player deserves to have been told.
+const WEAPON_DRY := Color(0.86, 0.45, 0.30)
+
 var health: int = 0
 var max_health: int = 0
 var carried: int = 0
@@ -94,6 +109,14 @@ var xp_needed: int = 0
 var level: int = 1
 var _xp_rect: Rect2 = Rect2()
 var _xp_hovered: bool = false
+
+## What the swap key has forward, pushed from the player (see
+## `Events.player_weapon_changed`). Cached rather than fetched for the reason
+## every other value here is: the HUD reads the bus, and reaching into
+## `current_scene` for a player breaks the moment there isn't one.
+var weapon_slot: int = ItemData.Slot.WEAPON
+var weapon_item: ItemData = null
+var quiver: int = 0
 
 ## Off for a title screen or a cutscene. Nothing sets it yet.
 var enabled: bool = true:
@@ -126,6 +149,7 @@ func _ready() -> void:
 	Events.player_gold_changed.connect(func(_amount: int) -> void: _canvas.queue_redraw())
 	Events.player_materials_changed.connect(func(contents: Dictionary) -> void:
 		materials = contents)
+	Events.player_weapon_changed.connect(_on_weapon)
 	Events.player_leveled.connect(_on_leveled)
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
@@ -148,6 +172,13 @@ func _on_inventory(units: int, limit: int) -> void:
 func _on_items(entries: Array, counts: Array) -> void:
 	slot_items = entries.duplicate()
 	slot_counts = counts.duplicate()
+	_canvas.queue_redraw()
+
+
+func _on_weapon(slot: int, weapon: ItemData, ammo: int) -> void:
+	weapon_slot = slot
+	weapon_item = weapon
+	quiver = ammo
 	_canvas.queue_redraw()
 
 
@@ -204,8 +235,10 @@ func _draw_hud() -> void:
 	# Health first, then experience beneath it — so the stack still ends level
 	# with the satchel on the far side rather than hanging below it.
 	var xp_top := size.y - MARGIN.y - XP_SIZE.y
-	_draw_health(Vector2(MARGIN.x, xp_top - XP_GAP - HEALTH_SIZE.y))
+	var health_top := xp_top - XP_GAP - HEALTH_SIZE.y
+	_draw_health(Vector2(MARGIN.x, health_top))
 	_draw_experience(Vector2(MARGIN.x, xp_top))
+	_draw_weapon(Vector2(MARGIN.x, health_top - WEAPON_GAP - WEAPON_SIZE))
 	_draw_hotbar(size)
 	var satchel := Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y)
 	_draw_satchel(satchel)
@@ -384,6 +417,51 @@ func _draw_level_banner(screen: Vector2) -> void:
 		_canvas.draw_string(font, Vector2((screen.x - w) * 0.5, y), line,
 			HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, Color(colour, alpha))
 		y += line_height
+
+
+## What the swap key has forward, and how many arrows are behind it.
+##
+## Two weapons are worn and one is in hand, and the only way to tell which
+## without this is to press attack and see what happens. The arrow count sits on
+## the plate rather than anywhere else because it is a fact about the bow: with
+## the sword out there is nothing to count, and a quiver readout that hangs
+## around while you are swinging is a number that means nothing four fifths of
+## the time.
+##
+## The key hint is drawn the same way the hotbar draws its numbers, and for the
+## same reason — the binding is the affordance, and nothing else in the game
+## teaches that Q exists.
+func _draw_weapon(origin: Vector2) -> void:
+	if weapon_item == null:
+		return
+	var font := ThemeDB.fallback_font
+	var box := Rect2(origin, Vector2(WEAPON_SIZE, WEAPON_SIZE))
+	var bow := weapon_slot == int(ItemData.Slot.RANGED)
+	var dry := bow and quiver <= 0
+	_canvas.draw_rect(box, WEAPON_BACK)
+	_canvas.draw_rect(box, WEAPON_DRY if dry else WEAPON_EDGE, false, 2.0)
+
+	if weapon_item.icon != null:
+		var pad := 5.0
+		# Dimmed with an empty quiver, so the plate reads as unusable at the same
+		# glance the warm edge does — colour alone is not a signal everyone gets.
+		_canvas.draw_texture_rect(weapon_item.icon,
+			Rect2(origin + Vector2(pad, pad),
+				Vector2(WEAPON_SIZE - pad * 2.0, WEAPON_SIZE - pad * 2.0)),
+			false, Color(1, 1, 1, 0.45) if dry else Color.WHITE)
+
+	_canvas.draw_string(font, origin + Vector2(4.0, 13.0), "Q",
+		HORIZONTAL_ALIGNMENT_LEFT, -1.0, 13, Color(0.75, 0.70, 0.62, 0.85))
+
+	if not bow:
+		return
+	var label := str(quiver)
+	var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+	var at := origin + Vector2(WEAPON_SIZE - w - 4.0, WEAPON_SIZE - 5.0)
+	_canvas.draw_string(font, at + Vector2(1, 1), label, HORIZONTAL_ALIGNMENT_LEFT,
+		-1.0, FONT_SIZE, Color(0.05, 0.04, 0.04, 0.9))
+	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE,
+		WEAPON_DRY if dry else TEXT)
 
 
 ## What is in the purse, tucked under the satchel bar.

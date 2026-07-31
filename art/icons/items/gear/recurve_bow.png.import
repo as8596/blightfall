@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cny33lmc8lw20"
-path="res://.godot/imported/medieval_bow_5.png-50d8019f408459212bf8c55b49c31291.ctex"
+uid="uid://bug11ocyg5oia"
+path="res://.godot/imported/recurve_bow.png-f2eb44bade23543e64fef3b552762bd1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/parked/medieval_bow_5.png"
-dest_files=["res://.godot/imported/medieval_bow_5.png-50d8019f408459212bf8c55b49c31291.ctex"]
+source_file="res://art/icons/items/gear/recurve_bow.png"
+dest_files=["res://.godot/imported/recurve_bow.png-f2eb44bade23543e64fef3b552762bd1.ctex"]
 
 [params]
 

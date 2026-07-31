@@ -36,6 +36,11 @@ extends CharacterBody2D
 @export var hurt_knockback_distance: float = 88.0
 @export var combo: PlayerComboData
 
+@export_group("Ranged")
+## What a loosed arrow is. Set in `player.tscn`; without it the bow refuses to
+## draw rather than drawing and firing nothing.
+@export var arrow_scene: PackedScene
+
 @export_group("Haul")
 ## Dropped where the player falls, carrying whatever they were holding.
 @export var haul_cache_scene: PackedScene
@@ -92,6 +97,17 @@ var charge_ready: bool = false
 const CHARGE_TIME: float = 0.45
 var combo_window_remaining: float = 0.0
 
+## Which hand the attack verb comes out of: `Slot.WEAPON` or `Slot.RANGED`.
+##
+## **Two slots and a toggle, rather than one slot you re-equip.** Both weapons
+## are worn at once and the swap is a keypress, because swapping through the
+## equipment menu is a thing nobody does with a wolf on them — and a bow you can
+## only reach between fights is a bow that never gets used in one.
+##
+## Tracked on the player rather than in `EquipmentComponent`, because it is not a
+## fact about what you are wearing. You are wearing both.
+var drawn_slot: ItemData.Slot = ItemData.Slot.WEAPON
+
 var _hitbox_shape: CollisionShape2D
 var _spawn_position: Vector2
 
@@ -125,7 +141,11 @@ func _ready() -> void:
 		Events.player_inventory_changed.emit(units, limit)
 		Events.player_materials_changed.emit(inventory.contents.duplicate()))
 	items.changed.connect(func() -> void:
-		Events.player_items_changed.emit(items.items, items.counts))
+		Events.player_items_changed.emit(items.items, items.counts)
+		# The quiver readout is a fact about the pack, so it moves when the pack
+		# does — buying arrows, looting them, dropping them.
+		Events.player_weapon_changed.emit(drawn_slot, equipment.item_in(drawn_slot),
+			arrows_left()))
 	items.refused.connect(func(slot: int) -> void:
 		Events.player_item_refused.emit(slot))
 	items.selection_changed.connect(func(slot: int) -> void:
@@ -136,7 +156,14 @@ func _ready() -> void:
 	experience.leveled.connect(func(level: int) -> void:
 		Events.player_leveled.emit(level))
 	equipment.changed.connect(func() -> void:
+		# Taking off the thing you are holding puts the other hand forward. Left
+		# alone, `drawn_slot` would go on naming an empty slot and every click
+		# would do nothing with no explanation.
+		if equipment.item_in(drawn_slot) == null:
+			drawn_slot = ItemData.Slot.WEAPON
 		Events.player_equipment_changed.emit(equipment.worn)
+		Events.player_weapon_changed.emit(drawn_slot, equipment.item_in(drawn_slot),
+			arrows_left())
 		# Worn gear writes stats, so the sheet has to be re-read after it moves.
 		Events.player_stats_changed.emit(stat_block()))
 	hurtbox.hit_taken.connect(_on_hit_taken)
@@ -161,6 +188,13 @@ func _ready() -> void:
 func _tick_charge(delta: float) -> void:
 	if combo == null or combo.heavy == null:
 		return
+	# Not while the bow is out. The hold means something else there — it is the
+	# draw — and a charge quietly winding up underneath it would fire a heavy
+	# swing the instant the player swapped back to the sword.
+	if drawn_slot == ItemData.Slot.RANGED:
+		charge = 0.0
+		charge_ready = false
+		return
 	if input.intent.attack_held and health.is_alive():
 		charge += delta
 		if not charge_ready and charge >= CHARGE_TIME:
@@ -182,6 +216,60 @@ func consume_heavy() -> bool:
 	return true
 
 
+# ------------------------------------------------------------------- the bow
+
+## The bow, if one is worn and it is the thing in hand. Null otherwise, which is
+## the single question every caller actually wants answered: *does attack shoot?*
+func drawn_bow() -> ItemData:
+	if drawn_slot != ItemData.Slot.RANGED:
+		return null
+	var item := equipment.item_in(ItemData.Slot.RANGED)
+	return item if item != null and item.is_ranged() else null
+
+
+## Swap which weapon the attack verb comes out of.
+##
+## Refuses when the slot it would swap to is empty, and says so by returning
+## false — a toggle that silently puts an empty hand forward would make the next
+## click do nothing for a reason the player cannot see.
+func toggle_weapon() -> bool:
+	var wanted: ItemData.Slot = ItemData.Slot.RANGED \
+		if drawn_slot == ItemData.Slot.WEAPON else ItemData.Slot.WEAPON
+	if equipment.item_in(wanted) == null:
+		Sfx.play(&"ui_deny", -6.0)
+		return false
+	drawn_slot = wanted
+	# The wind-up belongs to whatever was in hand a moment ago. Carrying it
+	# across the swap would let you charge a heavy and loose it as an arrow.
+	charge = 0.0
+	charge_ready = false
+	next_combo_index = 0
+	combo_window_remaining = 0.0
+	Sfx.play(&"ui_select", -6.0)
+	Events.player_weapon_changed.emit(drawn_slot, equipment.item_in(drawn_slot), arrows_left())
+	return true
+
+
+## How many arrows the drawn bow could fire. Zero when there is no bow.
+func arrows_left() -> int:
+	var bow := drawn_bow()
+	if bow == null:
+		return 0
+	return items.count_of(bow.ranged.ammo_id)
+
+
+## Take one arrow out of the pack. False when there were none, which is what
+## stops the draw state before it starts.
+func spend_arrow() -> bool:
+	var bow := drawn_bow()
+	if bow == null:
+		return false
+	if not items.take(bow.ranged.ammo_id, 1):
+		return false
+	Events.player_weapon_changed.emit(drawn_slot, bow, arrows_left())
+	return true
+
+
 ## Push current values onto the bus for anything that has just started listening.
 func _broadcast_state() -> void:
 	Events.player_health_changed.emit(health.current, health.max_health)
@@ -193,6 +281,7 @@ func _broadcast_state() -> void:
 	Events.player_stats_changed.emit(stat_block())
 	Events.player_xp_changed.emit(experience.current, experience.needed(), experience.level)
 	Events.player_equipment_changed.emit(equipment.worn)
+	Events.player_weapon_changed.emit(drawn_slot, equipment.item_in(drawn_slot), arrows_left())
 
 
 func _on_enemy_died(enemy: Node) -> void:
@@ -252,8 +341,21 @@ func _process(delta: float) -> void:
 			next_combo_index = 0
 
 	_tick_charge(delta)
+	_try_swap()
 	_try_interact()
 	_try_hotbar()
+
+
+## The weapon toggle. Allowed from standing, walking and the recovery of a swing
+## — the same places the hotbar is — but never mid-draw or mid-roll, where the
+## thing in your hands is already committed to something.
+func _try_swap() -> void:
+	if not (state_machine.is_in(&"Idle") or state_machine.is_in(&"Move")):
+		return
+	if not input.consume_swap():
+		return
+	@warning_ignore("return_value_discarded")
+	toggle_weapon()
 
 
 ## Interacting is handled here rather than in a state, because it is not a state
@@ -464,6 +566,7 @@ func save_data() -> Dictionary:
 		"items": items.save_data(),
 		"experience": experience.save_data(),
 		"equipment": equipment.save_data(),
+		"drawn_slot": int(drawn_slot),
 	}
 
 
@@ -497,6 +600,12 @@ func load_data(data: Dictionary) -> void:
 	if worn is Dictionary:
 		equipment.load_data(worn, Items.all())
 
+	# After the equipment, so a save that had the bow out can be checked against
+	# what actually got restored — and falls back to the sword if it did not.
+	drawn_slot = SaveGame.read_int(data, "drawn_slot", int(ItemData.Slot.WEAPON)) as ItemData.Slot
+	if not ItemData.HAND_SLOTS.has(drawn_slot) or equipment.item_in(drawn_slot) == null:
+		drawn_slot = ItemData.Slot.WEAPON
+
 	# Whatever the player was doing when they saved, they are standing still now.
 	motion_velocity = Vector2.ZERO
 	velocity = Vector2.ZERO
@@ -506,6 +615,8 @@ func load_data(data: Dictionary) -> void:
 	next_combo_index = 0
 	combo_window_remaining = 0.0
 	dodge_cooldown_remaining = 0.0
+	charge = 0.0
+	charge_ready = false
 	if health.is_alive():
 		hurtbox.disabled = false
 		input.enabled = true

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwodvsubgb1ul"
-path="res://.godot/imported/cracked_wolf_fang.png-586e8a2a6d2081c454814df22dd77aa9.ctex"
+uid="uid://dhujn4hodkr2d"
+path="res://.godot/imported/hunting_bow.png-caa64bd062c2f93836dcc157a5986b69.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/icons/items/trade/cracked_wolf_fang.png"
-dest_files=["res://.godot/imported/cracked_wolf_fang.png-586e8a2a6d2081c454814df22dd77aa9.ctex"]
+source_file="res://art/icons/items/gear/hunting_bow.png"
+dest_files=["res://.godot/imported/hunting_bow.png-caa64bd062c2f93836dcc157a5986b69.ctex"]
 
 [params]
 

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ShopData" load_steps=11 format=3]
+[gd_resource type="Resource" script_class="ShopData" load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://resources/shops/shop_data.gd" id="1_shop"]
 [ext_resource type="Resource" path="res://resources/items/defs/bread.tres" id="2_bread"]
@@ -10,12 +10,14 @@
 [ext_resource type="Resource" path="res://resources/items/defs/salve.tres" id="8_salve"]
 [ext_resource type="Resource" path="res://resources/items/defs/wrapped_boots.tres" id="9_wrapped"]
 [ext_resource type="Resource" path="res://resources/items/defs/riding_boots.tres" id="10_riding"]
+[ext_resource type="Resource" path="res://resources/items/defs/arrow.tres" id="11_arrow"]
+[ext_resource type="Resource" path="res://resources/items/defs/hunting_bow.tres" id="12_bow"]
 
 [resource]
 script = ExtResource("1_shop")
 id = &"sundries"
 display_name = "Tallow & Son"
 greeting = "Same prices as everyone. Ask if you don't see it."
-stock = Array[Resource]([ExtResource("2_bread"), ExtResource("3_cheese"), ExtResource("4_roots"), ExtResource("5_pies"), ExtResource("6_honey"), ExtResource("7_stew"), ExtResource("8_salve"), ExtResource("9_wrapped"), ExtResource("10_riding")])
+stock = Array[Resource]([ExtResource("2_bread"), ExtResource("3_cheese"), ExtResource("4_roots"), ExtResource("5_pies"), ExtResource("6_honey"), ExtResource("7_stew"), ExtResource("8_salve"), ExtResource("9_wrapped"), ExtResource("10_riding"), ExtResource("11_arrow"), ExtResource("12_bow")])
 markup = 1.0
 margin = 0.6

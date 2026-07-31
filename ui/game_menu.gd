@@ -286,7 +286,7 @@ func _refresh_inventory() -> void:
 
 	var line := "  Satchel   %d / %d" % [Hud.carried, Hud.capacity]
 	if materials.is_empty():
-		line += "      (empty — materials are what the town is rebuilt out of)"
+		line += "      (empty - materials are what the town is rebuilt out of)"
 	else:
 		for id in Materials.sorted(materials):
 			line += "      %s x%d" % [Materials.name_of(id), int(materials[id])]
@@ -370,9 +370,9 @@ func _journal_text() -> String:
 		var tag := ""
 		match state:
 			Quests.State.READY:
-				tag = "  " + _key("— ready, go back")
+				tag = "  " + _key("- ready, go back")
 			Quests.State.DONE:
-				tag = "  " + _aside("— done")
+				tag = "  " + _aside("- done")
 		lines.append("  %s%s" % [_named(quest.title), tag])
 		if Quests.completions(quest.id) > 1:
 			lines.append("  " + _aside("finished %d times" % Quests.completions(quest.id)))
@@ -534,7 +534,11 @@ func _build_equipment() -> Control:
 		var label := Label.new()
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.custom_minimum_size = Vector2(88, 0)
-		label.clip_text = true
+		# **Wrapped, not clipped.** "Hunting bow" is one character wider than the
+		# box and came out as "lunting bou" — clipped at both ends, which does not
+		# read as a truncation, it reads as a different word. Two short lines under
+		# a paper-doll slot is fine; a bow you cannot name is not.
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		label.add_theme_font_size_override("font_size", TypeScale.SMALL)
 		label.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
 		row.add_child(label)

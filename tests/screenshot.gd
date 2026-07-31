@@ -23,6 +23,13 @@ var _pull_enemies_close: bool = false
 var _attack: bool = false
 var _attack_delay: int = 6
 
+## `--bow=N` swaps to the bow and holds the draw for N physics ticks before
+## capturing, so the drawn-bow frame and the HUD's quiver plate can be shot.
+## `--loose` lets go afterwards and waits for the arrow to be in the air, which
+## is the only way to see the projectile in a still.
+var _bow: int = -1
+var _loose: bool = false
+
 ## `--anim` assigns the placeholder animation set, so the pipeline can be
 ## checked without changing what the project ships with by default.
 var _use_placeholder_animations: bool = false
@@ -140,6 +147,12 @@ func _capture() -> void:
 			var at := arg.trim_prefix("--pointer=").split(",")
 			if at.size() == 2:
 				_pointer = Vector2(float(at[0]), float(at[1]))
+		elif arg.begins_with("--bow="):
+			_bow = arg.trim_prefix("--bow=").to_int()
+		elif arg.begins_with("--bow"):
+			_bow = 30
+		elif arg.begins_with("--loose"):
+			_loose = true
 		elif arg.begins_with("--attack="):
 			_attack = true
 			_attack_delay = arg.trim_prefix("--attack=").to_int()
@@ -278,6 +291,24 @@ func _capture() -> void:
 		# Two full frames: one for the warp to land, one for whatever polls it.
 		await get_tree().process_frame
 		await get_tree().process_frame
+
+	if _bow >= 0 and player != null:
+		# Straight at the toggle rather than through the key, for the same reason
+		# `--shop` goes straight to the window: what this is for is a picture of
+		# the bow, and routing it through an input binding would make the shot
+		# quietly wrong the day somebody rebinds Q.
+		if player.drawn_bow() == null:
+			@warning_ignore("return_value_discarded")
+			player.toggle_weapon()
+		player.aim_override = Vector2.RIGHT
+		player.facing = Vector2.RIGHT
+		Input.action_press(&"attack")
+		await _wait_ticks(maxi(_bow, 1))
+		if _loose:
+			Input.action_release(&"attack")
+			# Long enough for the arrow to clear the player and be visible, short
+			# enough that it is still on screen.
+			await _wait_ticks(10)
 
 	if _attack and player != null:
 		# The swing follows the cursor, and a headless cursor sits at (0, 0) —

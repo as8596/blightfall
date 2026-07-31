@@ -16,6 +16,15 @@ func try_common_transitions(allow_attack: bool = true, allow_dodge: bool = true)
 	if allow_dodge and player.can_dodge() and player.input.consume_dodge():
 		state_machine.transition_to(&"Dodge")
 		return true
+	# **What attack means depends on what is in hand.** One button, two verbs,
+	# decided here rather than inside the states — so a state that allows
+	# attacking gets whichever one the player has out, and neither state has to
+	# know the other exists.
+	if allow_attack and player.drawn_bow() != null:
+		if player.input.consume_attack():
+			state_machine.transition_to(&"Draw")
+			return true
+		return false
 	# Letting go of a wound-up hold, before the ordinary press check — a release
 	# is not a press, so the two can never both fire, but reading the heavy first
 	# keeps the intent obvious.
