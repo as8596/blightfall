@@ -37,8 +37,12 @@ const LAYER: int = 107
 ## Above `Dialogue` (106), because a shop is opened *from* a conversation and
 ## has to cover it. Below `GameMenu` (108) and `PauseMenu` (110), because both
 ## of those are ways out and a way out that draws underneath is a trap.
-const ROW := 40
-const ICON := 28
+## A slot, and the icon inside it. Grid rather than list: a list showed nine
+## lines and scrolled, and a shop you scroll is a shop where you forget what was
+## above the fold. Forty-odd slots fit in the same box.
+const SLOT := 56
+const ICON := 40
+const COLUMNS := 5
 ## The window is authored against a 1280-wide interface, so this leaves a margin
 ## either side at the design size and simply centres on anything larger.
 const WIDTH := 1120.0
@@ -55,6 +59,10 @@ const TEXT := Color(0.92, 0.88, 0.80)
 const DIM := Color(0.54, 0.50, 0.45)
 const REFUSED := Color(0.78, 0.48, 0.42)
 const CREDIT := Color(0.58, 0.78, 0.52)
+const SLOT_EDGE := Color(0.30, 0.26, 0.20)
+const SLOT_EDGE_HOT := Color(0.72, 0.61, 0.39)
+const BUBBLE_FILL := Color(0.07, 0.06, 0.06, 0.97)
+const BUBBLE_WIDTH := 300.0
 
 var _open: bool = false
 var _shop: ShopData
@@ -64,10 +72,11 @@ var _root: Control
 var _title: Label
 var _greeting: Label
 var _gold: Label
-var _buy_rows: VBoxContainer
-var _sell_rows: VBoxContainer
-var _cart_rows: VBoxContainer
-var _detail: RichTextLabel
+var _buy_rows: GridContainer
+var _sell_rows: GridContainer
+var _cart_rows: GridContainer
+var _bubble: PanelContainer
+var _bubble_text: RichTextLabel
 var _total: Label
 var _confirm: Button
 var _note: Label
@@ -252,7 +261,6 @@ func _refresh() -> void:
 	_fill_sell()
 	_fill_cart()
 	_refresh_total()
-	_detail.text = _detail_text()
 	_note.text = _said if _said != "" else \
 		"Click to add. Shift-click for five. Click a cart line to take it back."
 	_note.add_theme_color_override("font_color", _note_colour if _said != "" else DIM)
@@ -290,7 +298,7 @@ func _fill_buy() -> void:
 		# Affordability is judged against the *whole cart*, not this row alone —
 		# a stew you cannot buy on its own is fine if the timber pays for it.
 		var live := Purse.amount() + _cart.credit(_shop) >= _cart.cost(_shop) + price
-		_buy_rows.add_child(_row(item.icon, item.display_name, price, live,
+		_buy_rows.add_child(_slot(item.icon, item.display_name, price, live,
 			item.id, in_cart,
 			func(n: int) -> void: _on_add_buy(item.id, n)))
 	if _buy_rows.get_child_count() == 0:
@@ -308,11 +316,11 @@ func _fill_sell() -> void:
 				haul.append(id)
 	if not haul.is_empty():
 		# Satchel first: it is the bulk of what comes home from a run and worth
-		# far more than anything in the pack.
-		_sell_rows.add_child(_group("Satchel"))
+		# far more than anything in the pack. No heading — a grid cannot carry
+		# one without breaking the row, and the bubble names every slot anyway.
 		for id in haul:
 			var left := _cart.left_of(id, _held(id))
-			_sell_rows.add_child(_row(Materials.icon_of(id), Materials.name_of(id),
+			_sell_rows.add_child(_slot(Materials.icon_of(id), Materials.name_of(id),
 				_shop.offer_for_material(id), true, id, 0,
 				func(n: int) -> void: _on_add_sell(id, n, true), left))
 
@@ -327,14 +335,11 @@ func _fill_sell() -> void:
 		if left <= 0:
 			continue
 		var wanted := Shops.why_not_sell(_shop, item) == ""
-		carried.append(_row(item.icon, item.display_name, _shop.offer_for(item),
+		carried.append(_slot(item.icon, item.display_name, _shop.offer_for(item),
 			wanted, item.id, 0,
 			func(n: int) -> void: _on_add_sell(item.id, n, false), left))
-	if not carried.is_empty():
-		if _sell_rows.get_child_count() > 0:
-			_sell_rows.add_child(_group("Pack"))
-		for row in carried:
-			_sell_rows.add_child(row)
+	for row in carried:
+		_sell_rows.add_child(row)
 
 	if _sell_rows.get_child_count() == 0:
 		_sell_rows.add_child(_empty("Nothing of yours she wants."))
@@ -347,28 +352,24 @@ func _fill_cart() -> void:
 		return
 
 	if not _cart.buys.is_empty():
-		_cart_rows.add_child(_group("Buying"))
 		for id in _cart.buys:
 			var item := Items.get_item(id)
 			var each := _shop.price_of(item)
 			var n := int(_cart.buys[id])
-			_cart_rows.add_child(_row(item.icon, item.display_name, each * n, true,
-				id, 0, func(taking: int) -> void: _on_unpick(id, "buy", taking), n))
+			_cart_rows.add_child(_slot(item.icon, item.display_name, each * n, true,
+				id, n, func(taking: int) -> void: _on_unpick(id, "buy", taking)))
 
-	var selling := not _cart.sell_materials.is_empty() or not _cart.sell_items.is_empty()
-	if selling:
-		_cart_rows.add_child(_group("Selling"))
 	for id in _cart.sell_materials:
 		var n := int(_cart.sell_materials[id])
-		_cart_rows.add_child(_row(Materials.icon_of(id), Materials.name_of(id),
-			_shop.offer_for_material(id) * n, true, id, 0,
-			func(taking: int) -> void: _on_unpick(id, "material", taking), n, CREDIT))
+		_cart_rows.add_child(_slot(Materials.icon_of(id), Materials.name_of(id),
+			_shop.offer_for_material(id) * n, true, id, n,
+			func(taking: int) -> void: _on_unpick(id, "material", taking), 0, CREDIT))
 	for id in _cart.sell_items:
 		var item := Items.get_item(id)
 		var n := int(_cart.sell_items[id])
-		_cart_rows.add_child(_row(item.icon, item.display_name,
-			_shop.offer_for(item) * n, true, id, 0,
-			func(taking: int) -> void: _on_unpick(id, "item", taking), n, CREDIT))
+		_cart_rows.add_child(_slot(item.icon, item.display_name,
+			_shop.offer_for(item) * n, true, id, n,
+			func(taking: int) -> void: _on_unpick(id, "item", taking), 0, CREDIT))
 
 
 func _detail_text() -> String:
@@ -389,70 +390,70 @@ func _detail_text() -> String:
 	return UiKit.item_detail(item, money)
 
 
-## One line of the ledger: icon, name, price. `live` is whether the click will
-## do anything — a dead row is dimmed and still shows its price, because "this
-## costs more than you have" is information and a hidden row is not.
+## One slot: an icon, a count, and a price tucked into the corner.
 ##
-## `held` appends "x3" to the name; `in_cart` appends "(2 in cart)". They are
-## separate because a buy row has no holding and a sell row has both.
-func _row(icon_texture: Texture2D, label: String, price: int, live: bool,
+## The name is deliberately **not** on the slot. That is the whole reason a grid
+## works here — the label is what forced a list, and moving it into the bubble
+## buys five times the density for the cost of pointing at something.
+##
+## The price stays, small and in the corner, because it is the one fact you scan
+## *across* items rather than read about one.
+func _slot(icon_texture: Texture2D, label: String, price: int, live: bool,
 		id: StringName, in_cart: int, on_click: Callable, held: int = 0,
 		price_colour: Color = GOLD) -> Control:
 	var panel := Panel.new()
-	panel.custom_minimum_size = Vector2(0, ROW)
+	panel.custom_minimum_size = Vector2(SLOT, SLOT)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel",
-		UiKit.frame(ROW_FILL if live else ROW_DEAD, Color(0, 0, 0, 0), 0, 0))
-
-	var line := HBoxContainer.new()
-	line.set_anchors_preset(Control.PRESET_FULL_RECT)
-	line.offset_left = 8.0
-	line.offset_right = -10.0
-	line.add_theme_constant_override("separation", 8)
-	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(line)
+		UiKit.frame(ROW_FILL if live else ROW_DEAD, SLOT_EDGE, 0, 1))
 
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(ICON, ICON)
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var inset := float(SLOT - ICON) * 0.5
+	icon.offset_left = inset
+	icon.offset_top = inset - 3.0
+	icon.offset_right = -inset
+	icon.offset_bottom = -inset - 3.0
 	icon.texture = icon_texture
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon.modulate = Color.WHITE if live else Color(0.5, 0.48, 0.45)
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_child(icon)
+	panel.add_child(icon)
 
-	var text := label
-	if held > 1:
-		text += "  x%d" % held
-	var name_label := Label.new()
-	name_label.text = text
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	name_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
-	name_label.add_theme_color_override("font_color", TEXT if live else DIM)
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_child(name_label)
-
-	if in_cart > 0:
-		var pending := Label.new()
-		pending.text = "%d in cart" % in_cart
-		pending.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		pending.add_theme_font_size_override("font_size", TypeScale.SMALL)
-		pending.add_theme_color_override("font_color", Color(0.60, 0.55, 0.40))
-		pending.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		line.add_child(pending)
-
+	# Bottom-right: what it costs. Bottom-left: how many you have, or how many
+	# are already in the cart. They never collide because no slot has both.
 	var cost := Label.new()
-	cost.text = "%d" % price if price > 0 else "—"
+	cost.text = "%d" % price if price > 0 else "-"
+	cost.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	cost.offset_left = -SLOT
+	cost.offset_top = -16.0
+	cost.offset_right = -3.0
+	cost.offset_bottom = 0.0
 	cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	cost.custom_minimum_size = Vector2(52, 0)
-	cost.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	cost.add_theme_font_override("font", UiKit.DISPLAY)
-	cost.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	cost.add_theme_font_size_override("font_size", TypeScale.TINY)
 	cost.add_theme_color_override("font_color", price_colour if live else DIM)
 	cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	line.add_child(cost)
+	panel.add_child(cost)
+
+	var corner := ""
+	if in_cart > 0:
+		corner = "+%d" % in_cart
+	elif held > 1:
+		corner = "%d" % held
+	if corner != "":
+		var tally := Label.new()
+		tally.text = corner
+		tally.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+		tally.offset_left = 3.0
+		tally.offset_top = -16.0
+		tally.offset_right = SLOT
+		tally.offset_bottom = 0.0
+		tally.add_theme_font_size_override("font_size", TypeScale.TINY)
+		tally.add_theme_color_override("font_color",
+			Color(0.72, 0.62, 0.40) if in_cart > 0 else TEXT)
+		tally.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(tally)
 
 	panel.gui_input.connect(func(event: InputEvent) -> void:
 		var click := event as InputEventMouseButton
@@ -460,23 +461,53 @@ func _row(icon_texture: Texture2D, label: String, price: int, live: bool,
 			on_click.call(5 if click.shift_pressed else 1))
 	panel.mouse_entered.connect(func() -> void:
 		_hovered = id
-		panel.add_theme_stylebox_override("panel", UiKit.frame(
-			ROW_HOVER if live else ROW_DEAD, Color(0, 0, 0, 0), 0, 0))
-		_detail.text = _detail_text())
+		panel.add_theme_stylebox_override("panel",
+			UiKit.frame(ROW_HOVER if live else ROW_DEAD, SLOT_EDGE_HOT, 0, 1))
+		_show_bubble(label, price, live))
 	panel.mouse_exited.connect(func() -> void:
-		panel.add_theme_stylebox_override("panel", UiKit.frame(
-			ROW_FILL if live else ROW_DEAD, Color(0, 0, 0, 0), 0, 0)))
+		if _hovered == id:
+			_hovered = &""
+		panel.add_theme_stylebox_override("panel",
+			UiKit.frame(ROW_FILL if live else ROW_DEAD, SLOT_EDGE, 0, 1))
+		_bubble.visible = false)
 	return panel
 
 
-## A heading inside a column, for when one column holds two kinds of thing.
-func _group(text: String) -> Control:
-	var label := Label.new()
-	label.text = text.to_upper()
-	label.add_theme_font_override("font", UiKit.DISPLAY)
-	label.add_theme_font_size_override("font_size", TypeScale.SMALL)
-	label.add_theme_color_override("font_color", Color(0.52, 0.47, 0.40))
-	return label
+## Fill the bubble for whatever is under the pointer. The name lives here
+## rather than on the slot, which is what makes the grid possible at all.
+func _show_bubble(label: String, price: int, live: bool) -> void:
+	var money := ""
+	if price > 0:
+		money = "%d gold" % price
+		if not live:
+			money += "  -  more than you have"
+	if Materials.known(_hovered):
+		_bubble_text.text = "%s    %s\n%s" % [UiKit.named(label), UiKit.kind("Material"),
+			UiKit.aside("She pays %d each." % _shop.offer_for_material(_hovered))]
+	else:
+		_bubble_text.text = UiKit.item_detail(Items.get_item(_hovered), money)
+	_bubble.visible = true
+	_place_bubble()
+
+
+## Kept beside the pointer and inside the window. `_process` rather than a
+## mouse-motion handler because the slots swallow their own input and the
+## bubble has to keep up while the pointer moves across one.
+func _process(_delta: float) -> void:
+	if _open and _bubble != null and _bubble.visible:
+		_place_bubble()
+
+
+func _place_bubble() -> void:
+	var at := _root.get_local_mouse_position() + Vector2(18, 18)
+	var size := _bubble.size
+	# Flip rather than clamp when it would run off an edge: a bubble pinned to
+	# the right margin sits under the pointer and hides the thing being read.
+	if at.x + size.x > _root.size.x:
+		at.x = _root.get_local_mouse_position().x - size.x - 12.0
+	if at.y + size.y > _root.size.y:
+		at.y = _root.size.y - size.y - 4.0
+	_bubble.position = at.floor()
 
 
 func _empty(text: String) -> Control:
@@ -568,14 +599,6 @@ func _build() -> void:
 	# The detail pane spans the full width under the columns rather than sitting
 	# in one of them: it describes whichever list the pointer is in, and a pane
 	# that lived in a column would look like it belonged to that column.
-	_detail = RichTextLabel.new()
-	_detail.bbcode_enabled = true
-	_detail.fit_content = true
-	_detail.custom_minimum_size = Vector2(0, 96)
-	_detail.add_theme_font_size_override("normal_font_size", TypeScale.SMALL)
-	_detail.add_theme_color_override("default_color", TEXT)
-	_detail.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	page.add_child(_detail)
 
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 16)
@@ -602,6 +625,26 @@ func _build() -> void:
 	_confirm.pressed.connect(_on_confirm)
 	footer.add_child(_confirm)
 
+	# The bubble lives on the root rather than in the page, so it can be moved
+	# to the pointer in window coordinates and draw over the columns. Added last
+	# so it is on top of everything it might cover.
+	_bubble = PanelContainer.new()
+	_bubble.add_theme_stylebox_override("panel",
+		UiKit.frame(BUBBLE_FILL, SLOT_EDGE_HOT, 10, 1))
+	_bubble.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bubble.visible = false
+	_bubble.custom_minimum_size = Vector2(BUBBLE_WIDTH, 0)
+	_root.add_child(_bubble)
+
+	_bubble_text = RichTextLabel.new()
+	_bubble_text.bbcode_enabled = true
+	_bubble_text.fit_content = true
+	_bubble_text.custom_minimum_size = Vector2(BUBBLE_WIDTH - 20, 0)
+	_bubble_text.add_theme_font_size_override("normal_font_size", TypeScale.SMALL)
+	_bubble_text.add_theme_color_override("default_color", TEXT)
+	_bubble_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bubble.add_child(_bubble_text)
+
 	var leave := Label.new()
 	leave.text = "Esc to leave"
 	leave.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -612,7 +655,7 @@ func _build() -> void:
 
 ## One titled, scrolling column. Scrolling because the pack has forty-two slots
 ## and a full one would otherwise push the footer off the bottom of the screen.
-func _column(parent: Container, title: String, tip: String) -> VBoxContainer:
+func _column(parent: Container, title: String, tip: String) -> GridContainer:
 	var column := UiKit.framed(title, tip)
 	var frame := UiKit.frame_of(column)
 	frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -624,8 +667,10 @@ func _column(parent: Container, title: String, tip: String) -> VBoxContainer:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
 
-	var rows := VBoxContainer.new()
+	var rows := GridContainer.new()
+	rows.columns = COLUMNS
 	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	rows.add_theme_constant_override("separation", 3)
+	rows.add_theme_constant_override("h_separation", 4)
+	rows.add_theme_constant_override("v_separation", 4)
 	scroll.add_child(rows)
 	return rows
