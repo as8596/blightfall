@@ -79,6 +79,18 @@ STAT_VALUE = {
 # sane rather than at zero — which would silently make it unsellable.
 GEAR_FLOOR = 20
 
+# **Trade goods**: things whose entire purpose is to be sold. They heal nothing
+# and do nothing, so the heals-based rule prices them at zero — and zero means
+# untradeable, which is exactly backwards for a hide.
+#
+# Priced by hand because there is nothing to derive from: their worth is a
+# decision about the economy, not a consequence of an effect. A wolf hide is
+# most of a meal's worth, so a good hunt is a day's food.
+TRADE_GOODS = {
+    "wolf_hide": 24,
+    "rags": 3,
+}
+
 KIND_CONSUMABLE, KIND_TOOL, KIND_KEY, KIND_GEAR = 0, 1, 2, 3
 
 
@@ -108,6 +120,8 @@ def price_of(item_id, text):
         return max(int(total), GEAR_FLOOR)
     if kind == KIND_TOOL:
         return 40
+    if item_id in TRADE_GOODS:
+        return TRADE_GOODS[item_id]
     heals = int(field(text, "heals", "0") or 0)
     if heals <= 0:
         return 0

@@ -7,6 +7,12 @@ resource_name = "Blighted Villager"
 script = ExtResource("1_data")
 id = &"blighted_villager"
 display_name = "Blighted Villager"
+loot = {
+&"rags": [0.6, 1, 2]
+}
+gold_chance = 0.22
+gold_min = 4
+gold_max = 14
 max_health = 12
 move_speed = 136.0
 contact_damage = 1

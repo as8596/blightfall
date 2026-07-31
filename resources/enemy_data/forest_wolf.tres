@@ -8,6 +8,13 @@ resource_name = "Forest Wolf"
 script = ExtResource("1_data")
 id = &"forest_wolf"
 display_name = "Forest Wolf"
+loot = {
+&"raw_meat": [0.75, 1, 2],
+&"wolf_hide": [0.45, 1, 1]
+}
+gold_chance = 0.08
+gold_min = 3
+gold_max = 9
 max_health = 10
 move_speed = 175.0
 contact_damage = 1

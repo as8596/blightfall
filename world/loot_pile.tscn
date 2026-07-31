@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world/loot_pile.gd" id="1_loot"]
+
+[sub_resource type="RectangleShape2D" id="Rect_loot"]
+size = Vector2(56, 48)
+
+[node name="LootPile" type="Area2D"]
+collision_layer = 128
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_loot")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Rect_loot")

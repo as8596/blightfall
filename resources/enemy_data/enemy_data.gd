@@ -13,6 +13,24 @@ extends Resource
 @export var id: StringName = &""
 @export var display_name: String = ""
 
+@export_group("Loot")
+## What this leaves behind, as `{id: [chance, min, max]}` — ids may be items
+## (`ItemData`) or haul materials, and `LootPile` sorts out which bag each goes
+## in so a table author does not have to care.
+##
+## **A pile you search, not a pickup you walk over.** Materials are the routine
+## currency of a run and walking over them is right; a kill is a *moment*, and
+## something worth stopping for is worth a keypress. It also means loot cannot
+## be hoovered up by accident mid-fight while you are dodging the next one.
+@export var loot: Dictionary = {}
+
+## Chance of coins on the body at all, and how many. Deliberately rare: gold
+## comes from selling a haul, and an enemy that reliably pays cash is a reason
+## to farm one instead of going anywhere.
+@export_range(0.0, 1.0, 0.01) var gold_chance: float = 0.0
+@export var gold_min: int = 0
+@export var gold_max: int = 0
+
 @export_group("Stats")
 @export var max_health: int = 10
 @export var move_speed: float = 40.0

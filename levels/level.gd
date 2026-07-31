@@ -48,6 +48,9 @@ const NPC_SCENE: PackedScene = preload("res://world/npc.tscn")
 ## and an amount.
 const PICKUP_SCENE: PackedScene = preload("res://world/pickup.tscn")
 
+## ...and for what is left where something fell. See `world/loot_pile.gd`.
+const LOOT_SCENE: PackedScene = preload("res://world/loot_pile.tscn")
+
 ## ...and for the things that are not people. `EnemyMarkers` carry an
 ## `enemy_id`; the map says where and what, the scene says how it behaves.
 const ENEMY_SCENES: Dictionary = {
@@ -351,8 +354,35 @@ func _exit_tree() -> void:
 
 
 func _on_enemy_died_here(enemy: Node) -> void:
-	if enemy != null and scene_file_path != "":
+	if enemy == null:
+		return
+	if scene_file_path != "":
 		EnemyMemory.killed(scene_file_path, enemy.name)
+	_drop_loot(enemy)
+
+
+## Leave a searchable pile where something fell, if its table gave anything.
+##
+## Spawned by the level rather than by the enemy, for the same reason damage
+## numbers are: the enemy knows what it was, but only the level knows where the
+## world node is — and a pile parented to the corpse would vanish with it.
+##
+## Nothing is dropped when the roll comes up empty. A body you can search for no
+## reward teaches the player to stop searching bodies, which costs more than the
+## occasional hide is worth.
+func _drop_loot(enemy: Node) -> void:
+	if world == null or LOOT_SCENE == null:
+		return
+	var data: EnemyData = enemy.get("data")
+	var rolled := LootPile.roll(data)
+	if rolled.is_empty():
+		return
+	var pile: LootPile = LOOT_SCENE.instantiate()
+	pile.contents = rolled["contents"]
+	pile.gold = int(rolled["gold"])
+	world.add_child(pile)
+	if enemy is Node2D:
+		pile.global_position = (enemy as Node2D).global_position
 
 
 ## Everything currently hunting in this level.
