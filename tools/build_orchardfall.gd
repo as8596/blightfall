@@ -151,6 +151,14 @@ const HARVEST_CAP := 9
 const BARE_GROUND: Array = ["dirt_path", "bridge", "cobble", "floorboards",
 	"water", "shallows", "hearth"]
 
+## The drawn terrain, and which greybox tiles map onto which of its two.
+const TERRAIN_GRASS_DIRT: TileSet = preload("res://resources/tilesets/grass_dirt.tres")
+## Walked-on ground becomes the dirt terrain.
+const TRODDEN: Array = ["dirt_path", "cobble", "bridge", "hearth", "floorboards"]
+## ...and water is left to the greybox layer underneath, which already draws it
+## and — unlike anything here — collides with it.
+const WET: Array = ["water", "shallows"]
+
 ## Undergrowth. Pure decoration: no tile, no collision, no effect on anything the
 ## assertions measure. Scattered on open ground the player can already walk, so a
 ## clearing reads as a clearing rather than as a flat green rectangle.
@@ -552,7 +560,10 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 	var root := Node2D.new()
 	root.name = id.to_pascal_case()
 	root.y_sort_enabled = true
-	for layer in [ground, objects, canopy, overhead]:
+	# Real ground art, drawn over the greybox `Ground`. See `_paint_terrain`.
+	var terrain := _paint_terrain(map, ground, size)
+
+	for layer in [ground, terrain, objects, canopy, overhead]:
 		root.add_child(layer)
 		layer.owner = root
 
@@ -758,6 +769,42 @@ static func _edge_cell(size: Vector2i, facing: String, along: int, depth: int) -
 
 
 # ------------------------------------------------------------------- markers
+
+## The drawn ground: `resources/tilesets/grass_dirt.tres`, autotiled from what
+## the greybox `Ground` layer already says.
+##
+## **The greybox layer stays and stays visible.** It is what every assertion in
+## this file reads — reachability, road clearance, "nothing spawns on a path" —
+## and it carries the collision for water. Replacing it would mean porting all
+## of that to a tileset whose job is to look right, which are two different
+## jobs. So this draws on top of it, at the same z but later in the child order,
+## and only where it has something better to show: water and shallows are left
+## alone and the greybox shows through.
+##
+## Terrain 0 is grass and terrain 1 is dirt in every file
+## `tools/build_terrain_tileset.gd` writes, so this does not have to ask.
+func _paint_terrain(map: GreyboxMap, ground: TileMapLayer, size: Vector2i) -> TileMapLayer:
+	var terrain := map.new_layer("Terrain", TERRAIN_GRASS_DIRT, GreyboxMap.Z_GROUND)
+	var only: Array[TileMapLayer] = [ground]
+	var grass: Array[Vector2i] = []
+	var dirt: Array[Vector2i] = []
+	for y in size.y:
+		for x in size.x:
+			var cell := Vector2i(x, y)
+			var tile := map.tile_at(only, cell)
+			if tile in WET:
+				continue
+			if tile in TRODDEN:
+				dirt.append(cell)
+			else:
+				grass.append(cell)
+	# Grass first, then dirt over it: `set_cells_terrain_connect` only resolves
+	# the edges of what it is given, so painting the larger field first and the
+	# paths into it is what makes the joins come out right.
+	terrain.set_cells_terrain_connect(grass, 0, 0, false)
+	terrain.set_cells_terrain_connect(dirt, 0, 1, false)
+	return terrain
+
 
 func _add_markers(root: Node2D, area: Dictionary) -> void:
 	var size: Vector2i = area["size"]
