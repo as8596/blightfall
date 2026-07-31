@@ -74,6 +74,10 @@ var carried: int = 0
 var capacity: int = 0
 var slot_items: Array = []
 var slot_counts: Array = []
+## What is actually in the satchel, as {id: count}. The cache everything else
+## reads — see `Events.player_materials_changed` for why a running total of
+## pickups is not the same thing.
+var materials: Dictionary = {}
 
 var selected: int = 0
 
@@ -120,6 +124,8 @@ func _ready() -> void:
 	Events.player_hotbar_selected.connect(_on_selected)
 	Events.player_xp_changed.connect(_on_xp)
 	Events.player_gold_changed.connect(func(_amount: int) -> void: _canvas.queue_redraw())
+	Events.player_materials_changed.connect(func(contents: Dictionary) -> void:
+		materials = contents)
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
 	# whatever is underneath it — so it cannot be told by `gui_input`.

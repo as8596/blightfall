@@ -224,12 +224,22 @@ else in the cast expresses warmth by *doing something for you*. She expresses it
 by refusing to treat you as a special case, which in a town that tried to hang
 you is the only one of the eleven that reads as citizenship rather than pity.
 
-**Mechanically she is the reason to come home with a full pack.** The carpenter
-wants timber and stone; she takes everything else — the fish, the meals, the
-gear you have outgrown — and turns it into the food that makes the next
-expedition survivable. Her side quests hang off that: the carters stopped coming
-up the south road in the spring, which is the road the player is already
-walking.
+**Mechanically she is the reason to come home with a full satchel, and she is
+the only source of income in the game.** She buys the haul — timber, stone,
+ironwork — at a fair rate, and that is the one place gold comes from.
+
+Which puts her in direct competition with the carpenter, deliberately. They want
+the same timber. Every plank sold to Maren is a plank the town is not rebuilt
+with, and the exchange rate is deliberately harsh in the town's favour: a
+high-tier project is worth ~350 gold in materials, and the most expensive thing
+on her shelf is a 55-gold salve. Selling the haul should feel like spending the
+house you were going to build.
+
+She does not hide this. Asked what she wants, she says the carpenter wants the
+same timber and that she is not going to pretend otherwise.
+
+Her side quests hang off the same thread: the carters stopped coming up the
+south road in the spring, which is the road the player is already walking.
 
 Four of the cast are indoors, so the square has fewer bodies in it than it used
 to. If that reads as empty, the answer is mute idle villagers: §2 caps NPCs with

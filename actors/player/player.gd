@@ -106,7 +106,8 @@ func _ready() -> void:
 	stamina.changed.connect(func(current: float, maximum: float) -> void:
 		Events.player_stamina_changed.emit(current, maximum))
 	inventory.changed.connect(func(units: int, limit: int) -> void:
-		Events.player_inventory_changed.emit(units, limit))
+		Events.player_inventory_changed.emit(units, limit)
+		Events.player_materials_changed.emit(inventory.contents.duplicate()))
 	items.changed.connect(func() -> void:
 		Events.player_items_changed.emit(items.items, items.counts))
 	items.refused.connect(func(slot: int) -> void:
@@ -140,6 +141,7 @@ func _broadcast_state() -> void:
 	Events.player_health_changed.emit(health.current, health.max_health)
 	Events.player_stamina_changed.emit(stamina.current, stamina.max_stamina)
 	Events.player_inventory_changed.emit(inventory.total(), inventory.capacity)
+	Events.player_materials_changed.emit(inventory.contents.duplicate())
 	Events.player_items_changed.emit(items.items, items.counts)
 	Events.player_hotbar_selected.emit(items.selected)
 	Events.player_stats_changed.emit(stat_block())

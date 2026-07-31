@@ -106,8 +106,11 @@ func _ready() -> void:
 		worn = gear.duplicate()
 		if _open:
 			_refresh())
-	Events.material_collected.connect(func(id: StringName, amount: int) -> void:
-		materials[id] = int(materials.get(id, 0)) + amount
+	# The contents, not a tally of pickups. This used to accumulate
+	# `material_collected` and never subtract, so after any rebuild the page went
+	# on listing timber that had already been spent.
+	Events.player_materials_changed.connect(func(contents: Dictionary) -> void:
+		materials = contents
 		if _open:
 			_refresh())
 
@@ -283,8 +286,8 @@ func _refresh_inventory() -> void:
 	if materials.is_empty():
 		line += "      (empty — materials are what the town is rebuilt out of)"
 	else:
-		for id in materials:
-			line += "      %s x%d" % [String(id).capitalize(), int(materials[id])]
+		for id in Materials.sorted(materials):
+			line += "      %s x%d" % [Materials.name_of(id), int(materials[id])]
 	_satchel.text = line
 
 

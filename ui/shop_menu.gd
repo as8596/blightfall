@@ -131,9 +131,16 @@ func _input(event: InputEvent) -> void:
 
 
 func _pack() -> ItemsComponent:
+	return _player().items if _player() != null else null
+
+
+func _sack() -> InventoryComponent:
+	return _player().inventory if _player() != null else null
+
+
+func _player() -> Player:
 	var scene := get_tree().current_scene
-	var player := scene.get("player") as Player if scene != null else null
-	return player.items if player != null else null
+	return scene.get("player") as Player if scene != null else null
 
 
 # ------------------------------------------------------------------ trading
@@ -163,6 +170,19 @@ func _on_sell(slot: int) -> void:
 	_refresh()
 
 
+func _on_sell_material(id: StringName, amount: int) -> void:
+	var each := _shop.offer_for_material(id)
+	var sack := _sack()
+	var selling := mini(amount, sack.count_of(id)) if sack != null else 0
+	var refusal := Shops.sell_material(_shop, sack, id, amount)
+	if refusal != "":
+		_say(refusal, REFUSED)
+	else:
+		_say("Sold %d %s. %d gold." % [selling, Materials.name_of(id).to_lower(),
+			each * selling], DIM)
+	_refresh()
+
+
 func _say(text: String, colour: Color) -> void:
 	_said = text
 	_note_colour = colour
@@ -176,7 +196,8 @@ func _refresh() -> void:
 	_title.text = _shop.display_name
 	_greeting.text = _shop.greeting
 	_gold.text = "%d gold" % Purse.amount()
-	_note.text = _said if _said != "" else "Click to buy. Click something of yours to sell."
+	_note.text = _said if _said != "" else \
+		"Click to buy. Click something of yours to sell — shift-click sells the stack."
 	_note.add_theme_color_override("font_color", _note_colour if _said != "" else DIM)
 	_fill_buy()
 	_fill_sell()
@@ -206,6 +227,21 @@ func _fill_buy() -> void:
 ## sell column rendered "Nothing to sell." for a player holding bread.
 func _fill_sell() -> void:
 	_clear(_sell_rows)
+
+	# Satchel first. It is the bulk of what comes home from a run, it is worth
+	# far more than anything in the pack, and putting it second would bury the
+	# reason to be standing here under a list of half-eaten meals.
+	var haul := Materials.sorted(Hud.materials)
+	if not haul.is_empty() and _shop.buys_materials:
+		_sell_rows.add_child(_group("Satchel"))
+		for id in haul:
+			var held: int = int(Hud.materials[id])
+			var each := _shop.offer_for_material(id)
+			_sell_rows.add_child(_material_row(id, held, each))
+
+	# The pack, built aside first so its heading can be skipped when there is
+	# nothing under it. A "Pack" label above empty space reads as a bug.
+	var carried: Array[Control] = []
 	for slot in Hud.slot_items.size():
 		var item: ItemData = Hud.slot_items[slot] if Hud.slot_items[slot] is ItemData else null
 		if item == null:
@@ -213,9 +249,18 @@ func _fill_sell() -> void:
 		var offer := _shop.offer_for(item)
 		var wanted := Shops.why_not_sell(_shop, item) == ""
 		var held: int = int(Hud.slot_counts[slot]) if slot < Hud.slot_counts.size() else 1
-		_sell_rows.add_child(_row(item, offer, wanted, _on_sell.bind(slot), held))
+		carried.append(_row(item, offer, wanted, _on_sell.bind(slot), held))
+
+	if not carried.is_empty():
+		# Only worth a heading when there is a satchel section above it to be
+		# told apart from.
+		if _sell_rows.get_child_count() > 0:
+			_sell_rows.add_child(_group("Pack"))
+		for row in carried:
+			_sell_rows.add_child(row)
+
 	if _sell_rows.get_child_count() == 0:
-		_sell_rows.add_child(_empty("Your pack is empty."))
+		_sell_rows.add_child(_empty("You are carrying nothing she wants."))
 
 
 ## One line of the ledger: icon, name, price. `live` is whether the click will
@@ -279,6 +324,80 @@ func _row(item: ItemData, price: int, live: bool, on_click: Callable,
 		panel.add_theme_stylebox_override("panel", UiKit.frame(
 			ROW_FILL if live else ROW_DEAD, Color(0, 0, 0, 0), 0, 0)))
 	return panel
+
+
+## A satchel line. Reads "Timber x7" with what one is worth on the right, the
+## same as every other row — the price column always means *per one*, so the two
+## halves of the ledger can be compared without a footnote.
+##
+## Left click sells one, **shift-click sells the lot.** Selling twelve timber
+## one click at a time is the kind of thing that makes a player stop selling
+## timber, and a second button per row would double the width of the column.
+func _material_row(id: StringName, held: int, each: int) -> Control:
+	var panel := Panel.new()
+	panel.custom_minimum_size = Vector2(0, ROW)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.add_theme_stylebox_override("panel",
+		UiKit.frame(ROW_FILL, Color(0, 0, 0, 0), 0, 0))
+
+	var line := HBoxContainer.new()
+	line.set_anchors_preset(Control.PRESET_FULL_RECT)
+	line.offset_left = 8.0
+	line.offset_right = -10.0
+	line.add_theme_constant_override("separation", 10)
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(line)
+
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(ICON, ICON)
+	icon.texture = Materials.icon_of(id)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_child(icon)
+
+	var name_label := Label.new()
+	name_label.text = "%s  x%d" % [Materials.name_of(id), held]
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_label.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	name_label.add_theme_color_override("font_color", TEXT)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_child(name_label)
+
+	var cost := Label.new()
+	cost.text = "%d" % each
+	cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cost.custom_minimum_size = Vector2(56, 0)
+	cost.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cost.add_theme_font_override("font", UiKit.DISPLAY)
+	cost.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	cost.add_theme_color_override("font_color", GOLD)
+	cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_child(cost)
+
+	panel.gui_input.connect(func(event: InputEvent) -> void:
+		var click := event as InputEventMouseButton
+		if click != null and click.pressed and click.button_index == MOUSE_BUTTON_LEFT:
+			_on_sell_material(id, held if click.shift_pressed else 1))
+	panel.mouse_entered.connect(func() -> void:
+		panel.add_theme_stylebox_override("panel",
+			UiKit.frame(ROW_HOVER, Color(0, 0, 0, 0), 0, 0)))
+	panel.mouse_exited.connect(func() -> void:
+		panel.add_theme_stylebox_override("panel",
+			UiKit.frame(ROW_FILL, Color(0, 0, 0, 0), 0, 0)))
+	return panel
+
+
+## A heading inside a column, for when one column holds two kinds of thing.
+func _group(text: String) -> Control:
+	var label := Label.new()
+	label.text = text.to_upper()
+	label.add_theme_font_override("font", UiKit.DISPLAY)
+	label.add_theme_font_size_override("font_size", TypeScale.SMALL)
+	label.add_theme_color_override("font_color", Color(0.52, 0.47, 0.40))
+	return label
 
 
 func _empty(text: String) -> Control:
@@ -358,7 +477,9 @@ func _build() -> void:
 	page.add_child(columns)
 
 	_buy_rows = _column(columns, "For sale", "What she has")
-	_sell_rows = _column(columns, "Your pack", "What she'll take")
+	# "Yours" rather than "Your pack": it holds the satchel as well, and the two
+	# are labelled separately inside it.
+	_sell_rows = _column(columns, "Yours", "What she'll take off you")
 
 	_note = Label.new()
 	_note.add_theme_font_size_override("font_size", TypeScale.SMALL)

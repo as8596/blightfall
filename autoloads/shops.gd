@@ -101,6 +101,33 @@ func sell(shop: ShopData, pack: ItemsComponent, slot: int) -> String:
 	return ""
 
 
+## Sell haul material out of the satchel. `amount` is clamped to what is held,
+## so "sell all" is `sell_material(shop, sack, id, 999)` rather than a second
+## method that can disagree with this one.
+##
+## Returns "" on success. Nothing partial: the count is decided, then removed,
+## then paid for, and a refusal has moved nothing.
+func sell_material(shop: ShopData, sack: InventoryComponent, id: StringName,
+		amount: int = 1) -> String:
+	if shop == null or sack == null:
+		return "Nothing to sell."
+	if not shop.buys_materials:
+		return "She doesn't deal in that."
+	if not Materials.known(id):
+		return "She has no use for it."
+	var selling := mini(amount, sack.count_of(id))
+	if selling <= 0:
+		return "You have none."
+	var paid := shop.offer_for_material(id) * selling
+	if sack.remove(id, selling) <= 0:
+		return "You have none."
+	@warning_ignore("return_value_discarded")
+	Purse.add(paid)
+	Sfx.play(&"ui_select", -6.0)
+	Events.traded.emit(id, -selling, paid)
+	return ""
+
+
 ## Slots' worth of space for this specific item, counting part-filled stacks.
 static func _room_for(pack: ItemsComponent, item: ItemData) -> int:
 	var room := 0

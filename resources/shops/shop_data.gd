@@ -47,6 +47,19 @@ extends Resource
 ## leaving it to be discovered by a player with a lot of bread.
 @export_range(0.05, 1.0, 0.05) var margin: float = 0.55
 
+## Whether she will take timber, stone and ironwork off you.
+##
+## **This is what connects the money to the expedition loop.** Everything else
+## on this resource trades in `ItemData`, and almost nothing in the world drops
+## one — the valley drops materials, and materials go in the satchel. Without
+## this the sell column shows the loaf you started with and nothing else, ever.
+##
+## One-directional on purpose: she buys them, she does not stock them. Not a
+## rule, just where it starts — a player who can buy timber can rebuild the town
+## without going outside, and the walk is the game. If that turns out to be
+## worth having, it is a stock array and about ten lines.
+@export var buys_materials: bool = true
+
 ## What the player pays for one.
 func price_of(item: ItemData) -> int:
 	if item == null or not item.is_tradeable():
@@ -62,6 +75,14 @@ func offer_for(item: ItemData) -> int:
 	if item == null or not item.is_tradeable():
 		return 0
 	return clampi(int(floorf(item.value * margin)), 1, price_of(item))
+
+
+## What she pays for one unit of a haul material. Zero if she does not deal in
+## them, or if it is not a material she recognises.
+func offer_for_material(id: StringName) -> int:
+	if not buys_materials or not Materials.known(id):
+		return 0
+	return maxi(int(floorf(Materials.value_of(id) * margin)), 1)
 
 
 func sells(id_wanted: StringName) -> bool:

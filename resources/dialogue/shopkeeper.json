@@ -67,7 +67,8 @@
     "trade_offer": {
       "lines": [
         "Right. Food, rope, a salve if you've been careless.",
-        "I'll take most things off you. Not everything — I've a shop, not a midden."
+        "And I'll take timber and stone off you at a fair rate, if you've been out.",
+        "Half this valley's building trade goes through my back room. Not everything, mind — I've a shop, not a midden."
       ],
       "choices": [
         { "text": "Show me.", "action": "shop", "shop": "sundries", "goto": "" },
@@ -126,8 +127,10 @@
 
     "errand_detail": {
       "lines": [
+        "Timber. Stone. Ironwork if you can find any, and you won't find much.",
         "Anything the valley still makes. Anything you'd eat and not regret.",
-        "I'll know it when I see it, and I'll tell you what it's worth before you hand it over."
+        "I'll tell you what it's worth before you hand it over. You can always say no.",
+        "Mind — the carpenter wants the same timber I do. I'm not going to pretend otherwise."
       ],
       "choices": [
         { "text": "Understood.", "goto": "errand_accepted" }

@@ -54,8 +54,77 @@ func _run() -> void:
 	_check_shops()
 	_check_purse()
 	await _check_trading()
+	await _check_materials()
 	await _check_the_room()
 	_finish()
+
+
+## Selling the haul. **This is the only source of income in the game**, so it is
+## the half of the shop that decides whether any of the rest of it is reachable:
+## the world drops materials, materials go in the satchel, and nothing else the
+## player can acquire is worth anything.
+func _check_materials() -> void:
+	print("\nThe haul")
+	var shop := Shops.get_shop(&"sundries")
+
+	var unpriced: Array[String] = []
+	for id in Materials.ORDER:
+		if Materials.value_of(id) <= 0:
+			unpriced.append(String(id))
+	_check("every material is worth something", unpriced.is_empty(), ", ".join(unpriced))
+	_check("she deals in them", shop.buys_materials)
+	_check("and pays for one", shop.offer_for_material(&"timber") > 0,
+		"%d" % shop.offer_for_material(&"timber"))
+	_check("but not for something she has never seen",
+		shop.offer_for_material(&"moonstone") == 0)
+
+	# A haul is worth much more than a meal, or there is no reason to walk
+	# anywhere. Set against the cheapest thing on her shelf.
+	var loaf := Items.get_item(&"bread")
+	_check("a haul beats pocket change",
+		shop.offer_for_material(&"ironwork") > shop.price_of(loaf),
+		"%d vs %d" % [shop.offer_for_material(&"ironwork"), shop.price_of(loaf)])
+
+	var level := get_tree().current_scene as Level
+	if level == null:
+		return
+	var sack: InventoryComponent = level.player.inventory
+	sack.clear()
+	@warning_ignore("return_value_discarded")
+	sack.add(&"timber", 5)
+	Purse.set_amount(0)
+
+	var each := shop.offer_for_material(&"timber")
+	_check("selling one succeeds", Shops.sell_material(shop, sack, &"timber", 1) == "")
+	_check("it leaves the satchel", sack.count_of(&"timber") == 4,
+		"%d" % sack.count_of(&"timber"))
+	_check("and is paid for", Purse.amount() == each, "%d" % Purse.amount())
+
+	# Shift-click sells the stack, and asks for more than is held on purpose —
+	# "sell all" is this call with a big number, so it has to clamp rather than
+	# pay out for timber that was never there.
+	_check("selling the stack succeeds",
+		Shops.sell_material(shop, sack, &"timber", 999) == "")
+	_check("the satchel empties", sack.count_of(&"timber") == 0,
+		"%d" % sack.count_of(&"timber"))
+	_check("and pays for exactly what was held", Purse.amount() == each * 5,
+		"%d, expected %d" % [Purse.amount(), each * 5])
+
+	var before := Purse.amount()
+	_check("selling what you do not have is refused",
+		Shops.sell_material(shop, sack, &"timber", 1) != "")
+	_check("and pays nothing", Purse.amount() == before)
+
+	# The satchel is the thing the whole expedition loop fills, so the menu and
+	# the shop have to agree about what is in it. They read the same cache.
+	await _ticks(2)
+	_check("the HUD cache tracks the satchel", int(Hud.materials.get(&"timber", 0)) == 0,
+		str(Hud.materials))
+	@warning_ignore("return_value_discarded")
+	sack.add(&"stone", 3)
+	await _ticks(2)
+	_check("and updates when it changes", int(Hud.materials.get(&"stone", 0)) == 3,
+		str(Hud.materials))
 
 
 # ------------------------------------------------------------------- prices

@@ -54,6 +54,16 @@ signal player_item_refused(slot: int)
 ## A material was picked up.
 signal material_collected(id: StringName, amount: int)
 
+## What is actually in the satchel now, as {id: count}.
+##
+## Distinct from `material_collected`, which is an *event* — "you just picked up
+## two timber". Adding those up is not the same as knowing what you are
+## carrying, and the inventory page used to do exactly that: it accumulated
+## every pickup and never subtracted a rebuild, so after building anything it
+## cheerfully listed materials that were already spent. This carries the
+## contents, so nothing downstream has to keep its own running total.
+signal player_materials_changed(contents: Dictionary)
+
 ## The purse changed. Carries the new total and nothing else — a listener that
 ## wants to know *why* it changed wants `Shop.traded`, not this.
 signal player_gold_changed(amount: int)

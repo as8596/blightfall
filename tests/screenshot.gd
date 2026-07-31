@@ -71,6 +71,12 @@ var _pointer: Vector2 = Vector2.INF
 var _shop: String = ""
 var _gold: int = -1
 
+## `--haul=timber:6,stone:3` fills the satchel. Every fresh scene starts it
+## empty, so without this the sell side of the shop can only ever be shot in
+## its "you have nothing" state — which is the one state it was already wrong
+## in once.
+var _haul: String = ""
+
 var _room: Node
 
 
@@ -110,6 +116,8 @@ func _capture() -> void:
 			_shop = arg.trim_prefix("--shop=")
 		elif arg.begins_with("--gold="):
 			_gold = arg.trim_prefix("--gold=").to_int()
+		elif arg.begins_with("--haul="):
+			_haul = arg.trim_prefix("--haul=")
 		elif arg.begins_with("--ui-scale="):
 			_ui_scale = arg.trim_prefix("--ui-scale=").to_float()
 		elif arg.begins_with("--talk-advance="):
@@ -233,6 +241,14 @@ func _capture() -> void:
 		GameMenu.show_page(int(PAGES.get(_menu, 1)))
 		for i in 8:
 			await get_tree().process_frame
+
+	if _haul != "" and player != null:
+		for pair in _haul.split(",", false):
+			var parts := pair.split(":")
+			if parts.size() == 2:
+				@warning_ignore("return_value_discarded")
+				player.inventory.add(StringName(parts[0]), parts[1].to_int())
+		await _wait_ticks(2)
 
 	if _shop != "":
 		# Straight to the window rather than through her conversation: what a
