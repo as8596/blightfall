@@ -31,7 +31,7 @@ const PANEL_EDGE := Color(0.30, 0.25, 0.19)
 ## project has one weight (`art/fonts/README.md`).
 static func framed(title: String, tip: String = "") -> VBoxContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", panel_box())
+	panel.add_theme_stylebox_override("panel", frame(PANEL_FILL, PANEL_EDGE, 12))
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)

@@ -59,21 +59,22 @@ const DISPLAY: Font = preload("res://art/fonts/ui_display.tres")
 ## preference: the window is 1280 wide, the hotbar is twelve slots across, and a
 ## column either side of it has to fit in what is left.
 ##
-## **Recomputed when the panels grew steel frames.** A drawn border cost 12px a
-## side; the frame art's band is 26 and it is on all three panels, which is 168
-## more pixels of chrome across the row. The numbers below were 50/5/200/250 and
-## the right-hand pane went off the edge of the screen — the same failure as the
-## first time, from the opposite direction.
+## At 62px — the size before the character and detail columns arrived — twelve
+## slots plus two columns came to 1354 and the right-hand pane fell off the
+## screen.
 ##
-##     1280 - 2 * 40                    = 1200   page, less its margins
-##     1200 - 2 * 12                    = 1176   less the gaps between panels
-##     1176 - 3 * 2 * 29                = 1002   less each panel's steel
-##     12 * 44 + 11 * 4                  =  572   the grid
-##     190 + 572 + 240                   = 1002   exactly, with nothing spare
-const SLOT := 44
-const GAP := 4
-const COLUMN_LEFT := 190
-const COLUMN_RIGHT := 240
+##     12 * 50 + 11 * 5 + 24  =  679   the grid
+##     200 + 12 + 679 + 12 + 250 = 1153   the row
+##     1153 + 2 * 40 = 1233 < 1280        with the page margins
+##
+## These briefly went to 44/4/190/240 to make room for steel frames around every
+## panel, which cost 29px a side instead of 12. The frames came off — three of
+## them across a row is a lot of border for the space it leaves — and the sizes
+## came back with them.
+const SLOT := 50
+const GAP := 5
+const COLUMN_LEFT := 200
+const COLUMN_RIGHT := 250
 const PAGE_MARGIN := 40.0
 
 var _detail: RichTextLabel
