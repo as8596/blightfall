@@ -118,6 +118,20 @@ doesn't.
 A shrine (`world/shrine.tscn`) takes two: `<name>_dormant.png` and
 `<name>_lit.png`.
 
+**Author a prop at the size it is drawn at.** `Prop.art_scale` snaps to whole
+numbers, so a canvas only ever has integer multiples of itself available — 96px
+art can be 96, 192 or 288 and nothing in between, and a tile is 64. Art whose
+native size is not on the ladder either sits at the wrong scale or gets a
+non-integer zoom that breaks the pixel grid. The ladder in use:
+
+| what | canvas | drawn at | why |
+| --- | --- | --- | --- |
+| undergrowth | 64 | 64 (1 tile) | below the knee; the player is 96 |
+| trees | 128 | 256 (4 tiles) | 256 art would be better, see `build_orchardfall.gd` |
+
+`tools/gen_shrubs.py` draws the four bushes, and its docstring is the long
+version of why they are 64 and not 96.
+
 ## Icons
 
 ```
