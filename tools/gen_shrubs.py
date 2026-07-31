@@ -28,18 +28,31 @@ hedge and a sage bush is entirely in their arguments:
 1. **The envelope**, filled with the darkest body tone. This is never seen
    directly — it is the shadow inside the bush, showing through the gaps.
 2. **Leaves**, a couple of hundred small rotated ellipses stamped over it. Each
-   one first casts a dark crescent off the side away from the light, so the leaf
-   in front of it cannot merge with it. That crescent is the whole trick:
-   without it, foliage is a green lump; with it, the same green is a mass of
-   separate leaves sitting on top of one another.
-3. **Light**, applied per leaf from a single direction against the bush's own
-   volume, so it has a lit shoulder and a shaded belly rather than being evenly
-   bright.
+   one first casts a dark crescent off its underside, so the leaf in front of it
+   cannot merge with it. That crescent is the whole trick: without it, foliage
+   is a green lump; with it, the same green is a mass of separate leaves sitting
+   on top of one another.
+3. **Light**, applied per leaf against the bush's own volume, so the crown is
+   brighter than the skirt rather than the whole thing being evenly bright.
 
 Leaves radiate away from a growth point, which is what stops the stamping from
 reading as a texture swatch: a leaf near the left edge leans left, one at the
 crown points up. They also sit slightly outside the envelope at falling odds,
 which is what keeps the silhouette from being visibly the ellipse it came from.
+
+## Light
+
+**There is no sun in these.** The light is straight down — no left, no right, no
+implied hour of the day. A prop in a top-down game gets walked all the way
+around, and a bush with a lit shoulder is a bush that argues with the one next
+to it the moment the camera moves; it also commits the scene to a time of day
+that nothing else in it commits to.
+
+Overhead is also what the originals do, which is measurable rather than a matter
+of taste: across the four, the left half beats the right by 0.008 to 0.021 of
+value — noise — while the top beats the bottom by 0.036 to 0.097. So the
+horizontal component is zero here and the vertical falloff is held down by the
+`gain` argument, close to the range the originals sit in.
 
 **The cypress is not one of the three.** Stamped like a broadleaf it comes out a
 lumpy pillar, because what says cypress is a clean flame outline and stamping
@@ -79,9 +92,17 @@ OUT = os.path.join(ROOT, "art", "sprites", "props")
 
 CLEAR = (0, 0, 0, 0)
 
-# Light comes from the upper left, as it does everywhere else in this project's
-# art. Normalised, pointing at the light.
-LIGHT = (-0.55, -0.83)
+# Light comes from **directly overhead**, with no horizontal component at all.
+#
+# Measured, not assumed: across the four originals the left half is brighter
+# than the right by 0.008 to 0.021 of value — noise — while the top beats the
+# bottom by 0.036 to 0.097. The art they replace has no sun in it, only a sky.
+#
+# That is the right call for a prop in a top-down game. A bush lit from the
+# upper left is a bush that disagrees with every other bush the moment the
+# player walks around it, and it fixes a time of day that nothing else in the
+# scene commits to. Overhead light is the same from every side.
+LIGHT = (0.0, -1.0)
 
 # Ramp indices, darkest first: the silhouette edge and the gaps between leaves,
 # then shadow, body, sunlit, highlight.
@@ -151,13 +172,13 @@ def leaf(sheet: Sheet, cx: float, cy: float, rx: float, ry: float,
 	"""One leaf: a small rotated ellipse with a shadow cast off its dark side.
 
 	**The shadow is a crescent, not a halo.** Ringing every leaf in dark makes a
-	grid of beads; shading only the side away from the light makes a leaf that
-	is sitting on top of another leaf. Drawn first and drawn over whatever is
-	already there, so a near leaf darkens the one behind it.
+	grid of beads; shading only the underside makes a leaf that is sitting on top
+	of another leaf. Drawn first and drawn over whatever is already there, so a
+	near leaf darkens the one behind it.
 
-	Within the leaf, the side facing the light is a step brighter and the far
-	side a step darker. Three tones across six pixels is enough — the leaf is
-	not the subject, the mass of them is.
+	Within the leaf, the top is a step brighter and the underside a step darker.
+	Three tones across six pixels is enough — the leaf is not the subject, the
+	mass of them is.
 	"""
 	ca, sa = math.cos(angle), math.sin(angle)
 	span = int(max(rx, ry)) + 3
@@ -179,18 +200,24 @@ def leaf(sheet: Sheet, cx: float, cy: float, rx: float, ry: float,
 
 def scatter(sheet: Sheet, rng: random.Random, inside, normal, growth,
 		count: int, rx: float, ry: float, lean: float = 1.0,
-		fringe: float = 2.5, bias: int = 0) -> None:
+		fringe: float = 2.5, bias: int = 0, gain: float = 1.0) -> None:
 	"""Stamp `count` leaves over whatever `inside(x, y)` says is bush.
 
 	`normal` maps a point to where it sits inside the bush's own volume, as a
 	pair in roughly [-1, 1]. That is what the light is applied to, and it is the
-	difference between a bush and a green disc: the upper-left shoulder catches
-	the sun and the lower-right belly does not, before a single leaf is drawn.
+	difference between a bush and a green disc: the crown catches the sky and the
+	skirt does not, before a single leaf is drawn.
 
 	`growth` is the point leaves grow away from: a leaf's angle is the direction
 	from there to the leaf, which makes the crown point up and the flanks point
 	out. `lean` scales how strictly that is obeyed — a hedge is nearly radial, a
 	sage bush much less so.
+
+	`gain` is how hard the overhead light is allowed to push. Below 1 it holds
+	most of the bush near the middle of the ramp and leaves the per-leaf shading
+	to carry the texture, which is what the originals do: their crown-to-skirt
+	falloff is only 0.04-0.10 of value, and a bush that ramps harder than that
+	stops reading as foliage and starts reading as a gradient with leaves on it.
 
 	`bias` moves the whole bush along its ramp. A cypress is a dark plant and a
 	sage bush is a pale one, and that difference lives in how much of each
@@ -243,7 +270,8 @@ def scatter(sheet: Sheet, rng: random.Random, inside, normal, growth,
 		# visible on a bush whose leaves are long.
 		angle += rng.uniform(-0.55, 0.55)
 		leaf(sheet, px, py, rx * rng.uniform(0.82, 1.18),
-			ry * rng.uniform(0.82, 1.18), angle, tone_at(normal, px, py, bias))
+			ry * rng.uniform(0.82, 1.18), angle,
+			tone_at(normal, px, py, bias, gain))
 
 
 def _area(inside) -> float:
@@ -275,17 +303,16 @@ def fill(sheet: Sheet, inside, tone: int) -> None:
 def tone_at(normal, x: float, y: float, bias: int = 0, gain: float = 1.0) -> int:
 	"""Where a point sits on the ramp, given the light and the bush's volume.
 
-	`gain` stretches the result across the ramp. A shape lit mostly across its
-	width only ever sees the horizontal part of the light vector, so without it
-	a tall narrow plant comes out in two tones and looks like a painted post.
+	`gain` stretches the result across the ramp, for a shape whose volume does
+	not span the full [-1, 1] on the axis the light is on.
 	"""
 	nx, ny = normal(x, y)
 	t = (nx * LIGHT[0] + ny * LIGHT[1]) * gain
-	if t > 0.68:
+	if t > 0.55:
 		tone = HOT
-	elif t > 0.28:
+	elif t > 0.18:
 		tone = LIT
-	elif t > -0.18:
+	elif t > -0.30:
 		tone = MID
 	else:
 		tone = DARK
@@ -458,7 +485,7 @@ def cypress_shrub(rng: random.Random) -> Sheet:
 		# is how you draw a bullet. A cypress is lit down one side.
 		return (x - 32.0) / max(half_at(y), 1.0), (y - 26.0) / 70.0
 
-	shade_fill(sheet, inside, normal, gain=2.2)
+	shade_fill(sheet, inside, normal, gain=0.75)
 	needles(sheet, rng, inside, 300)
 	ravel(sheet, rng, 0.25)
 	occlude(sheet, 3)
@@ -474,7 +501,7 @@ def round_hedge(rng: random.Random) -> Sheet:
 	inside, normal = ellipse(32.0, 32.0, 26.0, 25.0)
 	fill(sheet, inside, DARK)
 	scatter(sheet, rng, inside, normal, (32.0, 32.0), 170, 2.9, 2.1,
-		lean=1.0, fringe=2.0)
+		lean=1.0, fringe=2.0, gain=0.55)
 	occlude(sheet, 4)
 	despeckle(sheet)
 	outline(sheet)
@@ -492,8 +519,8 @@ def hedge_shrub(rng: random.Random) -> Sheet:
 
 	fill(sheet, inside, DARK)
 	scatter(sheet, rng, inside, normal, (32.0, 56.0), 185, 2.7, 2.0,
-		lean=1.4, fringe=3.0)
-	occlude(sheet, 4)
+		lean=1.4, fringe=3.0, gain=0.42)
+	occlude(sheet, 3)
 	despeckle(sheet)
 	outline(sheet)
 	return sheet
@@ -510,7 +537,7 @@ def sage_bush(rng: random.Random) -> Sheet:
 
 	fill(sheet, inside, DARK)
 	scatter(sheet, rng, inside, normal, (32.0, 62.0), 150, 3.2, 1.5,
-		lean=0.9, fringe=3.5)
+		lean=0.9, fringe=3.5, gain=0.6)
 	occlude(sheet, 3)
 	despeckle(sheet)
 	outline(sheet)
