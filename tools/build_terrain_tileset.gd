@@ -20,14 +20,17 @@ extends SceneTree
 ## grass/water without being told which is which.
 
 const TILE := 64
+## Reads the *derived* sheets, not the exports beside them: the grass as
+## delivered sits in the hue band `tools/check_colour.py` reserves for the
+## blight. `tools/shift_grass_hue.py` writes these and explains why.
 const SOURCES: Array = [
 	# png, tileset path, terrain set name, the two terrain names. The order of
 	# the names does not matter: which cluster is which is decided by the art,
 	# and `_name_clusters` puts the greener one first so "grass" is terrain 0
 	# in both files.
-	["res://art/tilesets/sandy dirt ↗ field grass-godot.png",
+	["res://art/tilesets/derived/grass_dirt.png",
 		"res://resources/tilesets/grass_dirt.tres", "grass_dirt", ["grass", "dirt"]],
-	["res://art/tilesets/forest pond ↗ field grass-godot.png",
+	["res://art/tilesets/derived/grass_water.png",
 		"res://resources/tilesets/grass_water.tres", "grass_water", ["grass", "water"]],
 ]
 

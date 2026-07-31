@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1iu5th554xvr"
-path="res://.godot/imported/forest pond ↗ field grass-godot.png-e83d30f1b0586b76b248896732df46b6.ctex"
+uid="uid://d24qay5q6jd66"
+path="res://.godot/imported/grass_water.png-78f403542841fb4c28e5243849933a02.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/tilesets/forest pond ↗ field grass-godot.png"
-dest_files=["res://.godot/imported/forest pond ↗ field grass-godot.png-e83d30f1b0586b76b248896732df46b6.ctex"]
+source_file="res://art/tilesets/derived/grass_water.png"
+dest_files=["res://.godot/imported/grass_water.png-78f403542841fb4c28e5243849933a02.ctex"]
 
 [params]
 

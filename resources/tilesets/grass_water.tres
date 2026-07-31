@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" path="res://art/tilesets/forest pond ↗ field grass-godot.png" id="1_84bvq"]
+[ext_resource type="Texture2D" path="res://art/tilesets/derived/grass_water.png" id="1_84bvq"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7n0nk"]
 texture = ExtResource("1_84bvq")
@@ -1354,7 +1354,7 @@ texture_region_size = Vector2i(64, 64)
 tile_size = Vector2i(64, 64)
 terrain_set_0/mode = 1
 terrain_set_0/terrain_0/name = "grass"
-terrain_set_0/terrain_0/color = Color(0.24556907, 0.53386706, 0.13665846, 1)
+terrain_set_0/terrain_0/color = Color(0.15026116, 0.53386706, 0.174615, 1)
 terrain_set_0/terrain_1/name = "water"
-terrain_set_0/terrain_1/color = Color(0.17499885, 0.3367672, 0.34249055, 1)
+terrain_set_0/terrain_1/color = Color(0.172441, 0.3367672, 0.34290153, 1)
 sources/0 = SubResource("TileSetAtlasSource_7n0nk")
