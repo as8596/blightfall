@@ -1,44 +1,59 @@
 class_name TypeScale
 extends RefCounted
-## The only font sizes the interface is allowed to use.
+## The font sizes the interface uses.
 ##
-## All three fonts in `art/fonts/` are pixel fonts drawn on a **16 units-per-em
-## grid** — 99.9% of their outline points land on it, measured. A font like that
-## rasterises cleanly only when one grid unit lands on a whole pixel, which
-## happens when the size is a whole multiple of 16:
+## **This used to be a lock and is now a scale.** The old rule was that only
+## whole multiples of 16 were allowed, because the body face was drawn on a
+## 16-unit grid and anything else made every fourth stem a pixel wider. That is
+## a real property of pixel fonts, and it had a real cost: it left exactly three
+## usable sizes, so a label and the sentence under it were *the same size* and
+## could only be told apart by colour. Every attempt at hierarchy was a 2x jump
+## or nothing.
 ##
-##     size 16 -> 1 pixel per grid unit   crisp
-##     size 32 -> 2 pixels per grid unit  crisp
-##     size 20 -> 1.25                    every fourth stem is a pixel wider
-##     size 24 -> 1.5                     every other stem is a pixel wider
+## The interface is not part of the pixel grid. The world renders into a fixed
+## 1280x720 SubViewport with nearest filtering; the UI is a separate layer laid
+## out at the window's real resolution, and that split was made deliberately.
+## Nothing about the sprites depends on what size this file says.
 ##
-## The UI used to be at 18, 20, 21, 22, 24, 44 and 72. Turning antialiasing off
-## made the edges hard; this is what makes the strokes even.
+## So the sizes are chosen to read well rather than to divide cleanly. Perfect
+## DOS VGA 437 measures linearly between them — a string at 20 is exactly 20/16
+## of its width at 16 — which is what makes an in-between size viable at all,
+## and is a property the previous face did not have.
 ##
-## **Three sizes, and hierarchy comes from somewhere else.** The grid leaves
-## 16, 32, 48, 64 and nothing between, so there is no "slightly bigger" — a
-## label and the body text are the same size and are told apart by colour,
-## spacing and position. That is how pixel-font interfaces are built, and
-## fighting it is how you end up with 21px text that looks subtly broken.
+## **What is still true:** the icons, the tiles and the sprites are pixel art and
+## are still drawn at whole scales. This is about type, and only type.
 
-## The design grid. Any size the UI uses must be a whole multiple of this.
-const STEP: int = 16
+## A minor step, for things that sit beside something else and should not
+## compete with it: units, counts, the "x3" on a stack.
+const TINY: int = 13
 
-## Everything you read: labels, body copy, buttons, replies, numbers.
+## Everything you read a sentence of: labels, body copy, buttons, replies.
 const SMALL: int = 16
 
-## Screen titles — "Paused", the tab headers.
-const HEADING: int = 32
+## A step up without a jump — sub-headings, the name on a shop row, the line the
+## eye should land on first inside a panel. This is the size the old scale could
+## not express, and most of the reason for changing it.
+const MEDIUM: int = 20
+
+## Panel and screen titles — "Paused", the tab headers.
+const HEADING: int = 28
 
 ## The game's name, and nothing else.
 const DISPLAY: int = 64
 
-## Every size in the scale, for the assertion in `m1_smoke_test` that checks
-## them against the font actually shipped rather than against this comment.
-const ALL: Array[int] = [SMALL, HEADING, DISPLAY]
+## Every size in the scale, smallest first. `m1_smoke_test` walks this to check
+## the shipped font renders each one distinctly, which is the invariant that
+## replaced the grid assertion: the old one policed a divisor, this one asks the
+## question that actually matters — can you tell these apart on screen?
+const ALL: Array[int] = [TINY, SMALL, MEDIUM, HEADING, DISPLAY]
 
 
-## Round to the nearest usable size, never below one grid step. For anywhere a
-## size is computed rather than chosen.
+## Clamp a computed size into the scale. For anywhere a size is derived rather
+## than chosen — nothing should invent a size outside `ALL`, or the hierarchy
+## stops being a hierarchy and becomes a spread.
 static func snap(size: float) -> int:
-	return maxi(int(round(size / float(STEP))) * STEP, STEP)
+	var best: int = ALL[0]
+	for step in ALL:
+		if absf(float(step) - size) < absf(float(best) - size):
+			best = step
+	return best

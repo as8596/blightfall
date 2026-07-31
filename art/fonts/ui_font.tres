@@ -2,16 +2,26 @@
 
 ; The workhorse: everything you read a sentence of.
 ;
-; Pixel Operator, because it is the only candidate that got the digits right.
-; `dico` — what this used to be — draws `1` as a bare serifed stem with no flag,
-; so `12` reads as `I2` wherever a number starts with one: carry capacity, stack
-; counts, any health above nine. See art/fonts/README.md for the comparison.
+; Perfect DOS VGA 437. It was picked by measurement rather than by eye, against
+; the two things that actually matter here:
 ;
-; `alagard` stays on as a fallback, which is glyph coverage rather than design:
-; it supplies anything Pixel Operator lacks. The *deliberate* use of alagard is
+;   crispness   2 distinct ink colours covering 100% of rendered text pixels,
+;               identical to Pixel Operator — no antialiasing fringe at all
+;   weight      1272 text pixels against Pixel Operator's 482 in the same
+;               panel, so it is ~2.6x the ink and correspondingly easier to read
+;
+; Geist Pixel measured 353 ink colours over the same region: it *looks* like a
+; pixel font and is not one, so it renders soft next to the sprites. That is why
+; it was rejected after being recommended.
+;
+; It is monospaced, which is a bonus rather than the reason: prices in the shop
+; and numbers on the character sheet line up in columns for free.
+;
+; `alagard` stays on as a fallback, which is glyph coverage rather than design —
+; it supplies anything this face lacks. The *deliberate* use of alagard is
 ; `ui_display.tres`.
 
-[ext_resource type="FontFile" path="res://art/fonts/pixel_operator.ttf" id="1_body"]
+[ext_resource type="FontFile" path="res://art/fonts/dos_vga.ttf" id="1_body"]
 [ext_resource type="FontFile" path="res://art/fonts/alagard.ttf" id="2_alagard"]
 
 [resource]

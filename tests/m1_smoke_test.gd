@@ -523,47 +523,58 @@ func _test_project_configuration() -> void:
 	# fact rather than a second check of it.
 
 
-## The UI font is a pixel font on a 16 units-per-em grid, so it only rasterises
-## evenly at whole multiples of 16 — at 20 every fourth stem gains a pixel and at
-## 24 every other one does. `ui/type_scale.gd` is the list of sizes that are
-## allowed; this checks that list against the font actually shipped rather than
-## against the comment above it.
+## The type scale, checked against the font actually shipped.
 ##
-## The measurement: on a clean grid, doubling the size doubles the advance width
-## exactly. Off the grid it does not, because the rounding differs per glyph.
+## **This replaced a grid assertion.** The old one proved every allowed size was
+## a whole multiple of 16 and that 20 was measurably *not* — which was the right
+## check while the body face was a 16-unit pixel font and the scale existed to
+## police that divisor. It is the wrong check now: the interface is a separate
+## layer from the pixel-art world, the scale is chosen to read well rather than
+## to divide cleanly, and Perfect DOS VGA 437 measures linearly at every size,
+## so the old negative case could never fire again.
+##
+## What is worth asserting instead is the thing a scale is actually for: that
+## the sizes are distinct on screen, in order, and all render.
 func _test_type_scale() -> void:
-	print("\nType scale (ui/type_scale.gd: pixel fonts only work on their grid)")
+	print("\nType scale (ui/type_scale.gd)")
 	var font: Font = ThemeDB.fallback_font
 	_check("the UI has a font", font != null)
 	if font == null:
 		return
 
 	const SAMPLE := "Hamburgefonstiv 0123"
-	var unit := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, TypeScale.STEP).x
-	_check("one grid step renders", unit > 0.0, "%.1fpx wide" % unit)
-
-	var off: Array[String] = []
+	var widths: Array[float] = []
+	var dead: Array[String] = []
 	for size in TypeScale.ALL:
-		if size % TypeScale.STEP != 0:
-			off.append("%d is not a multiple of %d" % [size, TypeScale.STEP])
-			continue
-		var want: float = unit * float(size) / float(TypeScale.STEP)
-		var got := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x
-		if not is_equal_approx(got, want):
-			off.append("%d measures %.1f, wants %.1f" % [size, got, want])
-	_check("every size in the scale lands on the font\u2019s grid", off.is_empty(),
-		", ".join(off))
+		var w := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x
+		if w <= 0.0:
+			dead.append("%d renders nothing" % size)
+		widths.append(w)
+	_check("every size in the scale renders", dead.is_empty(), ", ".join(dead))
 
-	# ...and the negative case, so this is testing the font rather than testing
-	# arithmetic. 20 was the HUD size and is exactly the kind of value that looks
-	# fine in a diff.
-	var want_20: float = unit * 20.0 / float(TypeScale.STEP)
-	var got_20 := font.get_string_size(SAMPLE, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20).x
-	_check("and an off-grid size measurably does not", not is_equal_approx(got_20, want_20),
-		"20 measures %.1f vs %.1f" % [got_20, want_20])
+	# Ordered and distinct. A scale with two steps that measure the same is a
+	# scale with a step nobody can see, which is how 16 and 20 would look if the
+	# font ever went back to snapping onto a grid.
+	var muddled: Array[String] = []
+	for i in range(1, widths.size()):
+		if widths[i] <= widths[i - 1]:
+			muddled.append("%d is not wider than %d" % [TypeScale.ALL[i], TypeScale.ALL[i - 1]])
+	_check("and each is visibly bigger than the last", muddled.is_empty(),
+		", ".join(muddled))
 
-	_check("snap() rounds onto it", TypeScale.snap(21) == 16 and TypeScale.snap(25) == 32
-		and TypeScale.snap(1) == TypeScale.STEP)
+	# The step this whole change was made for. Under the old scale there was
+	# nothing between body and heading, so a sub-heading had to be the same size
+	# as the sentence under it.
+	_check("there is a step between body and heading",
+		TypeScale.SMALL < TypeScale.MEDIUM and TypeScale.MEDIUM < TypeScale.HEADING,
+		"%d < %d < %d" % [TypeScale.SMALL, TypeScale.MEDIUM, TypeScale.HEADING])
+
+	# `snap` picks the nearest step rather than rounding onto a divisor, so
+	# nothing can invent a size that is not in the scale.
+	_check("snap() lands on a real step",
+		TypeScale.ALL.has(TypeScale.snap(21)) and TypeScale.ALL.has(TypeScale.snap(1))
+		and TypeScale.snap(19) == TypeScale.MEDIUM and TypeScale.snap(1) == TypeScale.TINY,
+		"21->%d, 19->%d, 1->%d" % [TypeScale.snap(21), TypeScale.snap(19), TypeScale.snap(1)])
 
 	# ...and nothing anywhere gets a weight invented for it.
 	#
