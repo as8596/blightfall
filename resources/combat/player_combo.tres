@@ -54,10 +54,34 @@ impact_sfx = &"impact_heavy"
 hitbox_size = Vector2(112, 96)
 hitbox_offset = 68.0
 
+[sub_resource type="Resource" id="Resource_heavy"]
+resource_name = "Heavy (charged)"
+script = ExtResource("2_step")
+; Slower to land than the finisher and far more committed. The windup is short
+; because the *hold* was the windup — charging again after releasing would make
+; the player pay for the same commitment twice.
+windup = 0.10
+active = 0.14
+recovery = 0.46
+damage = 14
+knockback_distance = 128.0
+; Nothing to cancel into. See `_has_next` in the attack state.
+cancel_into_next_at = -1.0
+move_speed_scale = 0.0
+hitstop = 0.16
+screen_shake = 14.0
+swing_sfx = &"swing_heavy"
+impact_sfx = &"impact_heavy"
+; Wider than the finisher on both axes: the reward for committing is that it is
+; hard to miss with, not only that it hurts more.
+hitbox_size = Vector2(148, 116)
+hitbox_offset = 76.0
+
 [resource]
 resource_name = "Player Light Combo"
 script = ExtResource("1_combo")
 hit_1 = SubResource("Resource_hit1")
 hit_2 = SubResource("Resource_hit2")
 hit_3 = SubResource("Resource_hit3")
+heavy = SubResource("Resource_heavy")
 combo_window_after_recovery = 0.25

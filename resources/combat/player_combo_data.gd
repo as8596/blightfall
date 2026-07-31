@@ -10,6 +10,14 @@ extends Resource
 @export var hit_2: ComboStepData
 @export var hit_3: ComboStepData
 
+## The charged swing. Not part of the chain — it is what holding the button
+## turns into, and it ends a chain rather than continuing one.
+##
+## A fourth named slot rather than a flag on `hit_3`, because it is a different
+## attack with its own frame data: slower to start, worth committing to, and the
+## only one whose windup the player controls.
+@export var heavy: ComboStepData
+
 ## GDD §5: "combo window closes 0.25s after recovery begins." Note this can
 ## outlast the hit itself — hit 1's recovery ends at 0.34s but its window stays
 ## open until 0.43s, so the chain survives a brief step back into Move.

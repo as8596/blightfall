@@ -74,6 +74,22 @@ var dodge_cooldown_remaining: float = 0.0
 ## Combo continuation, tracked here rather than in the Attack state because the
 ## window outlives the state it belongs to (see PlayerComboData).
 var next_combo_index: int = 0
+
+## How long attack has been held, in seconds, and whether that is now enough.
+##
+## **The light attack still fires on the press**, unchanged. Charging on the
+## press instead — tap for light, hold for heavy — would put the whole charge
+## threshold's worth of latency on every ordinary swing, and snappy light
+## attacks are worth more than a tidier input scheme. So a press swings, and
+## *keeping the button down* winds the heavy up underneath it: the charge is
+## something you hold into after a swing, not something you wait through before
+## one.
+var charge: float = 0.0
+var charge_ready: bool = false
+
+## Seconds of holding before the heavy is available. Short — this is a beat of
+## commitment, not a channel.
+const CHARGE_TIME: float = 0.45
 var combo_window_remaining: float = 0.0
 
 var _hitbox_shape: CollisionShape2D
@@ -134,6 +150,36 @@ func _ready() -> void:
 	# load — would miss values emitted during `_ready`, and then show zero hearts
 	# until the player first took damage.
 	_broadcast_state.call_deferred()
+
+
+## Wind the heavy up while the button is down, and let go of it when it is not.
+##
+## Lives on the player rather than in a state, because the hold spans states:
+## you press during Move, swing through Attack, and are still holding when it
+## drops you back into Idle. A charge owned by any one of those would be reset
+## by the transition out of it.
+func _tick_charge(delta: float) -> void:
+	if combo == null or combo.heavy == null:
+		return
+	if input.intent.attack_held and health.is_alive():
+		charge += delta
+		if not charge_ready and charge >= CHARGE_TIME:
+			charge_ready = true
+			Sfx.play(&"ui_select", -12.0)
+			if flash != null:
+				flash.flash(0.18)
+		return
+	charge = 0.0
+	charge_ready = false
+
+
+## Whether a released hold should become a heavy swing rather than nothing.
+func consume_heavy() -> bool:
+	if not charge_ready or input.intent.attack_held:
+		return false
+	charge = 0.0
+	charge_ready = false
+	return true
 
 
 ## Push current values onto the bus for anything that has just started listening.
@@ -205,6 +251,7 @@ func _process(delta: float) -> void:
 		if combo_window_remaining == 0.0:
 			next_combo_index = 0
 
+	_tick_charge(delta)
 	_try_interact()
 	_try_hotbar()
 

@@ -22,9 +22,16 @@ var _t: float = 0.0
 var _hitbox_on: bool = false
 var _chain_queued: bool = false
 
+## A charged swing rather than a link in the chain. It has its own frame data
+## and it ends the chain: there is nothing to cancel a committed heavy into, and
+## letting one flow back into hit 1 would make the hold strictly better than the
+## tap in every situation.
+var _heavy: bool = false
+
 
 func enter(msg: Dictionary = {}) -> void:
-	_index = msg.get("combo_index", 0)
+	_heavy = bool(msg.get("heavy", false))
+	_index = int(msg.get("combo_index", 0))
 	_start_step()
 
 
@@ -95,11 +102,16 @@ func _can_chain_now() -> bool:
 
 
 func _has_next() -> bool:
+	if _heavy:
+		return false
 	return player.combo != null and _index + 1 < player.combo.length()
 
 
 func _start_step() -> void:
-	_step = player.combo.step(_index) if player.combo != null else null
+	if _heavy:
+		_step = player.combo.heavy if player.combo != null else null
+	else:
+		_step = player.combo.step(_index) if player.combo != null else null
 	if _step == null:
 		return_to_locomotion()
 		return
