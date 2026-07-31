@@ -513,16 +513,11 @@ func _build_equipment() -> Control:
 		var panel := Panel.new()
 		panel.custom_minimum_size = Vector2(SLOT, SLOT)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
-		# The steel plate rather than a drawn box. A `StyleBoxTexture` because
-		# this is a real Control, unlike the hotbar, which paints itself.
-		var box := StyleBoxTexture.new()
-		box.texture = UiKit.SLOT_PLATE
+		var box := StyleBoxFlat.new()
+		box.bg_color = Color(0.13, 0.11, 0.10)
+		box.border_color = Color(0.42, 0.35, 0.26)
+		box.set_border_width_all(2)
 		panel.add_theme_stylebox_override("panel", box)
-		# Shrink rather than fill. The name underneath is wider than the slot, so
-		# left to expand the panel stretched to match it and the plate came out
-		# squashed into a letterbox.
-		panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(panel)
 
 		var icon := TextureRect.new()

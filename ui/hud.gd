@@ -470,8 +470,8 @@ func _draw_weapon(origin: Vector2) -> void:
 	var box := Rect2(origin, Vector2(WEAPON_SIZE, WEAPON_SIZE))
 	var bow := weapon_slot == int(ItemData.Slot.RANGED)
 	var dry := bow and quiver <= 0
-	_canvas.draw_texture_rect(UiKit.SLOT_PLATE, box, false,
-		WEAPON_DRY if dry else Color.WHITE)
+	_canvas.draw_rect(box, WEAPON_BACK)
+	_canvas.draw_rect(box, WEAPON_DRY if dry else WEAPON_EDGE, false, 2.0)
 
 	if weapon_item.icon != null:
 		var pad := 5.0
@@ -539,20 +539,14 @@ func _draw_hotbar(screen: Vector2) -> void:
 		var shift: float = POTION_GAP if ItemsComponent.is_potion_slot(i) else 0.0
 		var at := origin + Vector2(i * (SLOT_SIZE + SLOT_GAP) + shift, 0.0)
 		var box := Rect2(at, Vector2(SLOT_SIZE, SLOT_SIZE))
+		_canvas.draw_rect(box, SLOT_BACK)
 		var chosen := i == selected
-		# The steel plate replaces the drawn box and its border. Tinted rather
-		# than outlined for the two states that matter: a plate with a rectangle
-		# stamped over it is a plate wearing the old widget.
-		var tint := Color.WHITE
-		if _refused.has(i):
-			tint = SLOT_REFUSED
-		elif chosen:
-			tint = SLOT_SELECTED
-		_canvas.draw_texture_rect(UiKit.SLOT_PLATE, box, false, tint)
+		var edge: Color = SLOT_REFUSED if _refused.has(i) else (SLOT_SELECTED if chosen else SLOT_EDGE)
 		if chosen:
-			# ...and the selection still grows outward as well as brightening, so
-			# it is legible in a screenshot with no colour at all.
-			_canvas.draw_rect(box.grow(3.0), SLOT_SELECTED, false, 2.0)
+			# Grown outward rather than recoloured alone, so the selection is
+			# legible at a glance and in a screenshot with no colour at all.
+			_canvas.draw_rect(box.grow(3.0), edge, false, 3.0)
+		_canvas.draw_rect(box, edge, false, 2.0)
 
 		var item: ItemData = slot_items[i] if slot_items[i] is ItemData else null
 		if item != null and item.icon != null:
