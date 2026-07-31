@@ -126,6 +126,7 @@ func _ready() -> void:
 	Events.player_gold_changed.connect(func(_amount: int) -> void: _canvas.queue_redraw())
 	Events.player_materials_changed.connect(func(contents: Dictionary) -> void:
 		materials = contents)
+	Events.player_leveled.connect(_on_leveled)
 	# Always processing: the hover test polls the pointer. The canvas ignores
 	# mouse input by design — a HUD that swallows clicks is a HUD that breaks
 	# whatever is underneath it — so it cannot be told by `gui_input`.
@@ -181,6 +182,12 @@ func _process(delta: float) -> void:
 		_xp_hovered = on_xp
 		_canvas.queue_redraw()
 
+	# Before the early return below: the banner has to tick down even when
+	# nothing else on the HUD is animating, which is most of the time.
+	if _banner_left > 0.0:
+		_banner_left = maxf(_banner_left - delta, 0.0)
+		_canvas.queue_redraw()
+
 	if _refused.is_empty():
 		return
 	for slot in _refused.keys():
@@ -203,6 +210,7 @@ func _draw_hud() -> void:
 	var satchel := Vector2(size.x - MARGIN.x - SATCHEL_SIZE.x, size.y - MARGIN.y - SATCHEL_SIZE.y)
 	_draw_satchel(satchel)
 	_draw_purse(satchel)
+	_draw_level_banner(size)
 	# Last, so it sits over everything it might overlap.
 	_draw_cursor_bubble()
 
@@ -309,6 +317,73 @@ func _draw_satchel(origin: Vector2) -> void:
 		Color(0.05, 0.04, 0.04, 0.9))
 	_canvas.draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, TEXT)
 
+
+
+## Seconds the level-up banner stays up, and how long it takes to fade out.
+const BANNER_TIME: float = 3.5
+const BANNER_FADE: float = 0.6
+const BANNER_BACK := Color(0.09, 0.08, 0.07, 0.94)
+const BANNER_EDGE := Color(0.72, 0.61, 0.39)
+
+var _banner_level: int = 0
+var _banner_left: float = 0.0
+
+
+## A level happened. Say what it bought.
+##
+## **Because it buys exactly one thing and that thing is elsewhere.** A level
+## grants a skill point and nothing else — no stat moves, by design — so
+## without this the only feedback is a bar quietly resetting, and the point sits
+## unspent behind a tab the player has no reason to open. The banner exists to
+## name the reward and say where it is.
+func _on_leveled(level: int) -> void:
+	_banner_level = level
+	_banner_left = BANNER_TIME
+	_canvas.queue_redraw()
+
+
+## Centred, high, and gone in a few seconds. Not a modal: levelling up in the
+## middle of a fight should not be a thing you have to dismiss.
+func _draw_level_banner(screen: Vector2) -> void:
+	if _banner_left <= 0.0 or _banner_level <= 0:
+		return
+	var font := ThemeDB.fallback_font
+	var alpha: float = clampf(_banner_left / BANNER_FADE, 0.0, 1.0)
+
+	var points := Skills.points()
+	var lines := [
+		"Level %d" % _banner_level,
+		"+%d skill point%s" % [Skills.POINTS_PER_LEVEL,
+			"" if Skills.POINTS_PER_LEVEL == 1 else "s"],
+		# ASCII only. The body face has no em-dash and the fallback substitutes
+		# something else entirely — it drew as "ù" the first time this ran.
+		#
+		# And "Tab", not a letter: the skills tree has no direct key of its own,
+		# and the obvious guess is K, which is the tool button.
+		"%d unspent - Tab to spend" % points if points > 0 else "",
+	]
+	var width := 0.0
+	for line in lines:
+		if line != "":
+			width = maxf(width, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT,
+				-1.0, FONT_SIZE).x)
+	var pad := 18.0
+	var line_height := float(FONT_SIZE) + 8.0
+	var shown := lines.filter(func(l: String) -> bool: return l != "")
+	var box := Rect2(
+		Vector2((screen.x - width) * 0.5 - pad, screen.y * 0.16),
+		Vector2(width + pad * 2.0, line_height * shown.size() + pad))
+
+	_canvas.draw_rect(box, Color(BANNER_BACK, BANNER_BACK.a * alpha))
+	_canvas.draw_rect(box, Color(BANNER_EDGE, alpha), false, 2.0)
+	var y := box.position.y + pad * 0.5 + float(FONT_SIZE)
+	for i in shown.size():
+		var line: String = shown[i]
+		var w := font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE).x
+		var colour := BANNER_EDGE if i == 0 else TEXT
+		_canvas.draw_string(font, Vector2((screen.x - w) * 0.5, y), line,
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, FONT_SIZE, Color(colour, alpha))
+		y += line_height
 
 
 ## What is in the purse, tucked under the satchel bar.
