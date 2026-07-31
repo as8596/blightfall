@@ -115,6 +115,12 @@ const THICKET_INLAND := 0.25     # ...and the chance of one anywhere else
 ## is a tree further back, which is the whole illusion.
 const THICKET_JITTER := Vector2(30.0, 44.0)
 
+## Tiles either side of a road that a thicket tree may not lean over. One is
+## enough: the trees are drawn four tiles tall and lean by most of a tile, so a
+## single cell of clearance is the difference between a road you can follow and
+## a road that disappears into the treeline.
+const ROAD_CLEARANCE := 1
+
 ## What the valley has lying in it, and how much of each area is worth combing.
 ##
 ## **This is the middle of the loop.** GDD §15 A4 makes the town the progression
@@ -612,6 +618,17 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 	# item at y=0, which puts all 229 trees behind the player at once — including
 	# the ones he is standing behind.
 	grove.y_sort_enabled = true
+	# Where the roads are, so nothing leans over one. Built once: the check runs
+	# per extra tree and there are thousands of them.
+	# `layers` is [ground, objects, canopy]; the road is on the first of them.
+	var only_ground: Array[TileMapLayer] = [layers[0]]
+	var roads := {}
+	for cell in layers[0].get_used_cells():
+		if map.tile_at(only_ground, cell) == "dirt_path":
+			for dy in range(-ROAD_CLEARANCE, ROAD_CLEARANCE + 1):
+				for dx in range(-ROAD_CLEARANCE, ROAD_CLEARANCE + 1):
+					roads[cell + Vector2i(dx, dy)] = true
+
 	var cells := canopy.get_used_cells()
 	cells.sort()
 	for cell in cells:
@@ -630,6 +647,15 @@ func _plant_props(root: Node2D, canopy: TileMapLayer, layers: Array[TileMapLayer
 			var nudge := Vector2(
 				_rng.randf_range(-THICKET_JITTER.x, THICKET_JITTER.x),
 				_rng.randf_range(-THICKET_JITTER.y, THICKET_JITTER.y * 0.4))
+			# **Not over a road.** A rim tree jitters by most of a tile, and the
+			# thicket is five deep, so the edge of the map was drawing trees
+			# across the very paths it is meant to frame — the route out of an
+			# area vanished into the treeline. The cell blocks either way; what
+			# is being protected here is the *sightline*, so the check is
+			# against where the picture lands rather than where the trunk is.
+			var lands := cell + Vector2i((nudge / 64.0).round())
+			if roads.has(lands):
+				continue
 			var extra := _stand(root, grove, "Thicket%d" % i, cell,
 				String(choices[_rng.randi_range(0, choices.size() - 1)]),
 				Vector2.ZERO, TREE_SCALE)

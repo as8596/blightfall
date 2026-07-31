@@ -78,12 +78,51 @@ var _body: StaticBody2D
 var _shape: CollisionShape2D
 
 
+## How see-through a prop goes when the player is behind it, and how fast it
+## gets there. Not fully transparent: a ghost of the canopy is what tells you
+## you are *behind* something rather than that the tree has vanished.
+const FADE_TO := 0.35
+const FADE_SPEED := 6.0
+
+## Only things that actually hide you bother tracking the player. A thorn bush
+## is shorter than he is and fading it would be a flicker for nothing.
+const FADE_ABOVE := 96.0
+
+var _cover: Rect2 = Rect2()
+var _fade: float = 1.0
+
+
 func _ready() -> void:
 	y_sort_enabled = true
 	# Same z as the player, or sorting cannot help us. See the class comment.
 	z_index = 0
 	_build()
 	_refresh()
+	set_process(_cover.size.y >= FADE_ABOVE)
+
+
+## Fade out while the player is underneath the drawn sprite.
+##
+## **The test is the picture, not the trunk.** A radius around the base fades a
+## tree you are standing beside and in front of, and fails to fade the one whose
+## canopy you are actually lost behind — the canopy is 4 tiles tall and the
+## footprint is a third of one. So this asks whether the player is inside the
+## rectangle the sprite covers, which is the only thing that can hide them.
+##
+## Polled rather than driven by an `Area2D`, because the area that matters is
+## the *art* and it changes with `art_scale`; keeping a second collision shape
+## in step with the sprite is a bug waiting for the first prop that resizes.
+func _process(delta: float) -> void:
+	var wanted := 1.0
+	var scene := get_tree().current_scene
+	var player := scene.get("player") as Node2D if scene != null else null
+	if player != null and _cover.has_point(player.global_position - global_position):
+		wanted = FADE_TO
+	if is_equal_approx(_fade, wanted):
+		return
+	_fade = move_toward(_fade, wanted, FADE_SPEED * delta)
+	if _sprite != null:
+		_sprite.modulate.a = _fade
 
 
 func _build() -> void:
@@ -115,6 +154,15 @@ func _refresh() -> void:
 		# In sprite-local units, so `scale` multiplies it and the base stays put
 		# however tall the thing is drawn.
 		_sprite.offset = Vector2(0, -texture.get_height() * 0.5) + art_offset / zoom
+	# What the sprite covers, in this prop's own space, so `_process` can ask
+	# whether the player is under the picture. Recomputed here because it moves
+	# with the texture, the scale and the offset — all three of which are
+	# exported and can change after `_ready`.
+	if texture != null:
+		var drawn := texture.get_size() * zoom
+		_cover = Rect2(Vector2(-drawn.x * 0.5, -drawn.y) + art_offset, drawn)
+	set_process(_cover.size.y >= FADE_ABOVE)
+
 	(_shape.shape as RectangleShape2D).size = footprint
 	# The footprint sits *behind* the base by half its depth, so the player can
 	# stand at the foot of a tree rather than being held a body-length away.
