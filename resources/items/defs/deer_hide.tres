@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/items/item_data.gd" id="1_item"]
-[ext_resource type="Texture2D" path="res://art/icons/items/drops/wolf_hide.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://art/icons/items/trade/deer_hide.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_item")
-id = &"wolf_hide"
-display_name = "Wolf pelt"
-description = "Thick winter coat. Maren takes these without asking what they were."
+id = &"deer_hide"
+display_name = "Deer hide"
+description = "Thinner than wolf and worth less, which surprises everyone once."
 icon = ExtResource("2_icon")
 kind = 0
 stack_size = 4
-value = 24
+value = 16
 heals = 0

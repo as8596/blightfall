@@ -1,15 +1,15 @@
 [gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://resources/items/item_data.gd" id="1_item"]
-[ext_resource type="Texture2D" path="res://art/icons/items/drops/raw_meat.png" id="2_icon"]
+[ext_resource type="Texture2D" path="res://art/icons/items/forage/wild_berries.png" id="2_icon"]
 
 [resource]
 script = ExtResource("1_item")
-id = &"raw_meat"
-display_name = "Raw wolf meat"
-description = "Off a wolf. Edible at a push; better cooked, and better still sold."
+id = &"wild_berries"
+display_name = "Wild berries"
+description = "Hedgerow pickings. Barely a mouthful, but they are free and they are there."
 icon = ExtResource("2_icon")
 kind = 0
-stack_size = 6
+stack_size = 8
 value = 9
 heals = 1

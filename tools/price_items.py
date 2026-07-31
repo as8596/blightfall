@@ -86,8 +86,20 @@ GEAR_FLOOR = 20
 # Priced by hand because there is nothing to derive from: their worth is a
 # decision about the economy, not a consequence of an effect. A wolf hide is
 # most of a meal's worth, so a good hunt is a day's food.
+# Roughly by scarcity and by how much work it took to get: a pelt is a fight, an
+# antler is a walk, and feathers are luck. The blightcap is dearest and it is
+# not close — nobody else is bringing samples back, and somebody wants to know
+# what the rot is.
 TRADE_GOODS = {
     "wolf_hide": 24,
+    "deer_hide": 16,
+    "wolf_fang": 11,
+    "boar_tusk": 14,
+    "shed_antler": 9,
+    "dried_sinew": 7,
+    "rendered_fat": 8,
+    "crow_feathers": 4,
+    "blightcap_mushroom": 45,
     "rags": 3,
 }
 

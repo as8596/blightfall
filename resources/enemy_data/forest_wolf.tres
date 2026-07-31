@@ -10,7 +10,9 @@ id = &"forest_wolf"
 display_name = "Forest Wolf"
 loot = {
 &"raw_meat": [0.75, 1, 2],
-&"wolf_hide": [0.45, 1, 1]
+&"wolf_hide": [0.40, 1, 1],
+&"wolf_fang": [0.30, 1, 2],
+&"dried_sinew": [0.20, 1, 1]
 }
 gold_chance = 0.08
 gold_min = 3
