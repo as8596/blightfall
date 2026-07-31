@@ -168,10 +168,11 @@ func close() -> void:
 ## room with no door. Taking them first is the only reliable fix.
 ## Which page each direct key opens. Tab is the general toggle and reopens
 ## whatever you were last looking at; these jump.
+## Character 0, Inventory 1, Skills 2, Journal 3, Map 4.
 const PAGE_KEYS := {
 	&"open_character": 0,
 	&"open_inventory": 1,
-	&"open_map": 3,
+	&"open_map": 4,
 }
 
 
@@ -196,6 +197,7 @@ func _input(event: InputEvent) -> void:
 func _refresh() -> void:
 	_pages["Character"].text = _character_text()
 	_refresh_inventory()
+	_pages["Journal"].text = _journal_text()
 	_pages["Map"].text = _map_text()
 	_refresh_equipment()
 	_refresh_skills()
@@ -372,6 +374,65 @@ func _on_slot_hover(slot: int, entered: bool) -> void:
 		_refresh_detail()
 
 
+## What you have been asked to do.
+##
+## **Ready quests lead**, because "go back to her" is the only thing on this
+## page that is a instruction rather than a status — and a journal you have to
+## read to the bottom to find your next action is a journal players stop
+## opening. Finished ones stay, dimmed: a list that empties as you play tells
+## you nothing about what you have done.
+func _journal_text() -> String:
+	var entries := Quests.journal()
+	if entries.is_empty():
+		return "\n  " + _aside("Nobody has asked you for anything yet.")
+
+	var actor := _player()
+	var lines: Array[String] = [""]
+	for entry in entries:
+		var quest: QuestData = entry
+		var state := Quests.state_of(quest.id)
+		var tag := ""
+		match state:
+			Quests.State.READY:
+				tag = "  " + _key("— ready, go back")
+			Quests.State.DONE:
+				tag = "  " + _aside("— done")
+		lines.append("  %s%s" % [_named(quest.title), tag])
+		if Quests.completions(quest.id) > 1:
+			lines.append("  " + _aside("finished %d times" % Quests.completions(quest.id)))
+		if not quest.summary.is_empty() and state != Quests.State.DONE:
+			lines.append("  " + _aside(quest.summary))
+
+		if state != Quests.State.DONE:
+			for i in quest.steps.size():
+				var at := Quests.step_progress(quest, i, actor)
+				var done: bool = int(at[0]) >= int(at[1])
+				var mark := "x" if done else " "
+				var counted := ""
+				if int(at[1]) > 1:
+					counted = "   %d / %d" % [at[0], at[1]]
+				var text := "[%s]  %s%s" % [mark, Quests.step_text(quest.steps[i]), counted]
+				lines.append("    " + (_kind(text) if done else text))
+
+		var reward := _reward_line(quest)
+		if reward != "" and state != Quests.State.DONE:
+			lines.append("    " + _aside(reward))
+		lines.append("")
+	return "\n".join(lines)
+
+
+static func _reward_line(quest: QuestData) -> String:
+	var parts: Array[String] = []
+	if quest.gold > 0:
+		parts.append("%d gold" % quest.gold)
+	if quest.experience > 0:
+		parts.append("%d xp" % quest.experience)
+	for item in quest.items:
+		if item != null:
+			parts.append(item.display_name)
+	return "" if parts.is_empty() else "Pays: " + ", ".join(parts)
+
+
 func _map_text() -> String:
 	# Diegetic rather than "coming soon": the archive is the building that tracks
 	# the blight (docs/AMBRY.md, rebuild project 6), and it is a ruin. The map
@@ -422,12 +483,17 @@ func _build() -> void:
 
 	_tabs.add_child(_build_skills_page())
 
-	for page_name in ["Character", "Map"]:
+	# Journal is a text page, which is not just laziness: it means this builds
+	# empty and reads `Quests` only when opened, so the autoload can sit after
+	# `Dialogue` in the load order (it subscribes to it) without this reading an
+	# empty registry the way the skills tab once did.
+	for page_name in ["Character", "Journal", "Map"]:
 		var text := _text_page(page_name)
 		_tabs.add_child(text)
 		_pages[page_name] = text
-	# Character first, then the grid, then the tree, then the map.
+	# Character first, then the grid, then the tree, then the journal, then map.
 	_tabs.move_child(_tabs.get_node("Character"), 0)
+	_tabs.move_child(_tabs.get_node("Journal"), 3)
 
 
 ## Four worn slots: what you swing, what you wear, what is on your feet, and

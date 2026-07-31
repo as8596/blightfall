@@ -7,6 +7,10 @@ extends Resource
 ## an afternoon.
 
 @export_group("Identity")
+## Stable id, the same idea as `ItemData.id`. Saves and quest objectives name
+## an enemy by this rather than by `display_name`, so renaming "Rot Hound" to
+## "Blighted Hound" does not silently retire somebody's half-finished quest.
+@export var id: StringName = &""
 @export var display_name: String = ""
 
 @export_group("Stats")

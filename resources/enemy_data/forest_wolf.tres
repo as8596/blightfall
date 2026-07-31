@@ -6,6 +6,7 @@
 [resource]
 resource_name = "Forest Wolf"
 script = ExtResource("1_data")
+id = &"forest_wolf"
 display_name = "Forest Wolf"
 max_health = 10
 move_speed = 175.0

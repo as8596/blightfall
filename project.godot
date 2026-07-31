@@ -42,9 +42,12 @@ Hud="*res://ui/hud.gd"
 GameMenu="*res://ui/game_menu.gd"
 PauseMenu="*res://ui/pause_menu.gd"
 Dialogue="*res://ui/dialogue_box.gd"
-; After Dialogue: the shop window subscribes to its `action_chosen` in _ready,
-; and a listener registered before the thing it listens to does not exist yet.
+; After Dialogue: both subscribe to its `action_chosen` in _ready, and a
+; listener registered before the thing it listens to does not exist yet.
+; Quests is data but has to sit here for that reason — GameMenu can still draw
+; its journal, because that page is built empty and filled when opened.
 ShopMenu="*res://ui/shop_menu.gd"
+Quests="*res://autoloads/quests.gd"
 
 [display]
 

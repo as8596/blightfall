@@ -388,12 +388,25 @@ func _enter_node(name: String) -> void:
 ## eventually; until there is one, "have they heard this yet" answers most of
 ## what a branching conversation actually needs to ask, and it cannot fall out
 ## of step with the conversation because it *is* the conversation.
+## `"if_quest": "supply_run:ready"` gates a reply on a quest's state. The states
+## are `unknown`, `active`, `ready`, `done`, plus `offerable` for "could be
+## taken now", which is the one a giver's opening line actually wants — it
+## covers never-taken *and* finished-but-repeatable without the author having to
+## remember which.
+##
+## Several may be listed: `"supply_run:ready|done"`.
 func _allowed(choice: Dictionary) -> bool:
 	var needs := String(choice.get("if_seen", ""))
 	if needs != "" and not has_seen(_id, needs):
 		return false
 	var blocks := String(choice.get("unless_seen", ""))
 	if blocks != "" and has_seen(_id, blocks):
+		return false
+	var needs_quest := String(choice.get("if_quest", ""))
+	if needs_quest != "" and not Quests.matches(needs_quest):
+		return false
+	var blocks_quest := String(choice.get("unless_quest", ""))
+	if blocks_quest != "" and Quests.matches(blocks_quest):
 		return false
 	return true
 

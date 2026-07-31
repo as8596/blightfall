@@ -322,12 +322,14 @@ func _check_the_room() -> void:
 	var missing: Array[String] = []
 	for node_name in talk.get("nodes", {}):
 		for choice in (talk["nodes"][node_name] as Dictionary).get("choices", []):
-			var action := String((choice as Dictionary).get("action", ""))
-			if action == "":
+			# Only the shop actions. A reply may carry `quest` or `turn_in`
+			# instead, and those name a quest rather than a shop —
+			# `tests/quest_test.gd` is what checks those resolve.
+			if String((choice as Dictionary).get("action", "")) != "shop":
 				continue
 			named += 1
 			var id := StringName(String((choice as Dictionary).get("shop", "")))
-			if action != "shop" or not Shops.has(id):
+			if not Shops.has(id):
 				missing.append("%s -> %s" % [node_name, id])
 	_check("every trade reply names a real shop", missing.is_empty(), ", ".join(missing))
 	_check("and there is more than one way to reach the shelf", named >= 3, "%d" % named)

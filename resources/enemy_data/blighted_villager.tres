@@ -5,6 +5,7 @@
 [resource]
 resource_name = "Blighted Villager"
 script = ExtResource("1_data")
+id = &"blighted_villager"
 display_name = "Blighted Villager"
 max_health = 12
 move_speed = 136.0

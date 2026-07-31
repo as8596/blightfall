@@ -73,6 +73,16 @@ signal player_gold_changed(amount: int)
 ## not have to know which way it went.
 signal traded(item: StringName, amount: int, delta: int)
 
+## A quest changed hands: taken on, or finished. Carries the id; listeners ask
+## `Quests` for anything more, because the bus carries facts and not state.
+signal quest_taken(id: StringName)
+signal quest_completed(id: StringName)
+
+## A turn-in could not happen, and the conversation has already moved past the
+## reply that tried it. The HUD says so, because the alternative is a player who
+## clicked "Here you are" and watched nothing happen.
+signal quest_refused(id: StringName, reason: String)
+
 ## Somebody's shop was opened or closed. The world uses this the way it uses
 ## `Dialogue` — a villager stops wandering while you are buying from them.
 signal shop_opened(id: StringName)

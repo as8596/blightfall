@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://resources/quests/quest_data.gd" id="1_quest"]
+[ext_resource type="Script" path="res://resources/quests/quest_step.gd" id="2_step"]
+[ext_resource type="Resource" path="res://resources/items/defs/salve.tres" id="3_salve"]
+
+[sub_resource type="Resource" id="Step_timber"]
+script = ExtResource("2_step")
+kind = 0
+target = &"timber"
+count = 8
+
+[sub_resource type="Resource" id="Step_stone"]
+script = ExtResource("2_step")
+kind = 0
+target = &"stone"
+count = 4
+
+[resource]
+script = ExtResource("1_quest")
+id = &"supply_run"
+title = "The south road"
+giver = &"shopkeeper"
+summary = "The carters stopped coming up from the valley in the spring. Maren buys what you bring instead, and pays over the odds for it — not charity, she says. She has nobody else to buy from."
+steps = Array[Resource]([SubResource("Step_timber"), SubResource("Step_stone")])
+gold = 60
+experience = 25
+items = Array[Resource]([ExtResource("3_salve")])
+repeatable = true

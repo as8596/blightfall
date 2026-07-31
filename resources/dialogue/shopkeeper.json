@@ -139,12 +139,50 @@
 
     "errand_accepted": {
       "lines": [
+        "Eight timber and four stone, to start. That's a cart's worth, near enough.",
         "Good. That's an arrangement, not a favour.",
-        "Come back with a full pack and we'll both have had a decent day."
+        "Come back with a full satchel and we'll both have had a decent day."
       ],
       "choices": [
-        { "text": "Let's start now.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "Soon.", "goto": "" }
+        {
+          "text": "I'll bring it.",
+          "action": "quest",
+          "quest": "supply_run",
+          "goto": ""
+        },
+        { "text": "Let's start now.", "action": "shop", "shop": "sundries", "goto": "" }
+      ]
+    },
+
+    "errand_deliver": {
+      "lines": [
+        "That's the lot. Eight and four, and none of it damp.",
+        "Sixty, and take the salve — you look like somebody who's going back out."
+      ],
+      "choices": [
+        {
+          "text": "Here you are.",
+          "action": "turn_in",
+          "quest": "supply_run",
+          "goto": "errand_again"
+        }
+      ]
+    },
+
+    "errand_again": {
+      "lines": [
+        "Same again whenever you've got it. The road isn't going to start running on its own."
+      ],
+      "choices": [
+        {
+          "text": "I'll take another load.",
+          "action": "quest",
+          "quest": "supply_run",
+          "goto": "",
+          "if_quest": "supply_run:offerable"
+        },
+        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
+        { "text": "Later.", "goto": "" }
       ]
     },
 
@@ -154,10 +192,21 @@
         "Shelf's where it was."
       ],
       "choices": [
+        {
+          "text": "I've got your timber.",
+          "goto": "errand_deliver",
+          "if_quest": "supply_run:ready"
+        },
         { "text": "Let me see what you have.", "action": "shop", "shop": "sundries", "goto": "" },
         {
-          "text": "You said you needed things brought up.",
+          "text": "Still working on your load.",
           "goto": "errand_status",
+          "if_quest": "supply_run:active"
+        },
+        {
+          "text": "I'll take another load.",
+          "goto": "errand_again",
+          "if_quest": "supply_run:offerable",
           "if_seen": "errand_accepted"
         },
         {
@@ -173,8 +222,8 @@
 
     "errand_status": {
       "lines": [
-        "I did. I still do. That's the trouble with the arrangement — it doesn't finish.",
-        "Empty the pack out and I'll tell you what's worth having."
+        "Eight timber and four stone. I'll not pretend it's urgent — nothing is, any more.",
+        "Empty the satchel out and I'll tell you what's worth having."
       ],
       "choices": [
         { "text": "Here's what I've got.", "action": "shop", "shop": "sundries", "goto": "" },
