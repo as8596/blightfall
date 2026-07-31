@@ -151,6 +151,12 @@ const HARVEST_CAP := 9
 const BARE_GROUND: Array = ["dirt_path", "bridge", "cobble", "floorboards",
 	"water", "shallows", "hearth"]
 
+## How a road wanders. One tile either side of true, reconsidered every few
+## tiles — enough to break the rhythm, not enough to make a road look drunk or
+## to push it off the ground the area assertions cleared for it.
+const WANDER_MAX := 1
+const WANDER_EVERY := 4
+
 ## The drawn terrain, and which greybox tiles map onto which of its two.
 const TERRAIN_GRASS_DIRT: TileSet = preload("res://resources/tilesets/grass_dirt.tres")
 ## Walked-on ground becomes the dirt terrain.
@@ -535,11 +541,9 @@ func _build_area(tileset: TileSet, area: Dictionary) -> void:
 	# what makes "you can walk from any exit to any other" true by construction
 	# rather than by luck.
 	for path in area.get("paths", []):
-		map.fill(ground, path, "dirt_path")
-		for y in range(path.position.y, path.end.y):
-			for x in range(path.position.x, path.end.x):
-				objects.erase_cell(Vector2i(x, y))
-				canopy.erase_cell(Vector2i(x, y))
+		for cell in _carve_path(map, ground, path):
+			objects.erase_cell(cell)
+			canopy.erase_cell(cell)
 
 	for feature in area.get("features", []):
 		map.put(objects, feature[1], String(feature[0]))
@@ -804,6 +808,50 @@ func _paint_terrain(map: GreyboxMap, ground: TileMapLayer, size: Vector2i) -> Ti
 	terrain.set_cells_terrain_connect(grass, 0, 0, false)
 	terrain.set_cells_terrain_connect(dirt, 0, 1, false)
 	return terrain
+
+
+## Cut a road, wandering by up to a tile as it goes.
+##
+## **Roads used to be `Rect2i` fills**, which made every one of them a perfectly
+## straight band — and once the greybox was replaced by real ground that turned
+## into the most obvious thing on screen. A corner-Wang set draws a straight
+## boundary with one tile configuration, so a long axis-aligned edge is that
+## tile's scallop repeating at a fixed 64px period, and the eye locks onto the
+## frequency. Twelve art variants do not help: they all scallop in the same
+## places, because each has to meet its neighbours at the tile boundary.
+##
+## The cure is not more tiles, it is fewer long straight runs. A road that steps
+## sideways every few tiles has no single uninterrupted edge for the eye to find
+## a rhythm in, and it costs nothing at runtime.
+##
+## Through `_rng`, which is seeded per area — so a rebuild produces the same
+## valley, and a diff of the committed scenes is reviewable.
+##
+## Returns every cell carved, because the callers have to clear trees and
+## scatter off the road and can no longer do that from the rectangle.
+func _carve_path(map: GreyboxMap, ground: TileMapLayer, path: Rect2i) -> Array:
+	var carved: Array = []
+	var horizontal := path.size.x >= path.size.y
+	var length := path.size.x if horizontal else path.size.y
+	var width := path.size.y if horizontal else path.size.x
+	var drift := 0
+	var previous := 0
+	for step in length:
+		# Hold a line for a few tiles, then consider stepping. Wandering every
+		# tile reads as noise rather than as a road somebody walked.
+		if step > 0 and step % WANDER_EVERY == 0:
+			drift = clampi(drift + _rng.randi_range(-1, 1), -WANDER_MAX, WANDER_MAX)
+		# Between the old offset and the new one, so a step sideways leaves no
+		# diagonal gap for the player to be blocked by.
+		var low := mini(previous, drift)
+		var high := maxi(previous, drift)
+		for lane in range(low, high + width):
+			var cell := Vector2i(path.position.x + step, path.position.y + lane) if horizontal \
+				else Vector2i(path.position.x + lane, path.position.y + step)
+			map.put(ground, cell, "dirt_path")
+			carved.append(cell)
+		previous = drift
+	return carved
 
 
 func _add_markers(root: Node2D, area: Dictionary) -> void:
