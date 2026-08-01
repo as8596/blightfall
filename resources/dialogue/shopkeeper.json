@@ -12,9 +12,20 @@
         "That's the whole of my patter. Ask me anything else and you'll get an honest answer, which is worse."
       ],
       "choices": [
-        { "text": "You know who I am.", "goto": "who_i_am" },
-        { "text": "Why can't you get it?", "goto": "errand_offer" },
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" }
+        {
+          "text": "You know who I am.",
+          "goto": "who_i_am"
+        },
+        {
+          "text": "Why can't you get it?",
+          "goto": "errand_offer"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        }
       ]
     },
 
@@ -24,20 +35,32 @@
         "It doesn't change the price of bread."
       ],
       "choices": [
-        { "text": "That's it?", "goto": "thats_it" },
-        { "text": "Were you there?", "goto": "were_you_there" }
+        {
+          "text": "That's it?",
+          "goto": "thats_it"
+        },
+        {
+          "text": "Were you there?",
+          "goto": "were_you_there"
+        }
       ],
       "once": true
     },
 
     "thats_it": {
       "lines": [
-        "What were you expecting — a speech?",
+        "What were you expecting - a speech?",
         "You'll get charged what everyone gets charged. That's not me being kind. It's me not being bothered."
       ],
       "choices": [
-        { "text": "It reads as kind from where I'm standing.", "goto": "reads_as_kind" },
-        { "text": "Were you there?", "goto": "were_you_there" }
+        {
+          "text": "It reads as kind from where I'm standing.",
+          "goto": "reads_as_kind"
+        },
+        {
+          "text": "Were you there?",
+          "goto": "were_you_there"
+        }
       ],
       "once": true
     },
@@ -45,11 +68,23 @@
     "reads_as_kind": {
       "lines": [
         "Then this town has set the bar somewhere I'd rather not think about.",
-        "Anyway. Shelf's there."
+        "Anyway. Shelf's there, and it's thinner than it was."
       ],
       "choices": [
-        { "text": "Were you there?", "goto": "were_you_there" },
-        { "text": "Fair enough.", "goto": "" }
+        {
+          "text": "Were you there?",
+          "goto": "were_you_there"
+        },
+        {
+          "text": "Thinner how?",
+          "goto": "errand_offer"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        }
       ],
       "once": true
     },
@@ -57,12 +92,18 @@
     "were_you_there": {
       "lines": [
         "At the hanging? No. I was here, minding the shop.",
-        "Before you make that into something — I'd likely have gone if I hadn't been. Everyone else did.",
+        "Before you make that into something - I'd likely have gone if I hadn't been. Everyone else did.",
         "So I don't get to be the one who refused. I get to be the one who was busy."
       ],
       "choices": [
-        { "text": "You didn't have to tell me that.", "goto": "didnt_have_to" },
-        { "text": "Why can't you get stock?", "goto": "errand_offer" }
+        {
+          "text": "You didn't have to tell me that.",
+          "goto": "didnt_have_to"
+        },
+        {
+          "text": "Why can't you get stock?",
+          "goto": "errand_offer"
+        }
       ],
       "once": true
     },
@@ -73,21 +114,35 @@
         "I'd rather be dull and trusted. It's better for trade."
       ],
       "choices": [
-        { "text": "Why can't you get stock?", "goto": "errand_offer" },
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" }
+        {
+          "text": "Why can't you get stock?",
+          "goto": "errand_offer"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        }
       ],
       "once": true
     },
 
     "errand_offer": {
       "lines": [
-        "The carters stopped coming up from the valley in the spring. Nobody decided it — they just stopped.",
+        "The carters stopped coming up from the valley in the spring. Nobody decided it. They just stopped.",
         "Half of what I sell came up that road. The other half I can only make if somebody brings me the makings.",
         "You've been down there. You're going again. So: bring me timber and stone and I'll pay over the odds for it."
       ],
       "choices": [
-        { "text": "How much do you need?", "goto": "errand_detail" },
-        { "text": "Why pay over the odds?", "goto": "why_over_odds" }
+        {
+          "text": "How much do you need?",
+          "goto": "errand_detail"
+        },
+        {
+          "text": "Why pay over the odds?",
+          "goto": "why_over_odds"
+        }
       ]
     },
 
@@ -97,7 +152,10 @@
         "It's not generosity. It's the only price that gets the job done."
       ],
       "choices": [
-        { "text": "How much do you need?", "goto": "errand_detail" }
+        {
+          "text": "How much do you need?",
+          "goto": "errand_detail"
+        }
       ],
       "once": true
     },
@@ -105,47 +163,86 @@
     "errand_detail": {
       "lines": [
         "Eight timber and four stone, to start. That's a cart's worth, near enough.",
-        "One thing, and I'd rather say it than have you hear it from him — the carpenter wants that same timber for the rebuilding.",
-        "I'm not going to pretend otherwise. You'll have to decide who gets it."
+        "One thing, and I'd rather say it than have you hear it from him. The carpenter wants that same timber for the rebuilding.",
+        "So I'm asking for what's left after him, not instead of him. I'd not want it the other way and I'd not get it the other way."
       ],
       "choices": [
-        { "text": "I'll bring you a load.", "action": "quest", "quest": "supply_run", "goto": "errand_accepted" },
-        { "text": "Then he can have it.", "goto": "he_can_have_it" }
+        {
+          "text": "Then I'll bring you what's spare.",
+          "action": "quest",
+          "quest": "supply_run",
+          "goto": "errand_accepted"
+        },
+        {
+          "text": "He might need all of it.",
+          "goto": "he_might_need_it"
+        }
       ]
     },
 
-    "he_can_have_it": {
+    "he_might_need_it": {
       "lines": [
-        "Good. That's the right answer and I'd have thought less of you for the other one.",
-        "The offer stands regardless. Some days you'll come back with more than a house needs."
+        "He might, some weeks. Then I go without and the shelf stays thin, and that's the shape of it.",
+        "The offer doesn't expire. Come back when the valley's been generous."
       ],
       "choices": [
-        { "text": "I'll bring you what's spare.", "action": "quest", "quest": "supply_run", "goto": "errand_accepted" },
-        { "text": "I'll think about it.", "goto": "" }
+        {
+          "text": "All right. What's spare is yours.",
+          "action": "quest",
+          "quest": "supply_run",
+          "goto": "errand_accepted"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "I'll think about it.",
+          "goto": ""
+        }
       ]
     },
 
     "errand_accepted": {
       "lines": [
         "Then that's an arrangement, not a favour. I'll want it saying that way round.",
-        "Come back with a full satchel and we'll both have had a decent day."
+        "Bring the whole eight and four together, mind. I've no use for two timber and a promise."
       ],
       "choices": [
-        { "text": "What's your father's name doing on the sign?", "goto": "sign" },
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "I'll be off, then.", "goto": "" }
+        {
+          "text": "Tallow. That's the name over the door.",
+          "goto": "sign"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "I'll be off, then.",
+          "goto": ""
+        }
       ]
     },
 
     "sign": {
       "lines": [
-        "TALLOW AND SON. He painted that before he had any children — that's the sort of man he was, certain in advance.",
+        "TALLOW AND SON. My father painted that before he had any children - that's the sort of man he was, certain in advance.",
         "He got me first. Then he got a son, and then the valley got the son, and I got the shop.",
         "I've not repainted it. Everybody knows where the shop is."
       ],
       "choices": [
-        { "text": "I'm sorry.", "goto": "sorry" },
-        { "text": "You could paint over the last two words.", "goto": "good_sign" }
+        {
+          "text": "I'm sorry.",
+          "goto": "sorry"
+        },
+        {
+          "text": "You could paint over the last two words.",
+          "goto": "good_sign"
+        }
       ],
       "once": true
     },
@@ -153,11 +250,19 @@
     "sorry": {
       "lines": [
         "You didn't do it. Don't stand in my shop apologising for the weather.",
-        "But — noted. Thank you."
+        "But - noted. Thank you."
       ],
       "choices": [
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "I'll leave you to it.", "goto": "" }
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "I'll leave you to it.",
+          "goto": ""
+        }
       ]
     },
 
@@ -167,8 +272,16 @@
         "...I know."
       ],
       "choices": [
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "I'll leave you to it.", "goto": "" }
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "I'll leave you to it.",
+          "goto": ""
+        }
       ]
     },
 
@@ -184,7 +297,7 @@
           "if_quest": "supply_run:ready"
         },
         {
-          "text": "Still gathering it.",
+          "text": "How's the load coming?",
           "goto": "errand_status",
           "if_quest": "supply_run:active"
         },
@@ -199,27 +312,50 @@
           "goto": "errand_offer",
           "unless_seen": "errand_offer"
         },
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "What's your father's name doing on the sign?", "goto": "sign" },
-        { "text": "Just passing.", "goto": "" }
+        {
+          "text": "Tallow. That's the name over the door.",
+          "goto": "sign"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "Just passing.",
+          "goto": ""
+        }
       ]
     },
 
     "errand_status": {
       "lines": [
-        "Eight timber and four stone. I'll not pretend it's urgent — nothing is, any more.",
-        "Tip the satchel out when you've got it and I'll tell you what it's worth first."
+        "Eight timber and four stone, and I'll take it in one go or not at all.",
+        "Sell me the rest of what you're carrying by all means. Just don't sell me the load - I'd have bought my own cart off you and then paid you again for fetching it."
       ],
       "choices": [
-        { "text": "Here's what I have so far.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "Nothing yet.", "goto": "nothing_yet" }
+        {
+          "text": "I'll keep the load separate.",
+          "goto": "keep_separate"
+        },
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "South road, then.",
+          "goto": ""
+        }
       ]
     },
 
-    "nothing_yet": {
+    "keep_separate": {
       "lines": [
-        "Then you've come a long way to tell me so.",
-        "Go on. South road. Mind the crate on your way out — it's been there four months and it'll be there four more."
+        "Good. Come back heavy.",
+        "Mind the crate on your way out - it's been there four months and it'll be there four more."
       ],
       "choices": []
     },
@@ -251,8 +387,16 @@
           "goto": "",
           "if_quest": "supply_run:offerable"
         },
-        { "text": "Let me see the shelf.", "action": "shop", "shop": "sundries", "goto": "" },
-        { "text": "Another time.", "goto": "" }
+        {
+          "text": "Let me see the shelf.",
+          "action": "shop",
+          "shop": "sundries",
+          "goto": ""
+        },
+        {
+          "text": "Another time.",
+          "goto": ""
+        }
       ]
     }
   }
