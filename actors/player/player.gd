@@ -313,9 +313,15 @@ func stat_block() -> Dictionary:
 	var dodge := state_machine.get_node_or_null("Dodge")
 	var strike := "-"
 	if combo != null and combo.length() > 0:
+		# The bonus, the same way `configure_hitbox` applies it. Without it the
+		# sheet quoted the combo resource while the hitbox swung for more, so a
+		# forge or a better sword moved the world and not the page describing it
+		# — which is the disagreement the docstring above says is worse than no
+		# sheet at all.
+		var bonus := stats.bonus(StatsComponent.DAMAGE)
 		var steps: Array[String] = []
 		for i in combo.length():
-			steps.append(str(combo.step(i).damage))
+			steps.append(str(maxi(combo.step(i).damage + bonus, 1)))
 		strike = " / ".join(steps)
 	return {
 		"health": health.current,

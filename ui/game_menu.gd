@@ -64,23 +64,32 @@ const DISPLAY: Font = preload("res://art/fonts/ui_display.tres")
 ## screen.
 ##
 ##     12 * 50 + 11 * 5 + 24  =  679   the grid
-##     200 + 12 + 679 + 12 + 250 = 1153   the row
-##     1153 + 2 * 40 = 1233 < 1280        with the page margins
+##     216 + 12 + 679 + 12 + 250 = 1169   the row
+##     1169 + 2 * 40 = 1249 < 1280        with the page margins
 ##
 ## These briefly went to 44/4/190/240 to make room for steel frames around every
 ## panel, which cost 29px a side instead of 12. The frames came off — three of
 ## them across a row is a lot of border for the space it leaves — and the sizes
 ## came back with them.
+##
+## The left column then went 200 -> 216 for the vitals. Its frame takes 12 a
+## side, so 200 left 176 of usable width; the longest label is "Stamina" at 63px
+## and a three-step combo in double figures — "12 / 12 / 24" — is 108, which
+## with the 10px column gap comes to 181. Five pixels over, and the column would
+## have quietly grown to swallow them. There were 47 spare in the row, so it was
+## cheaper to spend sixteen of them than to leave a cliff the first good sword
+## walks off.
 const SLOT := 50
 const GAP := 5
-const COLUMN_LEFT := 200
+const COLUMN_LEFT := 216
 const COLUMN_RIGHT := 250
 const PAGE_MARGIN := 40.0
 
 var _detail: RichTextLabel
 var _detail_icon: TextureRect
 var _who: Label
-var _vitals: RichTextLabel
+var _vitals: GridContainer
+var _vital_values: Dictionary = {}
 var _gear_panels: Array[Panel] = []
 var _gear_icons: Array[TextureRect] = []
 var _gear_labels: Array[Label] = []
@@ -332,20 +341,22 @@ func _refresh_vitals() -> void:
 	if _who == null:
 		return
 	_who.text = "The Condemned"
-	if stats.is_empty():
-		_vitals.text = "\n  " + _aside("No player.")
-		return
-	var lines := [
-		"",
-		_row("Health", "%d / %d" % [stats.get("health", 0), stats.get("max_health", 0)]),
-		_row("Stamina", "%.0f" % stats.get("max_stamina", 0.0)),
-		_row("Carry", "%d" % stats.get("capacity", 0)),
-		"",
-		_row("Move", "%d px/s" % int(stats.get("move_speed", 0.0))),
-		_row("Strike", "%s" % stats.get("damage", "-")),
-		_row("Reach", "%s" % stats.get("reach", "-")),
-	]
-	_vitals.text = "\n".join(lines)
+	var values := {}
+	if not stats.is_empty():
+		values = {
+			&"Health": "%d / %d" % [stats.get("health", 0), stats.get("max_health", 0)],
+			&"Stamina": "%.0f" % stats.get("max_stamina", 0.0),
+			&"Carry": "%d" % stats.get("capacity", 0),
+			&"Move": "%d px/s" % int(stats.get("move_speed", 0.0)),
+			&"Strike": "%s" % stats.get("damage", "-"),
+			# `stat_block` publishes a *bonus*, not a reach — this row asked for
+			# "reach", never found it, and had been rendering a bare "-" since it
+			# was written. Shown the way the swing actually uses it, as a
+			# percentage of the shipped arc.
+			&"Reach": "%d%%" % (100 + int(stats.get("reach_bonus", 0))),
+		}
+	for row in _vital_values:
+		_vital_values[row].text = String(values.get(row, "-"))
 
 
 func _on_slot_hover(slot: int, entered: bool) -> void:
@@ -1138,11 +1149,64 @@ func _build_character_column() -> VBoxContainer:
 	_who.add_theme_color_override("font_color", Color(0.72, 0.61, 0.39))
 	column.add_child(_who)
 
-	_vitals = _text_page("Vitals")
-	_vitals.custom_minimum_size = Vector2(0, 250)
-	_vitals.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_vitals = _build_vitals()
 	column.add_child(_vitals)
 	return column
+
+
+## What the numbers are, laid out down the left column. Empty strings are gaps:
+## the three that describe the body, then the three that describe what it does.
+const VITAL_ROWS: Array[StringName] = [
+	&"Health", &"Stamina", &"Carry", &"", &"Move", &"Strike", &"Reach",
+]
+
+## A real two-column grid, rather than a label with the values pushed across by
+## spaces.
+##
+## **The padded version wrapped, and that is what "misaligned" looked like.**
+## `_row` writes the label, then spaces out to a fourteen-character field, then
+## the value — which lines up anywhere the line has room, and this column does
+## not have room. The DOS VGA face advances 9px a character; the column is
+## 200px wide and the frame takes 12 off each side, so 176px is nineteen
+## characters and the rows run to twenty-five. Four of the seven wrapped onto a
+## second line, each one landing in the middle of the column under its own
+## label.
+##
+## A grid cannot do that. The label sits left, the value sits right, and the
+## column widths come out of the longest of each rather than out of a guessed
+## character count — so "4 / 4 / 8" and "6 / 6" end on the same pixel and
+## nothing has to fit a field that was never measured.
+func _build_vitals() -> GridContainer:
+	var grid := GridContainer.new()
+	grid.name = "Vitals"
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 4)
+	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	for row in VITAL_ROWS:
+		if row == &"":
+			# A gap wants both cells, or the grid stops being two columns.
+			for _i in 2:
+				var gap := Control.new()
+				gap.custom_minimum_size = Vector2(0, 10)
+				grid.add_child(gap)
+			continue
+
+		var key := Label.new()
+		key.text = String(row)
+		key.add_theme_font_size_override("font_size", TypeScale.SMALL)
+		key.add_theme_color_override("font_color", Color.html(KEY))
+		grid.add_child(key)
+
+		var value := Label.new()
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		value.add_theme_font_size_override("font_size", TypeScale.SMALL)
+		value.add_theme_color_override("font_color", Color.html(BODY))
+		grid.add_child(value)
+		_vital_values[row] = value
+	return grid
 
 
 ## Right column: the item. Name, a large picture of it, and what it does.

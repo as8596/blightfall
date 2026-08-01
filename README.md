@@ -94,6 +94,9 @@ godot --headless --path . tests/shop_test.tscn
 # the bow: the weapon toggle, the draw, and an arrow crossing a room into a wolf
 godot --headless --path . tests/ranged_test.tscn
 
+# lays the menus out at ten window sizes and looks for anything off an edge
+godot --headless --path . tests/ui_fit_test.tscn
+
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
 

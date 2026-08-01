@@ -27,6 +27,19 @@ const STEP := 0.5
 ## default, a 720p one gets 1×.
 const BASE_HEIGHT := 720.0
 
+## The box the menus are laid out in, and the reason `menu_scale` exists rather
+## than menus simply taking `suggested()`.
+##
+## The inventory page is the widest thing in the game: twelve 50px slots with
+## 5px gaps, a 216px character column and a 250px detail column either side, and
+## 40px page margins — 1245x702 measured, against this 1280x720 box.
+const MENU_DESIGN := Vector2(1280.0, 720.0)
+
+## How far a menu is allowed to shrink when the window is smaller than the box
+## it was drawn in. Below this the text stops being legible and the honest
+## answer is a scroll bar, not a smaller font.
+const MENU_MIN_FACTOR := 0.5
+
 ## Assigning this is *the player choosing*, which is why it saves and stops
 ## following the window. Everything internal goes through `_set_factor` instead.
 ##
@@ -99,6 +112,34 @@ func suggested() -> float:
 	return clampf(snappedf(height / BASE_HEIGHT, STEP), MIN_FACTOR, MAX_FACTOR)
 
 
+## What a menu is drawn at: the largest step that still leaves `MENU_DESIGN`
+## worth of room inside the window.
+##
+## **Menus used to take `suggested()`, and it ran them off the screen.**
+## `suggested()` snaps to the *nearest* step, so it rounds up — a 1600x900
+## window measures 1.25 and was handed 1.5, which left the menu a 1067x600 box
+## to lay 1245x702 of inventory out in. Both axes overflowed, and the bottom of
+## the page went off the bottom of the screen, which is exactly the report.
+## 1366x768 and 1440x900 round up the same way; 1080p and 1440p happen to land
+## on a step and were fine, which is why this survived so long — the two
+## resolutions anyone tests at are the two it got right.
+##
+## So this floors instead of snapping, and floors against the whole box rather
+## than against the height alone. A short-but-wide window (2560x1080) and a
+## narrow-but-tall one are both cases where one axis fits and the other does
+## not, and only the smaller of the two is safe to use.
+##
+## Below 1x it stops stepping and returns the raw fit: a window smaller than the
+## box the menus were drawn in has no whole step to offer, and a slightly soft
+## menu that fits beats a crisp one with its buttons off the edge.
+func menu_scale() -> float:
+	var area := content_rect().size
+	var fit: float = minf(area.x / MENU_DESIGN.x, area.y / MENU_DESIGN.y)
+	if fit < MIN_FACTOR:
+		return maxf(fit, MENU_MIN_FACTOR)
+	return clampf(floorf(fit / STEP) * STEP, MIN_FACTOR, MAX_FACTOR)
+
+
 ## A UI layer and the Control filling it. Both are needed: the layer carries the
 ## scale, the Control has to be resized or its anchors point at the wrong edges.
 ## `menu` layers ignore the player's scale setting and follow the window
@@ -108,13 +149,11 @@ func suggested() -> float:
 ## is asking for less of the screen covered *while playing* — hearts, hotbar,
 ## satchel. A menu is the opposite situation: the world is paused, the screen is
 ## theirs, and shrinking a wall of text because the health bar was in the way is
-## answering a question nobody asked. So menus take `suggested()`, which is what
+## answering a question nobody asked. So menus take `menu_scale()`, which is what
 ## the window says rather than what the slider says.
 ##
-## Note this is a *fit*, not a fixed 2x. The menus are laid out against a
-## 1280x720 box — the inventory's twelve slots plus two columns come to 1153px —
-## so pinning them to 2x would push that off the side of any window under
-## 2560 wide. On a 1440p screen the fit is 2x; below that it is whatever fits.
+## Note that is a *fit*, not a fixed 2x — see `menu_scale`. On a 1440p screen it
+## comes out at 2x; below that it is whatever the window has room for.
 func register(layer: CanvasLayer, root: Control = null, menu: bool = false) -> void:
 	_layers.append({"layer": layer, "root": root, "menu": menu})
 	_apply()
@@ -152,7 +191,7 @@ func _apply() -> void:
 		var root = entry["root"]
 		if not is_instance_valid(layer):
 			continue
-		var used: float = suggested() if entry.get("menu", false) else factor
+		var used: float = menu_scale() if entry.get("menu", false) else factor
 		layer.scale = Vector2(used, used)
 		# The layer's offset is a translation in window pixels, applied outside
 		# the scale — so it moves the whole layer onto the picture without the

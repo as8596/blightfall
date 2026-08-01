@@ -22,6 +22,11 @@ const DISPLAY: Font = preload("res://art/fonts/ui_display.tres")
 const PANEL_FILL := Color(0.11, 0.10, 0.09)
 const PANEL_EDGE := Color(0.30, 0.25, 0.19)
 
+## What a `framed` panel costs its contents, per side. Named because a caller
+## sizing a column has to subtract it twice to know what it actually has to
+## draw in, and a magic 12 in two files is a magic 12 that drifts.
+const FRAME_MARGIN := 12
+
 
 ## A bordered box with a heading. Returns the *inside*: add children to what
 ## comes back, and add `frame_of(result)` to your layout.
@@ -31,7 +36,7 @@ const PANEL_EDGE := Color(0.30, 0.25, 0.19)
 ## project has one weight (`art/fonts/README.md`).
 static func framed(title: String, tip: String = "") -> VBoxContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", frame(PANEL_FILL, PANEL_EDGE, 12))
+	panel.add_theme_stylebox_override("panel", frame(PANEL_FILL, PANEL_EDGE, FRAME_MARGIN))
 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
