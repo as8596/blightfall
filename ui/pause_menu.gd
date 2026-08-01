@@ -74,10 +74,31 @@ func close() -> void:
 ## `_input` for the same reason the character menu uses it: a focused Button
 ## swallows `ui_cancel`, and a pause menu you cannot close with Escape is worse
 ## than no pause menu.
+## **Escape backs out of the innermost thing that is open.**
+##
+## Every menu in the game claims `ui_cancel`, and `_input` reaches autoloads in
+## reverse registration order — so this one, listed last, was getting Escape
+## first and opening the pause menu *on top of* whatever the player was actually
+## trying to close. The character menu's own Escape handler never ran.
+##
+## Standing aside is the fix rather than reordering the autoloads: the ordering
+## in `project.godot` is load-bearing for other reasons (data before UI), and a
+## menu that knows to wait its turn is easier to reason about than a list whose
+## order encodes input priority.
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"ui_cancel"):
-		toggle()
-		get_viewport().set_input_as_handled()
+	if not event.is_action_pressed(&"ui_cancel"):
+		return
+	if not _open and _something_else_is_open():
+		return
+	toggle()
+	get_viewport().set_input_as_handled()
+
+
+## Anything the player would expect Escape to shut before it reaches the pause
+## menu. Not `Hud`, which is never modal, and not this menu itself — once it is
+## up, Escape closes it and nothing else gets a say.
+func _something_else_is_open() -> bool:
+	return GameMenu.is_open() or ShopMenu.is_open() or Dialogue.is_open()
 
 
 # ------------------------------------------------------------------ actions
