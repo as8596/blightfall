@@ -261,7 +261,8 @@ func choice_index() -> int:
 ## conversation file may override it with a `"portrait"` path, which is drawn
 ## whole rather than cropped — that is the door real portrait art comes in by.
 func start(id: StringName, portrait: Dictionary = {}) -> bool:
-	if _open or Transition.is_busy() or PauseMenu.is_open() or GameMenu.is_open():
+	if _open or Transition.is_busy() or PauseMenu.is_open() or GameMenu.is_open() \
+			or LootMenu.is_open():
 		return false
 	var data := load_dialogue(id)
 	if data.is_empty():

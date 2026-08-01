@@ -119,7 +119,7 @@ func _on_dialogue_action(action: StringName, params: Dictionary) -> void:
 
 
 func open(id: StringName) -> bool:
-	if _open or PauseMenu.is_open() or GameMenu.is_open():
+	if _open or PauseMenu.is_open() or GameMenu.is_open() or LootMenu.is_open():
 		return false
 	var shop := Shops.get_shop(id)
 	if shop == null:

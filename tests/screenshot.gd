@@ -79,6 +79,12 @@ var _pointer: Vector2 = Vector2.INF
 ## keyboard and is where the settings live.
 var _pause: bool = false
 
+## `--loot=timber:2,wolf_fang:1&gold=7` drops a pile at the player's feet and
+## searches it. Nothing in the prototype room leaves loot on demand, and the
+## window is the only one whose contents are rolled rather than authored — so
+## without this it can only be shot by killing something and hoping.
+var _loot: String = ""
+
 var _shop: String = ""
 var _gold: int = -1
 
@@ -127,6 +133,8 @@ func _capture() -> void:
 			_pause = true
 		elif arg.begins_with("--shop="):
 			_shop = arg.trim_prefix("--shop=")
+		elif arg.begins_with("--loot="):
+			_loot = arg.trim_prefix("--loot=")
 		elif arg.begins_with("--gold="):
 			_gold = arg.trim_prefix("--gold=").to_int()
 		elif arg.begins_with("--haul="):
@@ -283,6 +291,24 @@ func _capture() -> void:
 			Purse.set_amount(_gold)
 		@warning_ignore("return_value_discarded")
 		ShopMenu.open(StringName(_shop))
+		for i in 8:
+			await get_tree().process_frame
+
+	if _loot != "" and player != null:
+		var pile: LootPile = load("res://world/loot_pile.tscn").instantiate()
+		for part in _loot.split(","):
+			var bits := part.split(":")
+			if bits.size() != 2:
+				continue
+			if bits[0] == "gold":
+				pile.gold = bits[1].to_int()
+			else:
+				pile.contents[StringName(bits[0])] = bits[1].to_int()
+		player.get_parent().add_child(pile)
+		pile.global_position = player.global_position
+		await get_tree().process_frame
+		@warning_ignore("return_value_discarded")
+		LootMenu.open(pile, player)
 		for i in 8:
 			await get_tree().process_frame
 

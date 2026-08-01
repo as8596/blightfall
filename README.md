@@ -97,6 +97,9 @@ godot --headless --path . tests/ranged_test.tscn
 # lays the menus out at ten window sizes and looks for anything off an edge
 godot --headless --path . tests/ui_fit_test.tscn
 
+# what a body leaves behind, and the window you take it out of
+godot --headless --path . tests/loot_test.tscn
+
 # colour discipline: profile every group, enforce the reserved blight accent
 python3 tools/check_colour.py
 
