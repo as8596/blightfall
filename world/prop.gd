@@ -14,6 +14,10 @@ extends Node2D
 ## were standing at its canopy — you walk behind a tree while still well in front
 ## of it.
 ##
+## **The sort point is not always the base.** Something the player can walk into
+## sorts half way up its own picture instead, so they are drawn in front of a
+## bush until they have waded past the middle of it. See `SORT_BIAS`.
+##
 ## **`z_index` stays 0.** Godot applies z_index before y-sorting, so a prop on a
 ## different z than the player is either always in front or always behind it, and
 ## no amount of correct sorting inside the layer will fix that (this cost an
@@ -88,6 +92,24 @@ const FADE_SPEED := 6.0
 ## is shorter than he is and fading it would be a flicker for nothing.
 const FADE_ABOVE := 96.0
 
+## How far up its own picture a prop sorts against the player, as a fraction of
+## the drawn height. Half: you are in front of a bush until you have waded past
+## the middle of it, and behind it after.
+##
+## **Why it is needed at all.** Sorting on the base is right for something you
+## cannot enter, and wrong for something you can. A bush blocks nothing, so the
+## player walks *into* it — and the instant their feet cross its bottom edge
+## they were drawn behind the whole thing, standing in the front half of a bush
+## that was covering them. Half-height is where it stops looking wrong.
+##
+## Godot has no per-node sort offset, but it does flatten nested Y-sort trees:
+## this node is `y_sort_enabled`, so its Sprite2D is sorted against the player by
+## the sprite's *own* global Y. Lifting the sprite node and pushing its `offset`
+## back down by the same amount moves the sort point and not the picture — and
+## the prop's origin stays on the base, which every builder and collider depends
+## on.
+const SORT_BIAS := 0.5
+
 var _cover: Rect2 = Rect2()
 var _fade: float = 1.0
 
@@ -153,7 +175,14 @@ func _refresh() -> void:
 		# Base on the origin. Same rule as AnimationComponent's feet-on-origin.
 		# In sprite-local units, so `scale` multiplies it and the base stays put
 		# however tall the thing is drawn.
-		_sprite.offset = Vector2(0, -texture.get_height() * 0.5) + art_offset / zoom
+		#
+		# The lift is added back here in the same units, so moving the sort point
+		# below cannot move the picture: `position` goes up by `lift` in prop
+		# space, `offset` comes down by `lift / zoom` in sprite space, and they
+		# cancel exactly.
+		var lift := _sort_lift()
+		_sprite.position = Vector2(0.0, -lift)
+		_sprite.offset = Vector2(0, -texture.get_height() * 0.5 + lift / zoom) + art_offset / zoom
 	# What the sprite covers, in this prop's own space, so `_process` can ask
 	# whether the player is under the picture. Recomputed here because it moves
 	# with the texture, the scale and the offset — all three of which are
@@ -169,3 +198,27 @@ func _refresh() -> void:
 	_shape.position = Vector2(0, -footprint.y * 0.5)
 	_body.process_mode = Node.PROCESS_MODE_INHERIT if solid else Node.PROCESS_MODE_DISABLED
 	_shape.disabled = not solid
+
+
+## How far above the base this prop sorts, in pixels. Zero for most things.
+##
+## **Two exclusions, and both are the difference between a fix and a new bug.**
+##
+## *Solid props sort on their base.* The footprint already stops the player
+## short, so they can never be inside a barrel or a trunk — and a lifted sort
+## point would draw them in front of a tree they are demonstrably standing
+## behind, which is the original complaint with the sign reversed.
+##
+## *So does anything taller than the player.* `FADE_ABOVE` is already the line
+## this file draws between something you are *in* and something you are *under*,
+## and the answer for the second kind is the fade, not the sort — a 512px
+## thicket tree lifted by 256 would let you walk a quarter of a screen past it
+## still drawn on top. Reusing the constant keeps the two halves of that
+## judgement from drifting apart.
+func _sort_lift() -> float:
+	if solid or texture == null:
+		return 0.0
+	var drawn := texture.get_height() * maxf(floorf(art_scale), 1.0)
+	if drawn >= FADE_ABOVE:
+		return 0.0
+	return drawn * SORT_BIAS

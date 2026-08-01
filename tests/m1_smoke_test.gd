@@ -178,9 +178,13 @@ func _test_world_objects() -> void:
 		for child in prop.get_children():
 			if child is Sprite2D:
 				sprite = child
+	# Measured where the picture actually lands, not off `offset` alone — the
+	# sort lift moves the sprite node and its offset by equal and opposite
+	# amounts, and an assertion that reads only one of the two would fail on a
+	# prop that is drawn in exactly the right place.
 	_check("the base of the picture sits on the origin",
-		sprite != null and is_equal_approx(sprite.offset.y, -art.get_height() * 0.5),
-		str(sprite.offset if sprite != null else Vector2.ZERO))
+		sprite != null and is_equal_approx(_picture_base(sprite), 0.0),
+		"%.1f" % _picture_base(sprite) if sprite != null else "no sprite")
 
 	var body: StaticBody2D = null
 	for child in prop.get_children():
@@ -198,6 +202,8 @@ func _test_world_objects() -> void:
 	await _ticks(2)
 	_check("a non-solid prop stops blocking", shape.disabled)
 	prop.queue_free()
+
+	await _test_prop_sort_point()
 
 	var shrine: Shrine = load("res://world/shrine.tscn").instantiate()
 	shrine.id = &"test_waystone"
@@ -257,6 +263,94 @@ func _test_world_objects() -> void:
 		reported.size() == 1 and bool(reported[0][0]), str(reported))
 	SaveGame.delete_save(REST_SLOT)
 	shrine.queue_free()
+
+
+## Where the bottom edge of the drawn picture sits, in the prop's own space.
+##
+## Zero means the base of the art is on the origin, which is the invariant the
+## whole prop system rests on. `position` and `offset` both move it and the sort
+## lift changes both, so neither number alone is the answer.
+static func _picture_base(sprite: Sprite2D) -> float:
+	if sprite == null or sprite.texture == null:
+		return NAN
+	return sprite.position.y + (sprite.offset.y + sprite.texture.get_height() * 0.5) * sprite.scale.y
+
+
+## **The player is in front of a bush until they have waded past the middle of
+## it.**
+##
+## Sorting on the base is right for something you cannot enter and wrong for
+## something you can: a bush blocks nothing, so the instant the player's feet
+## crossed its bottom edge they were drawn behind the whole thing while standing
+## in its front half. Godot has no per-node sort offset, so `Prop` lifts the
+## sprite and pushes its `offset` back down by the same amount — which moves the
+## sort point without moving the picture, and that "without" is the half of it
+## worth checking.
+##
+## **What is asserted here is the arithmetic; the engine's half was proved with
+## pixels.** The whole thing rests on Godot flattening nested Y-sort trees — on
+## the sprite being sorted against the player by its *own* global Y rather than
+## its parent's. That was checked by rendering a bush at base 160 into a
+## SubViewport with a marker at the same pixel: feet at 127 came out behind the
+## bush and feet at 140 in front, which is the halfway line at 128 to within a
+## pixel. It is not repeated here because reading back a rendered frame needs a
+## display and this suite runs headless.
+func _test_prop_sort_point() -> void:
+	# 64px, the size undergrowth is authored at — see art/sprites/README.md.
+	var bush: Texture2D = load("res://art/sprites/props/sage_bush.png")
+	var tall: Texture2D = load("res://art/sprites/player/player_idle_down.png")
+	_check("the undergrowth is authored at 64px", bush != null and bush.get_height() == 64,
+		str(bush.get_size()) if bush != null else "missing")
+
+	var scene: PackedScene = load("res://world/prop.tscn")
+	var prop: Prop = scene.instantiate()
+	add_child(prop)
+	prop.solid = false
+	prop.texture = bush
+	await _ticks(2)
+	var sprite := _sprite_of(prop)
+	_check("a bush sorts half its height above its base",
+		is_equal_approx(sprite.position.y, -bush.get_height() * Prop.SORT_BIAS),
+		"%.1f" % sprite.position.y)
+	_check("and the picture has not moved to do it",
+		is_equal_approx(_picture_base(sprite), 0.0), "%.1f" % _picture_base(sprite))
+
+	# A tree's footprint already stops the player short, so they can never be
+	# inside it — and a lifted sort point would draw them in front of a trunk
+	# they are demonstrably standing behind.
+	prop.solid = true
+	await _ticks(2)
+	_check("a solid prop keeps sorting on its base",
+		is_equal_approx(sprite.position.y, 0.0), "%.1f" % sprite.position.y)
+	_check("and its picture has not moved either",
+		is_equal_approx(_picture_base(sprite), 0.0), "%.1f" % _picture_base(sprite))
+
+	# Taller than the player is a thing you are *under*, and the answer to that
+	# is the fade, not the sort.
+	prop.solid = false
+	prop.texture = tall
+	await _ticks(2)
+	_check("anything at least as tall as the player does too",
+		tall.get_height() >= Prop.FADE_ABOVE and is_equal_approx(sprite.position.y, 0.0),
+		"%dpx, lifted %.1f" % [tall.get_height(), sprite.position.y])
+
+	# `art_scale` is the trap: a 64px bush drawn at 2x is 128px on screen, which
+	# is over the line even though the texture is not.
+	prop.texture = bush
+	prop.art_scale = 2.0
+	await _ticks(2)
+	_check("and the line is drawn against the drawn size, not the texture",
+		is_equal_approx(sprite.position.y, 0.0), "%.1f" % sprite.position.y)
+	_check("with the picture still standing on the origin",
+		is_equal_approx(_picture_base(sprite), 0.0), "%.1f" % _picture_base(sprite))
+	prop.queue_free()
+
+
+static func _sprite_of(prop: Prop) -> Sprite2D:
+	for child in prop.get_children():
+		if child is Sprite2D:
+			return child
+	return null
 
 
 func _check_near(label: String, actual: float, expected: float, tolerance: float) -> void:
