@@ -160,6 +160,7 @@ var _seen: Dictionary = {}
 
 var _root: Control
 var _panel: Control
+var _catcher: Control
 var _speaker: Label
 var _body: Label
 var _replies: VBoxContainer
@@ -505,14 +506,15 @@ func _advance() -> void:
 	_start_line()
 
 
-## Click anywhere on the box to do what the key does: finish the line if it is
-## still typing, otherwise move on.
+## Click anywhere to do what the key does: finish the line if it is still
+## typing, otherwise move on. Wired to both the box itself and the full-screen
+## catcher behind it — see `_build`.
 ##
-## The exception is while replies are up. There, a click on the box *behind* the
-## replies is not an answer — the reply frames own their own clicks, and
-## choosing the highlighted one on the player's behalf is a conversation they
-## did not have. Finishing a still-typing line is still allowed, because that is
-## not a choice.
+## The exception is while replies are up. There, a click that is not *on* a
+## reply is not an answer — the reply frames own their own clicks, and choosing
+## the highlighted one on the player's behalf is a conversation they did not
+## have. Finishing a still-typing line is still allowed, because that is not a
+## choice.
 func _on_box_input(event: InputEvent) -> void:
 	var click := event as InputEventMouseButton
 	if click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
@@ -523,8 +525,12 @@ func _on_box_input(event: InputEvent) -> void:
 	# repeat itself. Honouring the lock here only ate clicks that landed on the
 	# same frame as the press before them, which is most of the fast ones.
 	if _replies.visible and not _typing():
+		# Consumed anyway. A click the conversation is deliberately ignoring is
+		# still a click the world must not see, or declining to answer swings
+		# the sword.
+		get_viewport().set_input_as_handled()
 		return
-	_panel.accept_event()
+	get_viewport().set_input_as_handled()
 	_advance()
 
 
@@ -698,6 +704,28 @@ func _build() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
 	UiScale.register(self, _root, true)
+
+	# Click *anywhere* to advance, not just on the box.
+	#
+	# The box is a strip along the bottom of the screen, and the eye is on the
+	# character being talked to — so the natural click lands somewhere in the
+	# middle of the world and did nothing at all. This catches the rest of the
+	# screen and hands it to the same handler.
+	#
+	# **Behind the panel, so it changes nothing that already worked.** Godot
+	# picks the topmost Control under the cursor, which is the *last* sibling —
+	# so adding this first leaves the panel, and the reply frames inside it, with
+	# first refusal on every click in their own rectangle. A reply is still a
+	# reply and not an accidental advance.
+	#
+	# STOP rather than PASS on purpose: the click that advances a conversation
+	# must not also reach the world behind it and swing the sword.
+	_catcher = Control.new()
+	_catcher.name = "ClickCatcher"
+	_catcher.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+	_catcher.gui_input.connect(_on_box_input)
+	_root.add_child(_catcher)
 
 	_panel = Panel.new()
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)

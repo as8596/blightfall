@@ -264,6 +264,40 @@ func _test_clicking() -> void:
 	_check("and clicking again turns the page",
 		Dialogue.line_index() > before, "line %d" % Dialogue.line_index())
 
+	# The box is a strip along the bottom and the eye is on the person talking,
+	# so the natural click lands in the middle of the screen. It used to do
+	# nothing.
+	var catcher: Control = Dialogue._catcher
+	var root: Control = Dialogue._panel.get_parent()
+	_check("there is a catcher covering the whole screen",
+		catcher != null and catcher.size.is_equal_approx(root.size),
+		"%s of %s" % [catcher.size if catcher != null else Vector2.ZERO, root.size])
+	_check("it sits behind the box, so a reply is still a reply",
+		catcher.get_index() < Dialogue._panel.get_index(),
+		"%d vs %d" % [catcher.get_index(), Dialogue._panel.get_index()])
+	_check("and it stops the click reaching the world",
+		catcher.mouse_filter == Control.MOUSE_FILTER_STOP)
+
+	# From the top, for the reason in this function's own docstring: by now the
+	# greeting is on its last line with the replies up, and a catcher checked
+	# there would only ever be measuring the rule that says a click beside the
+	# replies chooses nothing.
+	Dialogue.close()
+	Dialogue.forget_conversations()
+	await _ticks(2)
+	_check("a fresh conversation opens for the catcher", Dialogue.start(&"carpenter"))
+	await _ticks(4)
+
+	_click_anywhere()
+	await _ticks(2)
+	_check("clicking away from the box reveals a typing line", not Dialogue.is_typing())
+
+	before = Dialogue.line_index()
+	_click_anywhere()
+	await _ticks(2)
+	_check("and clicking away again turns the page",
+		Dialogue.line_index() > before, "line %d" % Dialogue.line_index())
+
 	# Run it to the replies with the mouse alone, then confirm a click on the
 	# box *behind* them is not an answer — choosing the highlighted reply for
 	# the player is a conversation they did not have.
@@ -348,6 +382,17 @@ func _click() -> void:
 	event.button_index = MOUSE_BUTTON_LEFT
 	event.pressed = true
 	Dialogue._on_box_input(event)
+
+
+## A click somewhere on the screen that is not the box, through the catcher's
+## own signal rather than through the handler — which is the half of this the
+## direct call cannot check. A catcher that exists and is not connected to
+## anything passes every other assertion here.
+func _click_anywhere() -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = MOUSE_BUTTON_LEFT
+	event.pressed = true
+	Dialogue._catcher.gui_input.emit(event)
 
 
 func _tap(action: StringName) -> void:
